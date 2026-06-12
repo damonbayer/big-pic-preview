@@ -9,7 +9,7 @@ Tracking Sean and Amanda's predictions from The Big Picture's Summer Movie Previ
 - `summer_movie_preview_predictions.csv`: tidy host predictions transcribed from the source images.
 - `movies.csv`: movie lookup IDs generated from Wikidata.
 - `current_movie_results.csv`: latest fetched domestic box office and Metacritic scores.
-- `scores.csv`: predictions joined with actuals plus per-host points (regenerate with `uv run score.py`).
+- `scores.csv`: predictions joined with actuals plus per-host points (regenerate with `uv run scripts/score.py`).
 - `tmdb_details.json`: movie metadata (release dates, posters, synopses) from TMDB.
 
 ## Refresh movie IDs
@@ -47,7 +47,7 @@ The site in `site/` is built with [Astro](https://astro.build) and reads
 `scores.csv` and `tmdb_details.json` at build time. A GitHub Actions workflow
 (`.github/workflows/deploy.yml`) builds and deploys it to GitHub Pages on every
 push to `main`. To update the published scores: re-run the fetch scripts and
-`uv run score.py`, then commit and push.
+`uv run scripts/score.py`, then commit and push.
 
 ```sh
 cd site

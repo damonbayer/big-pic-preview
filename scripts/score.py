@@ -1,10 +1,14 @@
+from pathlib import Path
+
 import polars as pl
 
-current_results = pl.read_csv("current_movie_results.csv").select(
+ROOT = Path(__file__).resolve().parents[1]
+
+current_results = pl.read_csv(ROOT / "current_movie_results.csv").select(
     "title", "box_office", "metacritic"
 )
 predictions = (
-    pl.read_csv("summer_movie_preview_predictions.csv")
+    pl.read_csv(ROOT / "summer_movie_preview_predictions.csv")
     .rename({"box_office_pred_millions": "box_office_pred"})
     .with_columns(pl.col("box_office_pred") * 1_000_000)
 )
@@ -40,4 +44,4 @@ merged_df = (
     )
 )
 
-merged_df.write_csv("scores.csv")
+merged_df.write_csv(ROOT / "scores.csv")
