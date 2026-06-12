@@ -165,7 +165,7 @@ venv.bak/
 .ropeproject
 
 # mkdocs documentation
-/site
+# /site (mkdocs default, removed: site/ holds the Astro scoreboard)
 
 # mypy
 .mypy_cache/
@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Astro site
+site/node_modules/
+site/dist/
+site/.astro/

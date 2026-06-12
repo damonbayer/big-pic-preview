@@ -1,0 +1,927 @@
+---
+import { movies, totals } from '../data/scoreboard';
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function fmtDate(iso: string | null): string {
+  if (!iso) return 'TBD';
+  const [, m, d] = iso.split('-').map(Number);
+  return `${MONTHS[m - 1]} ${d}`;
+}
+
+function fmtBO(v: number | null): string {
+  if (v === null) return '—';
+  const millions = v / 1e6;
+  const text = millions >= 100 ? Math.round(millions).toString() : millions.toFixed(1).replace(/\.0$/, '');
+  return `$${text}M`;
+}
+
+function fmtMeta(v: number | null): string {
+  return v === null ? '—' : String(v);
+}
+
+function diffChip(m: (typeof movies)[number]): { text: string; cls: string } {
+  if (!m.scored) return { text: 'TBD', cls: 'tbd' };
+  if (m.diff > 0) return { text: `+${m.diff} Sean`, cls: 'sean' };
+  if (m.diff < 0) return { text: `+${-m.diff} Amanda`, cls: 'amanda' };
+  return { text: 'Tie', cls: 'tie' };
+}
+
+function ptsTitle(line: { boPts: number; metaPts: number }, scored: boolean): string | undefined {
+  return scored ? `Box office: ${line.boPts} pts · Metacritic: ${line.metaPts} pts` : undefined;
+}
+
+const overall = totals.sean === totals.amanda
+  ? { text: 'All tied up', cls: 'tie' }
+  : totals.sean > totals.amanda
+    ? { text: `+${totals.sean - totals.amanda} Sean`, cls: 'sean' }
+    : { text: `+${totals.amanda - totals.sean} Amanda`, cls: 'amanda' };
+
+const leader = totals.sean === totals.amanda ? null : totals.sean > totals.amanda ? 'sean' : 'amanda';
+
+// Compact payload for the hover/click cards.
+const cardData = Object.fromEntries(
+  movies
+    .filter((m) => m.tmdb)
+    .map((m) => [
+      m.title,
+      {
+        poster: m.tmdb!.poster_url,
+        date: m.releaseDate ? `${fmtDate(m.releaseDate)}, ${m.releaseDate.slice(0, 4)}` : 'Release date TBD',
+        runtime: m.tmdb!.runtime,
+        genres: m.tmdb!.genres,
+        tagline: m.tmdb!.tagline,
+        overview: m.tmdb!.overview,
+        directors: m.tmdb!.directors,
+        cast: m.tmdb!.cast,
+      },
+    ]),
+);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Big Picture · Summer Movie Preview Scoreboard</title>
+    <meta
+      name="description"
+      content="Sean vs. Amanda: tracking box office and Metacritic predictions from The Big Picture's Summer Movie Preview."
+    />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}/favicon.svg`.replace('//', '/')} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@400;600;700;900&family=Yellowtail&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="hero">
+      <p class="kicker">An unofficial scoreboard for The Ringer&rsquo;s</p>
+      <h1>
+        <span class="script">The</span>
+        <span class="slab"><span class="big">Big</span> <span class="picture">Picture</span></span>
+      </h1>
+      <p class="event">Summer Movie Preview</p>
+      <svg class="projector" viewBox="0 0 200 110" aria-hidden="true">
+        <g fill="var(--ink)">
+          <circle cx="62" cy="38" r="34" />
+          <circle cx="138" cy="38" r="34" />
+          <rect x="42" y="64" width="116" height="34" rx="6" />
+          <polygon points="158,72 186,64 186,98 158,90" />
+          <rect x="20" y="76" width="26" height="14" rx="4" />
+        </g>
+        <g fill="var(--gold)">
+          <circle cx="62" cy="24" r="6.5" />
+          <circle cx="62" cy="52" r="6.5" />
+          <circle cx="48" cy="38" r="6.5" />
+          <circle cx="76" cy="38" r="6.5" />
+          <circle cx="138" cy="24" r="6.5" />
+          <circle cx="138" cy="52" r="6.5" />
+          <circle cx="124" cy="38" r="6.5" />
+          <circle cx="152" cy="38" r="6.5" />
+        </g>
+        <rect x="52" y="74" width="58" height="6" rx="3" fill="var(--green)" />
+      </svg>
+    </header>
+
+    <div class="filmstrip" aria-hidden="true"></div>
+
+    <main>
+      <section class="scoreboard" aria-label="Season totals">
+        <div class={`score-card sean ${leader === 'sean' ? 'leading' : ''}`}>
+          {leader === 'sean' && <span class="badge">★ In the lead</span>}
+          <span class="host">Sean</span>
+          <span class="points">{totals.sean}</span>
+          <span class="pts-label">points</span>
+        </div>
+        <div class="vs">
+          <span>VS</span>
+          <span class={`overall chip ${overall.cls}`}>{overall.text}</span>
+        </div>
+        <div class={`score-card amanda ${leader === 'amanda' ? 'leading' : ''}`}>
+          {leader === 'amanda' && <span class="badge">★ In the lead</span>}
+          <span class="host">Amanda</span>
+          <span class="points">{totals.amanda}</span>
+          <span class="pts-label">points</span>
+        </div>
+      </section>
+
+      <p class="progress">
+        {totals.scoredCount} of {totals.movieCount} movies scored so far &mdash; updated through summer 2026.
+      </p>
+
+      <details class="rules">
+        <summary>How the scoring works</summary>
+        <div class="rules-body">
+          <div>
+            <h3>Domestic box office</h3>
+            <ul>
+              <li>Within $1M &rarr; <strong>20 pts</strong></li>
+              <li>Within $5M &rarr; <strong>10 pts</strong></li>
+              <li>Within $10M &rarr; <strong>5 pts</strong></li>
+              <li>Within $50M &rarr; <strong>1 pt</strong></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Metacritic score</h3>
+            <ul>
+              <li>Exact &rarr; <strong>5 pts</strong></li>
+              <li>Within 5 &rarr; <strong>1 pt</strong></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <section class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr class="groups">
+                <th rowspan="2" class="movie-col">Movie</th>
+                <th rowspan="2">Release</th>
+                <th colspan="3" class="group">Metacritic</th>
+                <th colspan="3" class="group">Box Office</th>
+                <th colspan="2" class="group">Points</th>
+                <th rowspan="2">Differential</th>
+              </tr>
+              <tr class="subs">
+                <th>Sean</th>
+                <th>Amanda</th>
+                <th class="actual">Actual</th>
+                <th>Sean</th>
+                <th>Amanda</th>
+                <th class="actual">Actual</th>
+                <th>Sean</th>
+                <th>Amanda</th>
+              </tr>
+            </thead>
+            <tbody>
+              {movies.map((m) => {
+                const chip = diffChip(m);
+                return (
+                  <tr class={m.scored ? '' : 'pending'}>
+                    <td class="movie-col">
+                      <button class="movie-btn" type="button" data-title={m.title}>{m.title}</button>
+                    </td>
+                    <td class="date">{fmtDate(m.releaseDate)}</td>
+                    <td class="num">{fmtMeta(m.sean.metaPred)}</td>
+                    <td class="num">{fmtMeta(m.amanda.metaPred)}</td>
+                    <td class="num actual">{fmtMeta(m.actualMeta)}</td>
+                    <td class="num">{fmtBO(m.sean.boPred)}</td>
+                    <td class="num">{fmtBO(m.amanda.boPred)}</td>
+                    <td class="num actual">{fmtBO(m.actualBO)}</td>
+                    <td
+                      class={`num pts ${m.scored && m.diff > 0 ? 'win' : ''}`}
+                      title={ptsTitle(m.sean, m.scored)}
+                    >
+                      {m.scored ? m.sean.totalPts : '—'}
+                    </td>
+                    <td
+                      class={`num pts ${m.scored && m.diff < 0 ? 'win' : ''}`}
+                      title={ptsTitle(m.amanda, m.scored)}
+                    >
+                      {m.scored ? m.amanda.totalPts : '—'}
+                    </td>
+                    <td class="diff"><span class={`chip ${chip.cls}`}>{chip.text}</span></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td class="movie-col">Totals</td>
+                <td colspan="7"></td>
+                <td class="num pts">{totals.sean}</td>
+                <td class="num pts">{totals.amanda}</td>
+                <td class="diff"><span class={`chip ${overall.cls}`}>{overall.text}</span></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <p class="hint">Hover or tap a title for the movie details.</p>
+      </section>
+    </main>
+
+    <div class="filmstrip" aria-hidden="true"></div>
+
+    <footer>
+      <p>
+        Predictions from <em>The Big Picture</em> Summer Movie Preview. Box office via Box Office Mojo,
+        review scores via Metacritic.
+      </p>
+      <p>
+        Movie details from <a href="https://www.themoviedb.org/">TMDB</a>. This site uses the TMDB API but is
+        not endorsed or certified by TMDB. Not affiliated with The Ringer or Spotify.
+      </p>
+      <p>
+        <a href="https://github.com/damonbayer/big_pic_summer_movie_preview">Data &amp; source on GitHub</a>
+      </p>
+    </footer>
+
+    <div id="movie-card" hidden>
+      <img id="card-poster" alt="" loading="lazy" />
+      <div class="card-body">
+        <h2 id="card-title"></h2>
+        <p id="card-meta" class="card-meta"></p>
+        <p id="card-tagline" class="card-tagline"></p>
+        <p id="card-overview" class="card-overview"></p>
+        <p id="card-credits" class="card-credits"></p>
+      </div>
+    </div>
+
+    <script type="application/json" id="movie-data" set:html={JSON.stringify(cardData)} />
+
+    <script>
+      const data = JSON.parse(document.getElementById('movie-data')!.textContent!);
+      const card = document.getElementById('movie-card')!;
+      const poster = document.getElementById('card-poster') as HTMLImageElement;
+      const titleEl = document.getElementById('card-title')!;
+      const metaEl = document.getElementById('card-meta')!;
+      const taglineEl = document.getElementById('card-tagline')!;
+      const overviewEl = document.getElementById('card-overview')!;
+      const creditsEl = document.getElementById('card-credits')!;
+
+      let pinned: string | null = null;
+
+      function fill(title: string) {
+        const d = data[title];
+        if (!d) return false;
+        titleEl.textContent = title;
+        const bits = [d.date];
+        if (d.runtime) bits.push(`${d.runtime} min`);
+        if (d.genres?.length) bits.push(d.genres.join(' / '));
+        metaEl.textContent = bits.join(' · ');
+        taglineEl.textContent = d.tagline ?? '';
+        taglineEl.hidden = !d.tagline;
+        overviewEl.textContent = d.overview ?? 'No synopsis yet.';
+        const credits = [];
+        if (d.directors?.length) credits.push(`Directed by ${d.directors.join(', ')}`);
+        if (d.cast?.length) credits.push(`Starring ${d.cast.join(', ')}`);
+        creditsEl.textContent = credits.join(' · ');
+        creditsEl.hidden = credits.length === 0;
+        if (d.poster) {
+          poster.src = d.poster;
+          poster.hidden = false;
+        } else {
+          poster.removeAttribute('src');
+          poster.hidden = true;
+        }
+        return true;
+      }
+
+      function place(anchor: Element) {
+        const r = anchor.getBoundingClientRect();
+        card.hidden = false;
+        const cw = card.offsetWidth;
+        const ch = card.offsetHeight;
+        let x = r.right + 14;
+        if (x + cw > window.innerWidth - 8) x = Math.max(8, window.innerWidth - cw - 8);
+        let y = r.top - 8;
+        if (y + ch > window.innerHeight - 8) y = Math.max(8, window.innerHeight - ch - 8);
+        card.style.left = `${x}px`;
+        card.style.top = `${y}px`;
+      }
+
+      function show(btn: Element) {
+        const title = (btn as HTMLElement).dataset.title!;
+        if (fill(title)) place(btn);
+      }
+
+      function hide() {
+        if (!pinned) card.hidden = true;
+      }
+
+      for (const btn of document.querySelectorAll<HTMLElement>('.movie-btn')) {
+        btn.addEventListener('mouseenter', () => {
+          if (!pinned) show(btn);
+        });
+        btn.addEventListener('mouseleave', hide);
+        btn.addEventListener('focus', () => {
+          if (!pinned) show(btn);
+        });
+        btn.addEventListener('blur', hide);
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const title = btn.dataset.title!;
+          if (pinned === title) {
+            pinned = null;
+            card.hidden = true;
+          } else {
+            pinned = title;
+            show(btn);
+          }
+        });
+      }
+
+      document.addEventListener('click', () => {
+        pinned = null;
+        card.hidden = true;
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          pinned = null;
+          card.hidden = true;
+        }
+      });
+      window.addEventListener('scroll', () => {
+        if (!pinned) card.hidden = true;
+      }, { passive: true });
+    </script>
+
+    <style is:global>
+      :root {
+        --green: #1f9e68;
+        --green-deep: #15875a;
+        --ink: #142838;
+        --ink-soft: #1d3850;
+        --cream: #f4efe1;
+        --cream-dim: #e7e0c9;
+        --gold: #f2c94c;
+        --gold-deep: #c79a25;
+        --shadow: 0 10px 30px rgba(10, 25, 35, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--green);
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Archivo', system-ui, sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(1100px 500px at 50% -100px, rgba(255, 255, 255, 0.14), transparent 70%),
+          var(--green);
+        min-height: 100vh;
+      }
+
+      /* ---------- hero ---------- */
+      .hero {
+        text-align: center;
+        padding: 56px 16px 18px;
+      }
+
+      .kicker {
+        margin: 0 0 4px;
+        color: var(--cream);
+        opacity: 0.85;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+      }
+
+      .hero h1 {
+        margin: 0;
+        line-height: 0.95;
+      }
+
+      .hero .script {
+        display: block;
+        font-family: 'Yellowtail', cursive;
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        color: var(--gold);
+        transform: rotate(-4deg);
+        text-shadow: 2px 2px 0 var(--ink);
+        margin-bottom: -0.2em;
+      }
+
+      .hero .slab {
+        font-family: 'Alfa Slab One', serif;
+        font-size: clamp(3rem, 10vw, 6.5rem);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      .hero .big {
+        color: var(--cream);
+        text-shadow: 3px 3px 0 var(--ink), 6px 6px 0 rgba(10, 25, 35, 0.35);
+      }
+
+      .hero .picture {
+        color: var(--gold);
+        text-shadow: 3px 3px 0 var(--ink), 6px 6px 0 rgba(10, 25, 35, 0.35);
+      }
+
+      .event {
+        margin: 18px 0 0;
+        color: var(--cream);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.35em;
+        font-size: clamp(0.85rem, 2.4vw, 1.25rem);
+      }
+
+      .projector {
+        width: 130px;
+        margin-top: 22px;
+        filter: drop-shadow(0 6px 0 rgba(10, 25, 35, 0.25));
+      }
+
+      .filmstrip {
+        height: 26px;
+        background:
+          repeating-linear-gradient(
+            90deg,
+            transparent 0 14px,
+            rgba(244, 239, 225, 0.85) 14px 26px,
+            transparent 26px 40px
+          ),
+          var(--ink);
+        background-clip: content-box, border-box;
+        padding: 7px 0;
+        opacity: 0.92;
+      }
+
+      /* ---------- layout ---------- */
+      main {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 34px 18px 10px;
+      }
+
+      /* ---------- scoreboard ---------- */
+      .scoreboard {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: stretch;
+        gap: 18px;
+        max-width: 760px;
+        margin: 0 auto;
+      }
+
+      .score-card {
+        position: relative;
+        background: var(--ink);
+        color: var(--cream);
+        border-radius: 18px;
+        border: 3px solid var(--ink);
+        padding: 22px 16px 18px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        box-shadow: var(--shadow);
+      }
+
+      .score-card.leading {
+        border-color: var(--gold);
+      }
+
+      .score-card .badge {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        background: var(--gold);
+        color: var(--ink);
+        font-weight: 900;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 4px 12px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+
+      .score-card .host {
+        font-family: 'Alfa Slab One', serif;
+        font-size: 1.35rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .score-card.sean .points { color: var(--gold); }
+      .score-card.amanda .points { color: #4fd79a; }
+
+      .score-card .points {
+        font-family: 'Alfa Slab One', serif;
+        font-size: clamp(2.6rem, 7vw, 4rem);
+        line-height: 1;
+      }
+
+      .pts-label {
+        text-transform: uppercase;
+        letter-spacing: 0.25em;
+        font-size: 0.7rem;
+        opacity: 0.7;
+      }
+
+      .vs {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .vs > span:first-child {
+        font-family: 'Yellowtail', cursive;
+        font-size: 2rem;
+        color: var(--cream);
+        text-shadow: 2px 2px 0 var(--ink);
+      }
+
+      .progress {
+        text-align: center;
+        color: var(--cream);
+        opacity: 0.9;
+        margin: 20px 0 6px;
+        font-weight: 600;
+      }
+
+      /* ---------- rules ---------- */
+      .rules {
+        max-width: 760px;
+        margin: 14px auto 30px;
+        background: var(--cream);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .rules summary {
+        cursor: pointer;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.85rem;
+        padding: 14px 18px;
+        user-select: none;
+      }
+
+      .rules-body {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0 24px;
+        padding: 0 22px 16px;
+      }
+
+      .rules h3 {
+        margin: 6px 0 4px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--green-deep);
+      }
+
+      .rules ul {
+        margin: 0;
+        padding-left: 18px;
+        font-size: 0.92rem;
+      }
+
+      .rules li { margin: 2px 0; }
+
+      /* ---------- table ---------- */
+      .table-card {
+        background: var(--cream);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 10px 10px 4px;
+        margin-bottom: 36px;
+      }
+
+      .table-scroll {
+        overflow-x: auto;
+        border-radius: 12px;
+      }
+
+      table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        font-size: 0.92rem;
+        min-width: 980px;
+      }
+
+      thead th {
+        background: var(--ink);
+        color: var(--cream);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.72rem;
+        padding: 8px 10px;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+
+      thead .groups th.group {
+        border-bottom: 1px solid rgba(244, 239, 225, 0.25);
+      }
+
+      thead .groups th.group,
+      thead .subs th {
+        text-align: center;
+      }
+
+      thead th.actual,
+      td.actual {
+        background-color: rgba(20, 40, 56, 0.08);
+      }
+
+      thead th.actual {
+        background-color: var(--ink-soft);
+        color: var(--gold);
+      }
+
+      th.movie-col {
+        text-align: left;
+      }
+
+      .movie-col {
+        position: sticky;
+        left: 0;
+      }
+
+      thead th.movie-col {
+        z-index: 3;
+      }
+
+      tbody td.movie-col,
+      tfoot td.movie-col {
+        z-index: 1;
+      }
+
+      tbody td.movie-col {
+        background-color: var(--cream);
+      }
+
+      .movie-col {
+        box-shadow: 5px 0 8px -5px rgba(20, 40, 56, 0.3);
+      }
+
+      tbody tr:nth-child(even) td.movie-col {
+        background-color: #ece6d6;
+      }
+
+      tbody tr:hover td.movie-col {
+        background-color: #f3e8c6;
+      }
+
+      tbody td,
+      tfoot td {
+        padding: 9px 10px;
+        border-bottom: 1px solid rgba(20, 40, 56, 0.12);
+        white-space: nowrap;
+      }
+
+      tbody tr:nth-child(even) td {
+        background-color: rgba(20, 40, 56, 0.035);
+      }
+
+      tbody tr:nth-child(even) td.actual {
+        background-color: rgba(20, 40, 56, 0.1);
+      }
+
+      tbody tr:hover td {
+        background-color: rgba(242, 201, 76, 0.18);
+      }
+
+      td.movie-col {
+        font-weight: 700;
+        max-width: 280px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .movie-btn {
+        all: unset;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+        border-bottom: 2px dotted var(--green-deep);
+        padding-bottom: 1px;
+      }
+
+      .movie-btn:hover,
+      .movie-btn:focus-visible {
+        color: var(--green-deep);
+      }
+
+      td.date {
+        color: var(--ink-soft);
+        font-weight: 600;
+      }
+
+      td.num {
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+      }
+
+      td.pts {
+        font-weight: 700;
+      }
+
+      td.pts.win {
+        color: var(--green-deep);
+        font-weight: 900;
+      }
+
+      tr.pending td:not(.movie-col):not(.date) {
+        opacity: 0.55;
+      }
+
+      td.diff {
+        text-align: center;
+      }
+
+      .chip {
+        display: inline-block;
+        font-weight: 900;
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 3px 10px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+
+      .chip.sean {
+        background: var(--gold);
+        color: var(--ink);
+      }
+
+      .chip.amanda {
+        background: var(--green-deep);
+        color: var(--cream);
+      }
+
+      .chip.tie {
+        background: transparent;
+        color: var(--ink);
+        border: 1.5px solid var(--ink);
+      }
+
+      .chip.tbd {
+        background: rgba(20, 40, 56, 0.08);
+        color: var(--ink-soft);
+      }
+
+      tfoot td {
+        background: var(--ink);
+        color: var(--cream);
+        font-weight: 900;
+        border-bottom: none;
+      }
+
+      tfoot td.pts {
+        color: var(--gold);
+        font-size: 1.05rem;
+      }
+
+      tfoot td.movie-col {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .hint {
+        text-align: center;
+        font-size: 0.78rem;
+        color: var(--ink-soft);
+        opacity: 0.75;
+        margin: 8px 0;
+      }
+
+      /* ---------- hover card ---------- */
+      #movie-card {
+        position: fixed;
+        z-index: 50;
+        width: min(400px, calc(100vw - 24px));
+        background: var(--ink);
+        color: var(--cream);
+        border: 2px solid var(--gold);
+        border-radius: 14px;
+        box-shadow: 0 18px 50px rgba(5, 15, 22, 0.55);
+        display: flex;
+        gap: 14px;
+        padding: 14px;
+        pointer-events: none;
+      }
+
+      #movie-card[hidden] {
+        display: none;
+      }
+
+      #card-poster {
+        width: 104px;
+        height: 156px;
+        object-fit: cover;
+        border-radius: 8px;
+        flex-shrink: 0;
+        background: var(--ink-soft);
+      }
+
+      #movie-card .card-body {
+        min-width: 0;
+      }
+
+      #card-title {
+        font-family: 'Alfa Slab One', serif;
+        font-size: 1.02rem;
+        margin: 0 0 4px;
+        color: var(--gold);
+        line-height: 1.15;
+      }
+
+      .card-meta {
+        margin: 0 0 6px;
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.8;
+      }
+
+      .card-tagline {
+        margin: 0 0 6px;
+        font-style: italic;
+        font-size: 0.84rem;
+        color: var(--gold);
+        opacity: 0.95;
+      }
+
+      .card-overview {
+        margin: 0 0 8px;
+        font-size: 0.82rem;
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 6;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .card-credits {
+        margin: 0;
+        font-size: 0.74rem;
+        opacity: 0.8;
+      }
+
+      /* ---------- footer ---------- */
+      footer {
+        text-align: center;
+        color: var(--cream);
+        padding: 26px 18px 40px;
+        font-size: 0.82rem;
+        opacity: 0.92;
+      }
+
+      footer p {
+        margin: 4px 0;
+      }
+
+      footer a {
+        color: var(--gold);
+        font-weight: 700;
+      }
+
+      /* ---------- responsive ---------- */
+      @media (max-width: 640px) {
+        .scoreboard {
+          grid-template-columns: 1fr;
+        }
+
+        .vs {
+          flex-direction: row;
+        }
+
+        .hero {
+          padding-top: 36px;
+        }
+
+        td.movie-col {
+          max-width: 190px;
+        }
+      }
+    </style>
+  </body>
+</html>
