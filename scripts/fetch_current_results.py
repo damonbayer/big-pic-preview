@@ -120,9 +120,9 @@ def fetch_metacritic_score(metacritic_id: str) -> tuple[str, FetchResult]:
 def write_results(rows: list[dict[str, str | int | None]]) -> None:
     fieldnames = [
         "title",
-        "domestic_box_office",
-        "metacritic_score",
-        "box_office_mojo_url",
+        "box_office",
+        "metacritic",
+        "box_office_url",
         "metacritic_url",
         "box_office_error",
         "metacritic_error",
@@ -149,9 +149,9 @@ def main() -> None:
         rows.append(
             {
                 "title": title,
-                "domestic_box_office": box_office.value,
-                "metacritic_score": metacritic.value,
-                "box_office_mojo_url": box_url,
+                "box_office": box_office.value,
+                "metacritic": metacritic.value,
+                "box_office_url": box_url,
                 "metacritic_url": metacritic_url,
                 "box_office_error": box_office.error,
                 "metacritic_error": metacritic.error,
@@ -161,8 +161,8 @@ def main() -> None:
         print(f"{index:02d}/{len(movies)} {title}")
 
     write_results(rows)
-    box_count = sum(row["domestic_box_office"] is not None for row in rows)
-    metacritic_count = sum(row["metacritic_score"] is not None for row in rows)
+    box_count = sum(row["box_office"] is not None for row in rows)
+    metacritic_count = sum(row["metacritic"] is not None for row in rows)
     print(f"Wrote {OUTPUT_CSV.relative_to(ROOT)} with {len(rows)} titles.")
     print(f"Found domestic box office for {box_count} titles.")
     print(f"Found Metacritic scores for {metacritic_count} titles.")

@@ -1,20 +1,13 @@
 import polars as pl
 
-current_results = (
-    pl.read_csv("current_movie_results.csv")
-    .rename(
-        {
-            "domestic_box_office": "box_office",
-            "metacritic_score": "metacritic",
-        }
-    )
-    .select("title", "box_office", "metacritic")
+current_results = pl.read_csv("current_movie_results.csv").select(
+    "title", "box_office", "metacritic"
 )
 predictions = (
     pl.read_csv("summer_movie_preview_predictions.csv")
-    .with_columns(pl.col("box_office") * 1_000_000)
-    .rename({"box_office": "box_office_pred", "matacritic": "metacritic_pred"})
-)  # typo
+    .rename({"box_office_pred_millions": "box_office_pred"})
+    .with_columns(pl.col("box_office_pred") * 1_000_000)
+)
 
 
 # Merge the two DataFrames on the 'movie_title' column
