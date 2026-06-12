@@ -1,4 +1,5 @@
-import scoresCsv from '../../../scores.csv?raw';
+import predictionsCsv from '../../../summer_movie_preview_predictions.csv?raw';
+import resultsCsv from '../../../current_movie_results.csv?raw';
 import tmdbDetails from '../../../tmdb_details.json';
 
 export interface TmdbInfo {
@@ -36,65 +37,84 @@ export interface MovieRow {
 
 const tmdb = tmdbDetails as Record<string, TmdbInfo>;
 
-function num(value: string): number | null {
-  return value === '' ? null : Number(value);
+// --- scoring rules ---
+
+function boxOfficePts(pred: number, actual: number): number {
+  const off = Math.abs(pred - actual);
+  if (off <= 1_000_000) return 20;
+  if (off <= 5_000_000) return 10;
+  if (off <= 10_000_000) return 5;
+  if (off <= 50_000_000) return 1;
+  return 0;
 }
 
-interface RawLine {
+function metacriticPts(pred: number, actual: number): number {
+  const off = Math.abs(pred - actual);
+  if (off === 0) return 5;
+  if (off <= 5) return 1;
+  return 0;
+}
+
+// --- load actuals: title -> { box_office, metacritic } ---
+
+const actuals = new Map<string, { bo: number | null; meta: number | null }>();
+
+for (const line of resultsCsv.trim().split('\n').slice(1)) {
+  // title,box_office,metacritic,box_office_url,metacritic_url,...
+  const cols = line.split(',');
+  actuals.set(cols[0], {
+    bo: cols[1] === '' ? null : Number(cols[1]),
+    meta: cols[2] === '' ? null : Number(cols[2]),
+  });
+}
+
+// --- load predictions: title+host -> guesses ---
+
+interface Pred {
   boPred: number;
   metaPred: number;
-  actualBO: number | null;
-  actualMeta: number | null;
-  boPts: number;
-  metaPts: number;
-  totalPts: number;
 }
 
-const byTitle = new Map<string, Partial<Record<'sean' | 'amanda', RawLine>>>();
+const byTitle = new Map<string, Partial<Record<'sean' | 'amanda', Pred>>>();
 
-for (const line of scoresCsv.trim().split('\n').slice(1)) {
+for (const line of predictionsCsv.trim().split('\n').slice(1)) {
+  // title,host,box_office_pred_millions,metacritic_pred
   const cols = line.split(',');
-  // title,host,box_office_pred,metacritic_pred,box_office,metacritic,
-  // box_office_diff,metacritic_diff,box_office_pts,metacritic_pts,total_pts
   const title = cols[0];
   const host = cols[1] as 'sean' | 'amanda';
   const entry = byTitle.get(title) ?? {};
   entry[host] = {
-    boPred: Number(cols[2]),
+    boPred: Number(cols[2]) * 1_000_000,
     metaPred: Number(cols[3]),
-    actualBO: num(cols[4]),
-    actualMeta: num(cols[5]),
-    boPts: Number(cols[8]),
-    metaPts: Number(cols[9]),
-    totalPts: Number(cols[10]),
   };
   byTitle.set(title, entry);
 }
 
+// --- score every guess ---
+
 export const movies: MovieRow[] = [...byTitle.entries()].map(([title, hosts]) => {
-  const sean = hosts.sean!;
-  const amanda = hosts.amanda!;
   const info = tmdb[title] ?? null;
-  const pick = (raw: RawLine): HostLine => ({
-    boPred: raw.boPred,
-    metaPred: raw.metaPred,
-    boPts: raw.boPts,
-    metaPts: raw.metaPts,
-    totalPts: raw.totalPts,
-  });
+  const { bo = null, meta = null } = actuals.get(title) ?? {};
+  const score = (pred: Pred): HostLine => {
+    const boPts = bo === null ? 0 : boxOfficePts(pred.boPred, bo);
+    const metaPts = meta === null ? 0 : metacriticPts(pred.metaPred, meta);
+    return { ...pred, boPts, metaPts, totalPts: boPts + metaPts };
+  };
+  const sean = score(hosts.sean!);
+  const amanda = score(hosts.amanda!);
   return {
     title,
     releaseDate: info?.release_date ?? null,
     tmdb: info,
-    actualBO: sean.actualBO,
-    actualMeta: sean.actualMeta,
-    sean: pick(sean),
-    amanda: pick(amanda),
+    actualBO: bo,
+    actualMeta: meta,
+    sean,
+    amanda,
     diff: sean.totalPts - amanda.totalPts,
     // A film only counts once both results are in: a Metacritic score alone
     // (reviews land before release) isn't enough, and neither is box office
     // without a Metacritic score.
-    scored: sean.actualBO !== null && sean.actualMeta !== null,
+    scored: bo !== null && meta !== null,
   };
 });
 

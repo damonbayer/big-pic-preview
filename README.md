@@ -9,7 +9,6 @@ Tracking Sean and Amanda's predictions from The Big Picture's Summer Movie Previ
 - `summer_movie_preview_predictions.csv`: tidy host predictions transcribed from the source images.
 - `movies.csv`: movie lookup IDs generated from Wikidata.
 - `current_movie_results.csv`: latest fetched domestic box office and Metacritic scores.
-- `scores.csv`: predictions joined with actuals plus per-host points (regenerate with `uv run scripts/score.py`).
 - `tmdb_details.json`: movie metadata (release dates, posters, synopses) from TMDB.
 
 ## Refresh movie IDs
@@ -38,16 +37,20 @@ missing.
 uv run scripts/fetch_tmdb_details.py
 ```
 
-The script reads `movies.csv`, fetches details from TMDB (set `TMDB_API_KEY` to
-override the default key), and rewrites `tmdb_details.json`.
+The script reads `movies.csv`, fetches details from TMDB, and rewrites
+`tmdb_details.json`. The API key comes from the `TMDB_API_KEY` environment
+variable or a git-ignored `.env` file at the repo root.
 
 ## Scoreboard site
 
-The site in `site/` is built with [Astro](https://astro.build) and reads
-`scores.csv` and `tmdb_details.json` at build time. A GitHub Actions workflow
+The site in `site/` is built with [Astro](https://astro.build). At build time
+it reads `summer_movie_preview_predictions.csv`, `current_movie_results.csv`,
+and `tmdb_details.json`, and computes all points, totals, and differentials —
+the scoring rules live in `site/src/data/scoreboard.ts`. A GitHub Actions workflow
 (`.github/workflows/deploy.yml`) builds and deploys it to GitHub Pages on every
-push to `main`. To update the published scores: re-run the fetch scripts and
-`uv run scripts/score.py`, then commit and push.
+push to `main`. To update the published scores: run the fetch scripts above,
+then commit and push — scoring happens in the site build, so there is no
+derived scores file to regenerate.
 
 ```sh
 cd site
