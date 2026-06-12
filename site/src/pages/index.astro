@@ -189,22 +189,22 @@ const cardData = Object.fromEntries(
           <table>
             <thead>
               <tr class="groups">
-                <th rowspan="2" class="movie-col">Movie</th>
-                <th rowspan="2">Release</th>
+                <th rowspan="2" class="movie-col"><button class="sort-btn" data-col="0">Movie</button></th>
+                <th rowspan="2" aria-sort="ascending"><button class="sort-btn" data-col="1">Release</button></th>
                 <th colspan="3" class="group">Metacritic</th>
                 <th colspan="3" class="group">Box Office</th>
                 <th colspan="2" class="group">Points</th>
-                <th rowspan="2">Differential</th>
+                <th rowspan="2"><button class="sort-btn" data-col="10">Differential</button></th>
               </tr>
               <tr class="subs">
-                <th>Sean</th>
-                <th>Amanda</th>
-                <th class="actual">Actual</th>
-                <th>Sean</th>
-                <th>Amanda</th>
-                <th class="actual">Actual</th>
-                <th>Sean</th>
-                <th>Amanda</th>
+                <th><button class="sort-btn" data-col="2">Sean</button></th>
+                <th><button class="sort-btn" data-col="3">Amanda</button></th>
+                <th class="actual"><button class="sort-btn" data-col="4">Actual</button></th>
+                <th><button class="sort-btn" data-col="5">Sean</button></th>
+                <th><button class="sort-btn" data-col="6">Amanda</button></th>
+                <th class="actual"><button class="sort-btn" data-col="7">Actual</button></th>
+                <th><button class="sort-btn" data-col="8">Sean</button></th>
+                <th><button class="sort-btn" data-col="9">Amanda</button></th>
               </tr>
             </thead>
             <tbody>
@@ -212,29 +212,31 @@ const cardData = Object.fromEntries(
                 const chip = diffChip(m);
                 return (
                   <tr class={m.scored ? '' : 'pending'}>
-                    <td class="movie-col">
+                    <td class="movie-col" data-sort={m.title.toLowerCase()}>
                       <button class="movie-btn" type="button" data-title={m.title}>{m.title}</button>
                     </td>
-                    <td class="date">{fmtDate(m.releaseDate)}</td>
-                    <td class="num" data-pts={heat(m.sean.metaPts, m.actualMeta)}>{fmtMeta(m.sean.metaPred)}</td>
-                    <td class="num" data-pts={heat(m.amanda.metaPts, m.actualMeta)}>{fmtMeta(m.amanda.metaPred)}</td>
-                    <td class="num actual">{fmtMeta(m.actualMeta)}</td>
-                    <td class="num" data-pts={heat(m.sean.boPts, m.actualBO)}>{fmtBO(m.sean.boPred)}</td>
-                    <td class="num" data-pts={heat(m.amanda.boPts, m.actualBO)}>{fmtBO(m.amanda.boPred)}</td>
-                    <td class="num actual">{fmtBO(m.actualBO)}</td>
+                    <td class="date" data-sort={m.releaseDate ?? ''}>{fmtDate(m.releaseDate)}</td>
+                    <td class="num" data-pts={heat(m.sean.metaPts, m.actualMeta)} data-sort={m.sean.metaPred}>{fmtMeta(m.sean.metaPred)}</td>
+                    <td class="num" data-pts={heat(m.amanda.metaPts, m.actualMeta)} data-sort={m.amanda.metaPred}>{fmtMeta(m.amanda.metaPred)}</td>
+                    <td class="num actual" data-sort={m.actualMeta ?? ''}>{fmtMeta(m.actualMeta)}</td>
+                    <td class="num" data-pts={heat(m.sean.boPts, m.actualBO)} data-sort={m.sean.boPred}>{fmtBO(m.sean.boPred)}</td>
+                    <td class="num" data-pts={heat(m.amanda.boPts, m.actualBO)} data-sort={m.amanda.boPred}>{fmtBO(m.amanda.boPred)}</td>
+                    <td class="num actual" data-sort={m.actualBO ?? ''}>{fmtBO(m.actualBO)}</td>
                     <td
                       class={`num pts ${m.scored && m.diff > 0 ? 'win' : ''}`}
                       title={ptsTitle(m.sean, m.scored)}
+                      data-sort={m.scored ? m.sean.totalPts : ''}
                     >
                       {m.scored ? m.sean.totalPts : '—'}
                     </td>
                     <td
                       class={`num pts ${m.scored && m.diff < 0 ? 'win' : ''}`}
                       title={ptsTitle(m.amanda, m.scored)}
+                      data-sort={m.scored ? m.amanda.totalPts : ''}
                     >
                       {m.scored ? m.amanda.totalPts : '—'}
                     </td>
-                    <td class="diff"><span class={`chip ${chip.cls}`}>{chip.text}</span></td>
+                    <td class="diff" data-sort={m.scored ? m.diff : ''}><span class={`chip ${chip.cls}`}>{chip.text}</span></td>
                   </tr>
                 );
               })}
@@ -252,7 +254,7 @@ const cardData = Object.fromEntries(
         </div>
         <p class="hint">
           {SHOW_GUESS_HEAT && 'Green shading on a guess shows the points it earned — darker is better. '}
-          Hover or tap a title for the movie details.
+          Click a column header to sort. Hover or tap a title for the movie details.
         </p>
       </section>
     </main>
@@ -382,6 +384,43 @@ const cardData = Object.fromEntries(
       window.addEventListener('scroll', () => {
         if (!pinned) card.hidden = true;
       }, { passive: true });
+
+      // ----- column sorting -----
+      const tbody = document.querySelector('tbody')!;
+      // The server renders rows sorted by release date ascending.
+      let sortCol: number | null = 1;
+      let sortDir: 'asc' | 'desc' = 'asc';
+
+      function sortKey(row: HTMLTableRowElement, col: number): string {
+        const cell = row.cells[col];
+        return cell.dataset.sort ?? cell.textContent!.trim();
+      }
+
+      for (const btn of document.querySelectorAll<HTMLButtonElement>('.sort-btn')) {
+        btn.addEventListener('click', () => {
+          const col = Number(btn.dataset.col);
+          // Text-ish columns sort ascending first, numeric ones biggest-first.
+          const firstDir = col <= 1 ? 'asc' : 'desc';
+          sortDir = sortCol === col ? (sortDir === 'asc' ? 'desc' : 'asc') : firstDir;
+          sortCol = col;
+
+          const mult = sortDir === 'asc' ? 1 : -1;
+          const rows = [...tbody.rows];
+          rows.sort((a, b) => {
+            const ka = sortKey(a, col);
+            const kb = sortKey(b, col);
+            if (ka === '' || kb === '') return (ka === '' ? 1 : 0) - (kb === '' ? 1 : 0);
+            const na = Number(ka);
+            const nb = Number(kb);
+            if (!Number.isNaN(na) && !Number.isNaN(nb)) return (na - nb) * mult;
+            return ka.localeCompare(kb) * mult;
+          });
+          for (const row of rows) tbody.appendChild(row);
+
+          for (const th of document.querySelectorAll('th[aria-sort]')) th.removeAttribute('aria-sort');
+          btn.closest('th')!.setAttribute('aria-sort', sortDir === 'asc' ? 'ascending' : 'descending');
+        });
+      }
     </script>
 
     <style is:global>
@@ -718,6 +757,40 @@ const cardData = Object.fromEntries(
 
       th.movie-col {
         text-align: left;
+      }
+
+      .sort-btn {
+        all: unset;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+        text-transform: inherit;
+        letter-spacing: inherit;
+        white-space: nowrap;
+      }
+
+      .sort-btn::after {
+        content: '\21C5';
+        display: inline-block;
+        margin-left: 4px;
+        opacity: 0.4;
+      }
+
+      .sort-btn:hover::after,
+      .sort-btn:focus-visible::after {
+        opacity: 1;
+      }
+
+      th[aria-sort='ascending'] .sort-btn::after {
+        content: '\25B2';
+        color: var(--gold);
+        opacity: 1;
+      }
+
+      th[aria-sort='descending'] .sort-btn::after {
+        content: '\25BC';
+        color: var(--gold);
+        opacity: 1;
       }
 
       .movie-col {
