@@ -91,7 +91,10 @@ export const movies: MovieRow[] = [...byTitle.entries()].map(([title, hosts]) =>
     sean: pick(sean),
     amanda: pick(amanda),
     diff: sean.totalPts - amanda.totalPts,
-    scored: sean.actualBO !== null || sean.actualMeta !== null,
+    // A film only counts once both results are in: a Metacritic score alone
+    // (reviews land before release) isn't enough, and neither is box office
+    // without a Metacritic score.
+    scored: sean.actualBO !== null && sean.actualMeta !== null,
   };
 });
 
@@ -103,8 +106,8 @@ movies.sort((a, b) => {
 });
 
 export const totals = {
-  sean: movies.reduce((sum, m) => sum + m.sean.totalPts, 0),
-  amanda: movies.reduce((sum, m) => sum + m.amanda.totalPts, 0),
+  sean: movies.reduce((sum, m) => sum + (m.scored ? m.sean.totalPts : 0), 0),
+  amanda: movies.reduce((sum, m) => sum + (m.scored ? m.amanda.totalPts : 0), 0),
   scoredCount: movies.filter((m) => m.scored).length,
   movieCount: movies.length,
 };
