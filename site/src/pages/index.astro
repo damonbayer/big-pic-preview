@@ -1,6 +1,21 @@
 ---
 import { movies, totals } from '../data/scoreboard';
 
+// Tint each host's guess cells by the points that guess earned (darker = more).
+// Set to false to render the table without the shading.
+const SHOW_GUESS_HEAT = true;
+
+const EPISODES = [
+  {
+    label: 'The Summer Movie Preview',
+    url: 'https://www.theringer.com/podcasts/the-big-picture/2026/04/14/the-2026-summer-movie-preview-boom-or-bust-game',
+  },
+  {
+    label: 'The June Check-In',
+    url: 'https://www.theringer.com/podcasts/the-big-picture/2026/06/02/were-so-back-for-good-backrooms-and-obsession-mania-and-10-movies-we-missed',
+  },
+];
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function fmtDate(iso: string | null): string {
@@ -29,6 +44,12 @@ function diffChip(m: (typeof movies)[number]): { text: string; cls: string } {
 
 function ptsTitle(line: { boPts: number; metaPts: number }, scored: boolean): string | undefined {
   return scored ? `Box office: ${line.boPts} pts · Metacritic: ${line.metaPts} pts` : undefined;
+}
+
+// data-pts value for a guess cell; undefined (no attribute) when the actual
+// isn't in yet or the shading is disabled.
+function heat(pts: number, actual: number | null): number | undefined {
+  return SHOW_GUESS_HEAT && actual !== null ? pts : undefined;
 }
 
 const overall = totals.sean === totals.amanda
@@ -133,6 +154,14 @@ const cardData = Object.fromEntries(
         {totals.scoredCount} of {totals.movieCount} movies scored so far &mdash; updated through summer 2026.
       </p>
 
+      <nav class="episodes" aria-label="Listen to the episodes">
+        {EPISODES.map((ep) => (
+          <a href={ep.url}>
+            <span aria-hidden="true">&#127911;</span> Listen: {ep.label}
+          </a>
+        ))}
+      </nav>
+
       <details class="rules">
         <summary>How the scoring works</summary>
         <div class="rules-body">
@@ -187,11 +216,11 @@ const cardData = Object.fromEntries(
                       <button class="movie-btn" type="button" data-title={m.title}>{m.title}</button>
                     </td>
                     <td class="date">{fmtDate(m.releaseDate)}</td>
-                    <td class="num">{fmtMeta(m.sean.metaPred)}</td>
-                    <td class="num">{fmtMeta(m.amanda.metaPred)}</td>
+                    <td class="num" data-pts={heat(m.sean.metaPts, m.actualMeta)}>{fmtMeta(m.sean.metaPred)}</td>
+                    <td class="num" data-pts={heat(m.amanda.metaPts, m.actualMeta)}>{fmtMeta(m.amanda.metaPred)}</td>
                     <td class="num actual">{fmtMeta(m.actualMeta)}</td>
-                    <td class="num">{fmtBO(m.sean.boPred)}</td>
-                    <td class="num">{fmtBO(m.amanda.boPred)}</td>
+                    <td class="num" data-pts={heat(m.sean.boPts, m.actualBO)}>{fmtBO(m.sean.boPred)}</td>
+                    <td class="num" data-pts={heat(m.amanda.boPts, m.actualBO)}>{fmtBO(m.amanda.boPred)}</td>
                     <td class="num actual">{fmtBO(m.actualBO)}</td>
                     <td
                       class={`num pts ${m.scored && m.diff > 0 ? 'win' : ''}`}
@@ -221,7 +250,10 @@ const cardData = Object.fromEntries(
             </tfoot>
           </table>
         </div>
-        <p class="hint">Hover or tap a title for the movie details.</p>
+        <p class="hint">
+          {SHOW_GUESS_HEAT && 'Green shading on a guess shows the points it earned — darker is better. '}
+          Hover or tap a title for the movie details.
+        </p>
       </section>
     </main>
 
@@ -229,7 +261,8 @@ const cardData = Object.fromEntries(
 
     <footer>
       <p>
-        Predictions from <em>The Big Picture</em> Summer Movie Preview. Box office via Box Office Mojo,
+        Predictions from <a href={EPISODES[0].url}><em>The Big Picture</em> Summer Movie Preview</a>,
+        scored on <a href={EPISODES[1].url}>the June check-in</a>. Box office via Box Office Mojo,
         review scores via Metacritic.
       </p>
       <p>
@@ -558,6 +591,34 @@ const cardData = Object.fromEntries(
         font-weight: 600;
       }
 
+      /* ---------- episode links ---------- */
+      .episodes {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 4px 0 8px;
+      }
+
+      .episodes a {
+        background: var(--ink);
+        color: var(--gold);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 9px 18px;
+        border-radius: 999px;
+        border: 2px solid transparent;
+        box-shadow: 0 4px 14px rgba(10, 25, 35, 0.3);
+        transition: transform 0.12s ease, border-color 0.12s ease;
+      }
+
+      .episodes a:hover,
+      .episodes a:focus-visible {
+        border-color: var(--gold);
+        transform: translateY(-2px);
+      }
+
       /* ---------- rules ---------- */
       .rules {
         max-width: 760px;
@@ -740,6 +801,26 @@ const cardData = Object.fromEntries(
       }
 
       td.pts {
+        font-weight: 700;
+      }
+
+      /* Guess-cell shading by points earned (see SHOW_GUESS_HEAT). The extra
+         specificity keeps it above the stripe and row-hover backgrounds. */
+      tbody tr td.num[data-pts='1'] {
+        background-color: rgba(31, 158, 104, 0.14);
+      }
+
+      tbody tr td.num[data-pts='5'] {
+        background-color: rgba(31, 158, 104, 0.3);
+      }
+
+      tbody tr td.num[data-pts='10'] {
+        background-color: rgba(31, 158, 104, 0.48);
+      }
+
+      tbody tr td.num[data-pts='20'] {
+        background-color: rgba(31, 158, 104, 0.68);
+        color: var(--cream);
         font-weight: 700;
       }
 
