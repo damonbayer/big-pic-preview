@@ -52,6 +52,32 @@ function heat(pts: number, actual: number | null): number | undefined {
   return SHOW_GUESS_HEAT && actual !== null ? pts : undefined;
 }
 
+function pluralPts(pts: number): string {
+  return `${pts} ${pts === 1 ? 'pt' : 'pts'}`;
+}
+
+// More precise than fmtBO so a $1.04M miss doesn't read as "$1M".
+function fmtBODiff(v: number): string {
+  const millions = v / 1e6;
+  const text =
+    millions >= 100 ? Math.round(millions).toString()
+    : millions >= 10 ? millions.toFixed(1).replace(/\.0$/, '')
+    : millions.toFixed(2).replace(/0$/, '').replace(/\.0$/, '');
+  return `$${text}M`;
+}
+
+function metaGuessTitle(pred: number, actual: number | null, pts: number): string | undefined {
+  if (actual === null) return undefined;
+  const off = Math.abs(pred - actual);
+  return `Guessed ${pred}, actual ${actual} — ${off === 0 ? 'exact' : `off by ${off}`} → ${pluralPts(pts)}`;
+}
+
+function boGuessTitle(pred: number, actual: number | null, pts: number): string | undefined {
+  if (actual === null) return undefined;
+  const off = Math.abs(pred - actual);
+  return `Guessed ${fmtBO(pred)}, actual ${fmtBO(actual)} — off by ${fmtBODiff(off)} → ${pluralPts(pts)}`;
+}
+
 const overall = totals.sean === totals.amanda
   ? { text: 'All tied up', cls: 'tie' }
   : totals.sean > totals.amanda
@@ -216,11 +242,11 @@ const cardData = Object.fromEntries(
                       <button class="movie-btn" type="button" data-title={m.title}>{m.title}</button>
                     </td>
                     <td class="date" data-sort={m.releaseDate ?? ''}>{fmtDate(m.releaseDate)}</td>
-                    <td class="num" data-pts={heat(m.sean.metaPts, m.actualMeta)} data-sort={m.sean.metaPred}>{fmtMeta(m.sean.metaPred)}</td>
-                    <td class="num" data-pts={heat(m.amanda.metaPts, m.actualMeta)} data-sort={m.amanda.metaPred}>{fmtMeta(m.amanda.metaPred)}</td>
+                    <td class="num" data-pts={heat(m.sean.metaPts, m.actualMeta)} data-sort={m.sean.metaPred} title={metaGuessTitle(m.sean.metaPred, m.actualMeta, m.sean.metaPts)}>{fmtMeta(m.sean.metaPred)}</td>
+                    <td class="num" data-pts={heat(m.amanda.metaPts, m.actualMeta)} data-sort={m.amanda.metaPred} title={metaGuessTitle(m.amanda.metaPred, m.actualMeta, m.amanda.metaPts)}>{fmtMeta(m.amanda.metaPred)}</td>
                     <td class="num actual" data-sort={m.actualMeta ?? ''}>{fmtMeta(m.actualMeta)}</td>
-                    <td class="num" data-pts={heat(m.sean.boPts, m.actualBO)} data-sort={m.sean.boPred}>{fmtBO(m.sean.boPred)}</td>
-                    <td class="num" data-pts={heat(m.amanda.boPts, m.actualBO)} data-sort={m.amanda.boPred}>{fmtBO(m.amanda.boPred)}</td>
+                    <td class="num" data-pts={heat(m.sean.boPts, m.actualBO)} data-sort={m.sean.boPred} title={boGuessTitle(m.sean.boPred, m.actualBO, m.sean.boPts)}>{fmtBO(m.sean.boPred)}</td>
+                    <td class="num" data-pts={heat(m.amanda.boPts, m.actualBO)} data-sort={m.amanda.boPred} title={boGuessTitle(m.amanda.boPred, m.actualBO, m.amanda.boPts)}>{fmtBO(m.amanda.boPred)}</td>
                     <td class="num actual" data-sort={m.actualBO ?? ''}>{fmtBO(m.actualBO)}</td>
                     <td
                       class={`num pts ${m.scored && m.diff > 0 ? 'win' : ''}`}
