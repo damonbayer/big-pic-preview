@@ -168,7 +168,7 @@ const cardData = Object.fromEntries(
       </section>
 
       <p class="progress">
-        {totals.scoredCount} of {totals.movieCount} movies scored so far &mdash; updated through summer 2026.
+        {totals.scoredCount} of {totals.movieCount} movies scored so far &mdash; updated daily around 2&nbsp;pm Pacific.
       </p>
 
       <nav class="episodes" aria-label="Listen to the episodes">
@@ -269,10 +269,6 @@ const cardData = Object.fromEntries(
             </tfoot>
           </table>
         </div>
-        <p class="hint">
-          {SHOW_GUESS_HEAT && 'Green shading on a guess shows the points it earned — darker is better. '}
-          Click a column header to sort. Hover or tap a title for the movie details.
-        </p>
       </section>
     </main>
 
@@ -999,14 +995,6 @@ const cardData = Object.fromEntries(
       tfoot td.movie-col {
         text-transform: uppercase;
         letter-spacing: 0.1em;
-      }
-
-      .hint {
-        text-align: center;
-        font-size: 0.78rem;
-        color: var(--ink-soft);
-        opacity: 0.75;
-        margin: 8px 0;
       }
 
       /* ---------- hover card ---------- */
