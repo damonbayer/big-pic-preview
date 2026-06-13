@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import html
 import re
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -18,6 +19,14 @@ MOVIES_CSV = ROOT / "movies.csv"
 OUTPUT_CSV = ROOT / "current_movie_results.csv"
 
 REQUEST_DELAY_SECONDS = 0.25
+
+# A 404 from Box Office Mojo / Metacritic is retried up to MAX_404_ATTEMPTS times
+# total; if every attempt still 404s, the run fails (PersistentNotFoundError) so
+# the scheduled GitHub Action surfaces the broken page instead of silently
+# recording it as a missing result.
+MAX_404_ATTEMPTS = 3
+RETRY_DELAY_SECONDS = 2.0
+
 USER_AGENT = (
     "Mozilla/5.0 (compatible; big_pic_summer_movie_preview/0.1; local data script)"
 )
@@ -29,10 +38,37 @@ class FetchResult:
     error: str
 
 
+class PersistentNotFoundError(RuntimeError):
+    """A page returned HTTP 404 on every attempt; the whole run should fail."""
+
+
 def fetch_text(url: str) -> str:
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=45) as response:
-        return response.read().decode("utf-8", errors="replace")
+    """Fetch ``url`` as text, retrying transient 404s.
+
+    Box Office Mojo and Metacritic occasionally serve a spurious 404. Retry up to
+    MAX_404_ATTEMPTS times; a 404 that survives every attempt raises
+    PersistentNotFoundError so the run (and the scheduled GitHub Action) fails
+    loudly rather than silently recording the page as missing. Non-404 errors are
+    raised immediately for the caller to record as before.
+    """
+    for attempt in range(1, MAX_404_ATTEMPTS + 1):
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(request, timeout=45) as response:
+                return response.read().decode("utf-8", errors="replace")
+        except urllib.error.HTTPError as error:
+            if error.code != 404:
+                raise
+            if attempt == MAX_404_ATTEMPTS:
+                raise PersistentNotFoundError(
+                    f"{url} returned HTTP 404 after {MAX_404_ATTEMPTS} attempts"
+                ) from error
+            print(
+                f"  HTTP 404 on {url} (attempt {attempt}/{MAX_404_ATTEMPTS}); "
+                f"retrying in {RETRY_DELAY_SECONDS:g}s"
+            )
+            time.sleep(RETRY_DELAY_SECONDS)
+    raise RuntimeError("unreachable")  # pragma: no cover
 
 
 def money_to_int(value: str) -> int:
@@ -174,4 +210,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except PersistentNotFoundError as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        raise SystemExit(1) from error
