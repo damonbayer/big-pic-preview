@@ -292,6 +292,7 @@ const cardData = Object.fromEntries(
           <a id="card-link-tmdb" target="_blank" rel="noopener noreferrer">TMDB</a>
           <a id="card-link-bo" target="_blank" rel="noopener noreferrer">Box Office Mojo</a>
           <a id="card-link-mc" target="_blank" rel="noopener noreferrer">Metacritic</a>
+          <a id="card-link-letterboxd" target="_blank" rel="noopener noreferrer">Letterboxd</a>
         </p>
       </div>
     </div>
@@ -311,6 +312,7 @@ const cardData = Object.fromEntries(
       const linkTmdb = document.getElementById('card-link-tmdb') as HTMLAnchorElement;
       const linkBo = document.getElementById('card-link-bo') as HTMLAnchorElement;
       const linkMc = document.getElementById('card-link-mc') as HTMLAnchorElement;
+      const linkLetterboxd = document.getElementById('card-link-letterboxd') as HTMLAnchorElement;
 
       let pinned: string | null = null;
 
@@ -344,6 +346,7 @@ const cardData = Object.fromEntries(
         setLink(linkTmdb, links.tmdb);
         setLink(linkBo, links.boxOffice);
         setLink(linkMc, links.metacritic);
+        setLink(linkLetterboxd, links.letterboxd);
         if (d.poster) {
           poster.src = d.poster;
           poster.hidden = false;
