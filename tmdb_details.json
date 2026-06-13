@@ -65,7 +65,7 @@
       "Nicholas Braun"
     ]
   },
-  "Billie Eilish - Hit Me Hard and Soft: The Tour": {
+  "Billie Eilish - Hit Me Hard and Soft: The Tour (Live in 3D)": {
     "tmdb_id": 1515899,
     "tmdb_title": "Billie Eilish - Hit Me Hard and Soft: The Tour (Live in 3D)",
     "release_date": "2026-05-06",
@@ -138,7 +138,7 @@
     "tmdb_title": "Obsession",
     "release_date": "2026-05-13",
     "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
-    "tagline": "My little food critic.",
+    "tagline": "Be careful who you wish for\u2026",
     "runtime": 108,
     "genres": [
       "Horror",
@@ -222,7 +222,7 @@
       "Joseph Lopez"
     ]
   },
-  "Star Wars: The Mandalorian and Grogu": {
+  "The Mandalorian and Grogu": {
     "tmdb_id": 1228710,
     "tmdb_title": "The Mandalorian and Grogu",
     "release_date": "2026-05-20",
@@ -410,9 +410,9 @@
     "tagline": "We deserve to know.",
     "runtime": 145,
     "genres": [
+      "Action",
       "Science Fiction",
-      "Thriller",
-      "Action"
+      "Thriller"
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/3o5YPjDGDTcTDL5ftDA9NwN9dLd.jpg",
     "directors": [
@@ -643,7 +643,7 @@
       "Comedy",
       "Adventure"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/rQ0f1Y3t9w3DxVxuVydkgqQ2Hji.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/jDrtrBDIFGDmwSJ52F987wz2Gkn.jpg",
     "directors": [
       "Thomas Kail"
     ],
@@ -730,7 +730,7 @@
       "Horror",
       "Thriller"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/ztadKzIIR0ERYqpHteaPFtk7inP.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/syGSQh7bqPHCFRhwHewHdR5EqjD.jpg",
     "directors": [
       "S\u00e9bastien Vani\u010dek"
     ],
@@ -753,7 +753,7 @@
       "Action",
       "Adventure"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/zp1nJcLxWDhDEQu5iZi4TAnRaSc.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/yyB2VJEW3an2xCdcYCPQhn9QERR.jpg",
     "directors": [
       "Destin Daniel Cretton"
     ],
@@ -764,7 +764,7 @@
       "Jacob Batalon"
     ]
   },
-  "Fall 2": {
+  "Fall 2: Deadpoint": {
     "tmdb_id": 1101412,
     "tmdb_title": "Fall 2: Deadpoint",
     "release_date": "2026-08-07",
@@ -776,8 +776,8 @@
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/ckKAdEz49bJ10jCLbCYIzVHJGEu.jpg",
     "directors": [
-      "Peter Spierig",
-      "Michael Spierig"
+      "Michael Spierig",
+      "Peter Spierig"
     ],
     "cast": [
       "Harriet Slater",
@@ -979,8 +979,8 @@
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/d2Ga7lZI4c19YGcIH09vj9mDZKU.jpg",
     "directors": [
-      "Scott Moore",
-      "Jon Lucas"
+      "Jon Lucas",
+      "Scott Moore"
     ],
     "cast": [
       "Leslie Mann",
@@ -1012,7 +1012,7 @@
       "Franz Rogowski"
     ]
   },
-  "Coyote vs. Acme": {
+  "Coyote vs ACME": {
     "tmdb_id": 1204680,
     "tmdb_title": "Coyote vs ACME",
     "release_date": "2026-08-26",

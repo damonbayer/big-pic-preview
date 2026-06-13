@@ -1,50 +1,50 @@
-title,tmdb_id,box_office_mojo_id,metacritic_id
-The Devil Wears Prada 2,1314481,tt33612209,movie/the-devil-wears-prada-2
-Hokum,1430077,tt35672862,movie/hokum
-The Sheep Detectives,1301421,tt32565993,movie/the-sheep-detectives
-Billie Eilish - Hit Me Hard and Soft: The Tour,1515899,tt39018643,movie/billie-eilish---hit-me-hard-and-soft-the-tour-live-in-3d
-Mortal Kombat II,931285,tt17490712,movie/mortal-kombat-ii
-Is God Is,1380316,tt34379307,movie/is-god-is
-Obsession,1339713,tt37287335,movie/obsession-2025
-In the Grey,1122573,tt27681354,movie/in-the-grey
-I Love Boosters,1227877,tt30827810,movie/i-love-boosters
-Passenger,1368314,tt33763941,movie/passenger
-Star Wars: The Mandalorian and Grogu,1228710,tt30825738,movie/star-wars-the-mandalorian-and-grogu
-Pressure,1318413,tt32547691,movie/pressure
-The Breadwinner,1440050,tt34459219,movie/the-breadwinner-2026
-Tuner,1340206,tt33296751,movie/tuner
-Backrooms,1083381,tt26657236,movie/backrooms
-Masters of the Universe,454639,tt0427340,movie/masters-of-the-universe-2026
-Power Ballad,1284016,tt32267691,movie/power-ballad/
-Scary Movie,1273221,tt32093575,movie/scary-movie-6
-Disclosure Day,1275779,tt15047880,movie/disclosure-day
-Stop! That! Train!,1541560,tt38128726,movie/stop-that-train
-Toy Story 5,1084244,tt29355505,movie/toy-story-5
-The Death of Robin Hood,1284465,tt32273171,movie/the-death-of-robin-hood
-Girls Like Girls,1397485,tt32432654,movie/girls-like-girls
-Supergirl,1081003,tt8814476,movie/supergirl-2026
-Jackass: Best and Last,1612018,tt39316472,movie/jackass-best-and-last
-The Invite,950028,tt14173636,movie/the-invite
-Minions & Monsters,1315772,tt32890033,movie/minions-and-monsters
-Young Washington,1308767,tt32104007,
-Moana,1108427,tt27419466,movie/moana-2026
-Gail Daughtry and the Celebrity Sex Pass,1476682,tt36834010,movie/gail-daughtry-and-the-celebrity-sex-pass
-The Odyssey,1368337,tt33764258,movie/the-odyssey-2026
-Cut Off,1451148,tt36246412,
-Evil Dead Burn,1212763,tt31170389,movie/evil-dead-burn
-Spider-Man: Brand New Day,969681,tt22084616,movie/spider-man-brand-new-day
-Fall 2,1101412,tt31192372,
-Ice Cream Man,1477712,tt36893729,movie/ice-cream-man
-One Night Only,1433367,tt37853455,movie/one-night-only/
-Super Troopers 3,675871,tt8820258,movie/super-troopers-3
-The End of Oak Street,1101383,tt27165187,movie/the-end-of-oak-street
-PAW Patrol: The Dino Movie,1185806,tt29356163,movie/paw-patrol-the-dino-movie
-The Rivals of Amziah King,1124142,tt27706593,movie/the-rivals-of-amziah-king
-Insidious: Out of the Further,1291595,tt32393988,movie/insidious-out-of-the-further
-Mutiny,1288445,tt32338669,
-Spa Weekend,1341138,tt33305867,
-Cliffhanger,1120556,tt1441251,
-Coyote vs. Acme,1204680,tt1756855,movie/coyote-vs-acme
-The Dog Stars,1384216,tt21285562,movie/the-dog-stars
-Finding Emily,1339588,tt32499466,movie/finding-emily
-Idiots,445466,tt6628920,movie/idiots
+title,wikidata_id,tmdb_id,box_office_mojo_id,metacritic_id,letterboxd_id
+The Devil Wears Prada 2,Q134611972,1314481,tt33612209,movie/the-devil-wears-prada-2,the-devil-wears-prada-2
+Hokum,Q133397105,1430077,tt35672862,movie/hokum,hokum
+The Sheep Detectives,Q126405648,1301421,tt32565993,movie/the-sheep-detectives,the-sheep-detectives
+Billie Eilish - Hit Me Hard and Soft: The Tour (Live in 3D),Q137204783,1515899,tt39018643,movie/billie-eilish---hit-me-hard-and-soft-the-tour-live-in-3d,billie-eilish-hit-me-hard-and-soft-the-tour
+Mortal Kombat II,Q117830073,931285,tt17490712,movie/mortal-kombat-ii,mortal-kombat-ii
+Is God Is,Q135742878,1380316,tt34379307,movie/is-god-is,
+Obsession,Q136163067,1339713,tt37287335,movie/obsession-2025,obsession-2025-2
+In the Grey,Q123172835,1122573,tt27681354,movie/in-the-grey,in-the-grey-2026
+I Love Boosters,Q131109043,1227877,tt30827810,movie/i-love-boosters,i-love-boosters
+Passenger,Q137708152,1368314,tt33763941,movie/passenger,passenger-2026
+The Mandalorian and Grogu,Q124246549,1228710,tt30825738,movie/star-wars-the-mandalorian-and-grogu,star-wars-the-mandalorian-and-grogu
+Pressure,Q127698549,1318413,tt32547691,movie/pressure,pressure-3
+The Breadwinner,Q134972733,1440050,tt34459219,movie/the-breadwinner-2026,
+Tuner,Q130660452,1340206,tt33296751,movie/tuner,tuner
+Backrooms,Q125131076,1083381,tt26657236,movie/backrooms,backrooms-2026
+Masters of the Universe,Q112040381,454639,tt0427340,movie/masters-of-the-universe-2026,masters-of-the-universe-2026
+Power Ballad,Q126285100,1284016,tt32267691,movie/power-ballad/,power-ballad
+Scary Movie,Q131450198,1273221,tt32093575,movie/scary-movie-6,scary-movie-2026
+Disclosure Day,Q126683577,1275779,tt15047880,movie/disclosure-day,disclosure-day
+Stop! That! Train!,Q137648596,1541560,tt38128726,movie/stop-that-train,stop-that-train
+Toy Story 5,Q113641997,1084244,tt29355505,movie/toy-story-5,toy-story-5
+The Death of Robin Hood,Q125960231,1284465,tt32273171,movie/the-death-of-robin-hood,the-death-of-robin-hood
+Girls Like Girls,Q131428413,1397485,tt32432654,movie/girls-like-girls,girls-like-girls
+Supergirl,Q116921951,1081003,tt8814476,movie/supergirl-2026,supergirl-woman-of-tomorrow
+Jackass: Best and Last,Q138035676,1612018,tt39316472,movie/jackass-best-and-last,jackass-best-and-last
+The Invite,Q134083296,950028,tt14173636,movie/the-invite,the-invite-2026
+Minions & Monsters,Q127605787,1315772,tt32890033,movie/minions-and-monsters,
+Young Washington,Q136002124,1308767,tt32104007,,young-washington
+Moana,Q118996994,1108427,tt27419466,movie/moana-2026,moana-2026
+Gail Daughtry and the Celebrity Sex Pass,Q137356279,1476682,tt36834010,movie/gail-daughtry-and-the-celebrity-sex-pass,gail-daughtry-and-the-celebrity-sex-pass
+The Odyssey,Q131547207,1368337,tt33764258,movie/the-odyssey-2026,the-odyssey-2026
+Cut Off,Q135906854,1451148,tt36246412,,cut-off-2026
+Evil Dead Burn,Q132731331,1212763,tt31170389,movie/evil-dead-burn,evil-dead-burn
+Spider-Man: Brand New Day,Q113244935,969681,tt22084616,movie/spider-man-brand-new-day,spider-man-brand-new-day
+Fall 2: Deadpoint,Q136388712,1101412,tt31192372,,fall-2-2026
+Ice Cream Man,Q136773033,1477712,tt36893729,movie/ice-cream-man,
+One Night Only,Q135906833,1433367,tt37853455,movie/one-night-only/,one-night-only-2026
+Super Troopers 3,Q136325016,675871,tt8820258,movie/super-troopers-3,super-troopers-3
+The End of Oak Street,Q124804916,1101383,tt27165187,movie/the-end-of-oak-street,the-end-of-oak-street
+PAW Patrol: The Dino Movie,Q132802215,1185806,tt29356163,movie/paw-patrol-the-dino-movie,paw-patrol-the-dino-movie
+The Rivals of Amziah King,Q122585845,1124142,tt27706593,movie/the-rivals-of-amziah-king,the-rivals-of-amziah-king
+Insidious: Out of the Further,Q136311783,1291595,tt32393988,movie/insidious-out-of-the-further,
+Mutiny,Q125878994,1288445,tt32338669,,mutiny-2026
+Spa Weekend,Q135285630,1341138,tt33305867,,
+Cliffhanger,Q118455791,1120556,tt1441251,,cliffhanger-2
+Coyote vs ACME,Q106392679,1204680,tt1756855,movie/coyote-vs-acme,coyote-vs-acme
+The Dog Stars,Q132256832,1384216,tt21285562,movie/the-dog-stars,the-dog-stars
+Finding Emily,Q131737274,1339588,tt32499466,movie/finding-emily,finding-emily
+Idiots,Q137356276,445466,tt6628920,movie/idiots,idiots-2026

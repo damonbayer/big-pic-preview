@@ -12,23 +12,30 @@ import polars as pl
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PREDICTIONS_CSV = ROOT / "summer_movie_preview_predictions.csv"
-OUTPUT_CSV = ROOT / "movies.csv"
+MOVIES_CSV = ROOT / "movies.csv"
 
 TARGET_YEARS = {2025, 2026, 2027}
 
-ALIASES = {
-    "I Love Boosters": ["I Love Boosters!"],
-    "Star Wars: The Mandalorian and Grogu": ["The Mandalorian and Grogu"],
-    "The Breadwinner": ["The Breadwinner (2026 film)"],
-    "Supergirl": ["Supergirl: Woman of Tomorrow"],
-    "Moana": ["Moana (2026 film)"],
-    "PAW Patrol: The Dino Movie": ["Paw Patrol: The Dino Movie"],
+FIELDNAMES = ["title", "wikidata_id", "tmdb_id", "box_office_mojo_id", "metacritic_id", "letterboxd_id"]
+
+# Maps the movies.csv ID column to the SPARQL variable that carries its value.
+ID_COLUMNS = {
+    "tmdb_id": "tmdb",
+    "box_office_mojo_id": "imdb",
+    "metacritic_id": "metacritic",
+    "letterboxd_id": "letterboxd",
 }
 
-WIKIDATA_ITEM_OVERRIDES = {
-    "The End of Oak Street": "Q124804916",
-}
+QID_PATTERN = re.compile(r"^Q\d+$")
+
+
+def lookup_term(row: dict[str, str]) -> str:
+    """The Wikidata item (Q-id) to look up, falling back to the title label."""
+    return (row.get("wikidata_id") or "").strip() or row["title"]
+
+
+def missing_columns(row: dict[str, str]) -> list[str]:
+    return [column for column in ID_COLUMNS if not (row.get(column) or "").strip()]
 
 
 def sparql_literal(value: str) -> str:
@@ -36,50 +43,56 @@ def sparql_literal(value: str) -> str:
     return f'"{escaped}"@en'
 
 
-def build_query(titles: list[str]) -> str:
-    pairs = []
-    manual_pairs = []
-    for title in titles:
-        matched_titles = [title, *ALIASES.get(title, [])]
-        for matched_title in dict.fromkeys(matched_titles):
-            pairs.append(f"({sparql_literal(title)} {sparql_literal(matched_title)})")
-        if wikidata_item := WIKIDATA_ITEM_OVERRIDES.get(title):
-            manual_pairs.append(
-                f"({sparql_literal(title)} {sparql_literal(title)} wd:{wikidata_item})"
-            )
+def build_query(term_by_title: dict[str, str]) -> str:
+    label_pairs = []
+    item_pairs = []
+    for title, name in term_by_title.items():
+        if QID_PATTERN.match(name):
+            item_pairs.append(f"({sparql_literal(title)} wd:{name})")
+        else:
+            label_pairs.append(f"({sparql_literal(title)} {sparql_literal(name)})")
 
-    values = "\n    ".join(pairs)
-    manual_union = ""
-    if manual_pairs:
-        manual_values = "\n    ".join(manual_pairs)
-        manual_union = f"""
-  UNION {{
-    VALUES (?sourceTitle ?matched ?item) {{
-    {manual_values}
-    }}
-  }}
-"""
-    return f"""
-SELECT ?sourceTitle ?matched ?item ?itemLabel ?imdb ?tmdb ?metacritic ?date WHERE {{
-  {{
-    VALUES (?sourceTitle ?matched) {{
+    blocks = []
+    if label_pairs:
+        values = "\n    ".join(label_pairs)
+        blocks.append(
+            f"""  {{
+    VALUES (?sourceTitle ?label) {{
     {values}
     }}
     ?item wdt:P31/wdt:P279* wd:Q11424.
-    {{ ?item rdfs:label ?matched. }} UNION {{ ?item skos:altLabel ?matched. }}
-  }}
-{manual_union}
+    {{ ?item rdfs:label ?label. }} UNION {{ ?item skos:altLabel ?label. }}
+  }}"""
+        )
+    if item_pairs:
+        values = "\n    ".join(item_pairs)
+        blocks.append(
+            f"""  {{
+    VALUES (?sourceTitle ?item) {{
+    {values}
+    }}
+  }}"""
+        )
+
+    union = "\n  UNION\n".join(blocks)
+    return f"""
+SELECT ?sourceTitle ?item ?itemLabel ?imdb ?tmdb ?metacritic ?letterboxd ?date WHERE {{
+{union}
   OPTIONAL {{ ?item wdt:P345 ?imdb }}
   OPTIONAL {{ ?item wdt:P4947 ?tmdb }}
   OPTIONAL {{ ?item wdt:P1712 ?metacritic }}
+  OPTIONAL {{ ?item wdt:P6127 ?letterboxd }}
   OPTIONAL {{ ?item wdt:P577 ?date }}
   SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
 }}
 """.strip()
 
 
-def query_wikidata(titles: list[str]) -> pl.DataFrame:
-    query = build_query(titles)
+def query_wikidata(term_by_title: dict[str, str]) -> pl.DataFrame:
+    if not term_by_title:
+        return empty_candidates()
+
+    query = build_query(term_by_title)
     data = urllib.parse.urlencode({"query": query, "format": "csv"}).encode()
     request = urllib.request.Request(
         "https://query.wikidata.org/sparql?format=csv",
@@ -105,7 +118,7 @@ def query_wikidata(titles: list[str]) -> pl.DataFrame:
 
 def parse_sparql_xml(body: bytes) -> pl.DataFrame:
     namespace = {"sparql": "http://www.w3.org/2005/sparql-results#"}
-    fields = ["sourceTitle", "matched", "item", "itemLabel", "imdb", "tmdb", "metacritic", "date"]
+    fields = ["sourceTitle", "item", "itemLabel", "imdb", "tmdb", "metacritic", "letterboxd", "date"]
     root = ET.fromstring(body)
     rows = []
     for result in root.findall(".//sparql:result", namespace):
@@ -122,12 +135,12 @@ def empty_candidates() -> pl.DataFrame:
     return pl.DataFrame(
         schema={
             "sourceTitle": pl.String,
-            "matched": pl.String,
             "item": pl.String,
             "itemLabel": pl.String,
             "imdb": pl.String,
             "tmdb": pl.String,
             "metacritic": pl.String,
+            "letterboxd": pl.String,
             "date": pl.String,
         }
     )
@@ -140,21 +153,19 @@ def year_from_date(value: str | None) -> int | None:
     return int(match.group(1)) if match else None
 
 
-def candidate_score(row: dict[str, object]) -> tuple[int, int, int, int, str]:
+def candidate_score(row: dict[str, object]) -> tuple[int, int, int, str]:
     date_year = year_from_date(row.get("date"))
     has_target_year = date_year in TARGET_YEARS
     has_no_date = date_year is None
-    has_any_id = any(row.get(column) for column in ("imdb", "tmdb", "metacritic"))
-    matched_source = row.get("matched") == row.get("sourceTitle")
+    has_any_id = any(row.get(column) for column in ("imdb", "tmdb", "metacritic", "letterboxd"))
 
     # Avoid assigning older same-title films to the 2026 preview slate.
     if date_year is not None and date_year not in TARGET_YEARS:
-        return (-1, 0, 0, 0, "")
+        return (-1, 0, 0, "")
 
     return (
         int(has_target_year),
         int(has_any_id),
-        int(matched_source),
         int(has_no_date),
         str(row.get("item") or ""),
     )
@@ -176,37 +187,53 @@ def select_best_candidates(candidates: pl.DataFrame, titles: list[str]) -> dict[
             "tmdb_id": str(best.get("tmdb") or ""),
             "box_office_mojo_id": str(best.get("imdb") or ""),
             "metacritic_id": str(best.get("metacritic") or ""),
+            "letterboxd_id": str(best.get("letterboxd") or ""),
         }
     return selected
 
 
-def write_movies_csv(titles: list[str], selected: dict[str, dict[str, str]]) -> None:
-    with OUTPUT_CSV.open("w", newline="") as file:
-        writer = csv.DictWriter(
-            file,
-            fieldnames=["title", "tmdb_id", "box_office_mojo_id", "metacritic_id"],
-        )
+def read_movies() -> list[dict[str, str]]:
+    with MOVIES_CSV.open(newline="") as file:
+        rows = list(csv.DictReader(file))
+    for row in rows:
+        row.setdefault("wikidata_id", "")
+    return rows
+
+
+def write_movies(rows: list[dict[str, str]]) -> None:
+    with MOVIES_CSV.open("w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=FIELDNAMES, extrasaction="ignore")
         writer.writeheader()
-        for title in titles:
-            ids = selected.get(title, {})
-            writer.writerow(
-                {
-                    "title": title,
-                    "tmdb_id": ids.get("tmdb_id", ""),
-                    "box_office_mojo_id": ids.get("box_office_mojo_id", ""),
-                    "metacritic_id": ids.get("metacritic_id", ""),
-                }
-            )
+        for row in rows:
+            writer.writerow({field: row.get(field, "") for field in FIELDNAMES})
 
 
 def main() -> None:
-    predictions = pl.read_csv(PREDICTIONS_CSV)
-    titles = predictions.select("title").unique(maintain_order=True).get_column("title").to_list()
-    candidates = query_wikidata(titles)
-    selected = select_best_candidates(candidates, titles)
-    write_movies_csv(titles, selected)
-    print(f"Wrote {OUTPUT_CSV.relative_to(ROOT)} with {len(titles)} titles.")
-    print(f"Matched at least one ID for {len(selected)} titles.")
+    rows = read_movies()
+
+    term_by_title = {
+        row["title"]: lookup_term(row) for row in rows if missing_columns(row)
+    }
+    if not term_by_title:
+        print("All movies already have every link; nothing to fetch.")
+        return
+
+    candidates = query_wikidata(term_by_title)
+    selected = select_best_candidates(candidates, list(term_by_title))
+
+    filled = 0
+    for row in rows:
+        ids = selected.get(row["title"])
+        if not ids:
+            continue
+        for column in missing_columns(row):
+            value = ids.get(column, "")
+            if value:
+                row[column] = value
+                filled += 1
+
+    write_movies(rows)
+    print(f"Checked {len(term_by_title)} movies with missing links; filled {filled} link(s).")
 
 
 if __name__ == "__main__":
