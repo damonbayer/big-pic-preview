@@ -870,9 +870,12 @@ const cardData = Object.fromEntries(
 
       td.movie-col {
         font-weight: 700;
-        max-width: 260px;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        /* Sized so the three longest titles (≥269px) wrap to two lines while
+           the next-longest (~196px) still fits on one. Override the table-wide
+           nowrap to allow that wrapping. */
+        max-width: 210px;
+        white-space: normal;
+        line-height: 1.2;
       }
 
       .movie-btn {
@@ -880,8 +883,11 @@ const cardData = Object.fromEntries(
         cursor: pointer;
         font: inherit;
         color: inherit;
-        border-bottom: 2px dotted var(--green-deep);
-        padding-bottom: 1px;
+        /* text-decoration (not border-bottom) so the dotted underline follows
+           each line when a long title wraps. */
+        text-decoration: underline dotted var(--green-deep);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 3px;
       }
 
       .movie-btn:hover,
