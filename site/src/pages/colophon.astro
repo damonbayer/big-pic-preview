@@ -28,34 +28,43 @@ const repo = 'https://github.com/damonbayer/big-pic-preview';
       <h1>Colophon</h1>
 
       <section>
-        <h2>Who made this</h2>
+        <h2>What</h2>
+        <p>This is an unofficial fan project, not affiliated with The Ringer or Spotify.</p>
+      </section>
+
+      <section>
+        <h2>Who</h2>
         <p>
-          Built by <a href="https://github.com/damonbayer">Damon Bayer</a> &mdash; an unofficial fan project, not affiliated
-          with The Ringer or Spotify.
+          Built by <a href="https://damon.phd">Damon Bayer</a> &mdash; Follow me on <a
+            href="https://letterboxd.com/Damon/">Letterboxd</a
+          >.
         </p>
       </section>
 
       <section>
-        <h2>How it&rsquo;s built</h2>
+        <h2>How</h2>
         <p>
           A static site built with <a href="https://astro.build">Astro</a> and deployed on GitHub Pages. Set in Alfa&nbsp;Slab&nbsp;One,
-          Archivo, and Yellowtail. The design takes its cues from the cover art for
-          <em>The Big Picture</em> podcast.
+          Archivo, and Yellowtail.
         </p>
-        <p>
-          Predictions are transcribed from <em>The Big Picture</em>&rsquo;s
-          <a href={EPISODES[0].url}>Summer Movie Preview</a> and
-          <a href={EPISODES[1].url}>June check-in</a> episodes. Box office and review scores are fetched from Box Office
-          Mojo and Metacritic and refresh daily; movie details come from
-          <a href="https://www.themoviedb.org/">TMDB</a>. Points and standings are computed when the site builds.
-        </p>
-        <p class="tmdb-note">This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
-      </section>
-
-      <section>
-        <h2>Source</h2>
         <p>
           The code and data live on <a href={repo}>GitHub</a>.
+        </p>
+        <p class="tmdb-attr">
+          Movie details and posters provided by
+          <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">
+            <img
+              class="tmdb-logo"
+              src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg"
+              alt="The Movie Database (TMDB)"
+              width="300"
+              height="22"
+              loading="lazy"
+            />
+          </a>
+        </p>
+        <p class="tmdb-note">
+          This website uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.
         </p>
       </section>
     </main>
@@ -72,8 +81,12 @@ const repo = 'https://github.com/damonbayer/big-pic-preview';
         box-sizing: border-box;
       }
 
+      /* The page glow lives on <html> (not <body>) so iOS rubber-band overscroll
+         reveals the same gradient at the top instead of a flat green band. */
       html {
-        background: var(--green);
+        background:
+          radial-gradient(1100px 500px at 50% -100px, rgba(255, 255, 255, 0.14), transparent 70%), var(--green);
+        background-attachment: fixed;
       }
 
       body {
@@ -81,8 +94,6 @@ const repo = 'https://github.com/damonbayer/big-pic-preview';
         min-height: 100vh;
         font-family: 'Archivo', system-ui, sans-serif;
         color: var(--cream);
-        background:
-          radial-gradient(1100px 500px at 50% -100px, rgba(255, 255, 255, 0.14), transparent 70%), var(--green);
       }
 
       main {
@@ -133,9 +144,34 @@ const repo = 'https://github.com/damonbayer/big-pic-preview';
         font-size: 0.98rem;
       }
 
+      .tmdb-attr {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      /* The logo's wordmark is dark navy, so sit it on a light chip for
+         contrast against the green page (per TMDB's attribution guidance). */
+      .tmdb-attr a {
+        display: inline-flex;
+        align-items: center;
+        background: var(--cream);
+        padding: 6px 10px;
+        border-radius: 8px;
+      }
+
+      .tmdb-logo {
+        display: block;
+        height: 19px;
+        width: auto;
+      }
+
       .tmdb-note {
         font-size: 0.8rem;
         opacity: 0.7;
+        margin-top: 10px;
       }
 
       a {
