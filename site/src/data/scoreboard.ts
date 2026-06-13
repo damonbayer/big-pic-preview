@@ -79,7 +79,12 @@ for (const line of resultsCsv.trim().split('\n').slice(1)) {
 
 // --- load source links from movies.csv IDs ---
 
-const NO_LINKS: MovieLinks = { tmdb: null, boxOffice: null, metacritic: null, letterboxd: null };
+const NO_LINKS: MovieLinks = {
+  tmdb: null,
+  boxOffice: null,
+  metacritic: null,
+  letterboxd: null,
+};
 const links = new Map<string, MovieLinks>();
 
 for (const line of moviesCsv.trim().split('\n').slice(1)) {

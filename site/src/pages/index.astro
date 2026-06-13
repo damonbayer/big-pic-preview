@@ -50,9 +50,11 @@ function pluralPts(pts: number): string {
 function fmtBODiff(v: number): string {
   const millions = v / 1e6;
   const text =
-    millions >= 100 ? Math.round(millions).toString()
-    : millions >= 10 ? millions.toFixed(1).replace(/\.0$/, '')
-    : millions.toFixed(2).replace(/0$/, '').replace(/\.0$/, '');
+    millions >= 100
+      ? Math.round(millions).toString()
+      : millions >= 10
+        ? millions.toFixed(1).replace(/\.0$/, '')
+        : millions.toFixed(2).replace(/0$/, '').replace(/\.0$/, '');
   return `$${text}M`;
 }
 
@@ -68,11 +70,12 @@ function boGuessTitle(pred: number, actual: number | null, pts: number): string 
   return `Guessed ${fmtBO(pred)}, actual ${fmtBO(actual)} — off by ${fmtBODiff(off)} → ${pluralPts(pts)}`;
 }
 
-const overall = totals.sean === totals.amanda
-  ? { text: 'All tied up', cls: 'tie' }
-  : totals.sean > totals.amanda
-    ? { text: `+${totals.sean - totals.amanda} Sean`, cls: 'sean' }
-    : { text: `+${totals.amanda - totals.sean} Amanda`, cls: 'amanda' };
+const overall =
+  totals.sean === totals.amanda
+    ? { text: 'All tied up', cls: 'tie' }
+    : totals.sean > totals.amanda
+      ? { text: `+${totals.sean - totals.amanda} Sean`, cls: 'sean' }
+      : { text: `+${totals.amanda - totals.sean} Amanda`, cls: 'amanda' };
 
 const leader = totals.sean === totals.amanda ? null : totals.sean > totals.amanda ? 'sean' : 'amanda';
 
@@ -120,28 +123,31 @@ const cardData = Object.fromEntries(
       <p class="kicker">An unofficial scoreboard for The Ringer&rsquo;s</p>
       <h1>
         <span class="script">The</span>
-        <span class="slab"><span class="big">Big</span> <span class="picture">Picture</span></span>
+        <span class="slab"
+          ><span class="big">Big</span>
+          <span class="picture">Picture</span></span
+        >
       </h1>
       <p class="event">Summer Movie Preview</p>
       <svg class="projector" viewBox="0 0 200 110" aria-hidden="true">
         <g fill="var(--ink)">
-          <circle cx="62" cy="38" r="34" />
-          <circle cx="138" cy="38" r="34" />
-          <rect x="42" y="64" width="116" height="34" rx="6" />
-          <polygon points="158,72 186,64 186,98 158,90" />
-          <rect x="20" y="76" width="26" height="14" rx="4" />
+          <circle cx="62" cy="38" r="34"></circle>
+          <circle cx="138" cy="38" r="34"></circle>
+          <rect x="42" y="64" width="116" height="34" rx="6"></rect>
+          <polygon points="158,72 186,64 186,98 158,90"></polygon>
+          <rect x="20" y="76" width="26" height="14" rx="4"></rect>
         </g>
         <g fill="var(--gold)">
-          <circle cx="62" cy="24" r="6.5" />
-          <circle cx="62" cy="52" r="6.5" />
-          <circle cx="48" cy="38" r="6.5" />
-          <circle cx="76" cy="38" r="6.5" />
-          <circle cx="138" cy="24" r="6.5" />
-          <circle cx="138" cy="52" r="6.5" />
-          <circle cx="124" cy="38" r="6.5" />
-          <circle cx="152" cy="38" r="6.5" />
+          <circle cx="62" cy="24" r="6.5"></circle>
+          <circle cx="62" cy="52" r="6.5"></circle>
+          <circle cx="48" cy="38" r="6.5"></circle>
+          <circle cx="76" cy="38" r="6.5"></circle>
+          <circle cx="138" cy="24" r="6.5"></circle>
+          <circle cx="138" cy="52" r="6.5"></circle>
+          <circle cx="124" cy="38" r="6.5"></circle>
+          <circle cx="152" cy="38" r="6.5"></circle>
         </g>
-        <rect x="52" y="74" width="58" height="6" rx="3" fill="var(--green)" />
+        <rect x="52" y="74" width="58" height="6" rx="3" fill="var(--green)"></rect>
       </svg>
     </header>
 
@@ -172,11 +178,13 @@ const cardData = Object.fromEntries(
       </p>
 
       <nav class="episodes" aria-label="Listen to the episodes">
-        {EPISODES.map((ep) => (
-          <a href={ep.url}>
-            <span aria-hidden="true">&#127911;</span> Listen: {ep.label}
-          </a>
-        ))}
+        {
+          EPISODES.map((ep) => (
+            <a href={ep.url}>
+              <span aria-hidden="true">&#127911;</span> Listen: {ep.label}
+            </a>
+          ))
+        }
       </nav>
 
       <details class="rules">
@@ -225,54 +233,90 @@ const cardData = Object.fromEntries(
               </tr>
             </thead>
             <tbody>
-              {movies.map((m) => {
-                const chip = diffChip(m);
-                return (
-                  <tr class={m.scored ? '' : 'pending'}>
-                    <td class="movie-col" data-sort={m.title.toLowerCase()}>
-                      <button class="movie-btn" type="button" data-title={m.title}>{m.title}</button>
-                    </td>
-                    <td class="date" data-sort={m.releaseDate ?? ''}>{fmtDate(m.releaseDate)}</td>
-                    <td class="num" data-pts={heat(m.sean.metaPts, m.actualMeta)} data-sort={m.sean.metaPred} title={metaGuessTitle(m.sean.metaPred, m.actualMeta, m.sean.metaPts)}>{fmtMeta(m.sean.metaPred)}</td>
-                    <td class="num" data-pts={heat(m.amanda.metaPts, m.actualMeta)} data-sort={m.amanda.metaPred} title={metaGuessTitle(m.amanda.metaPred, m.actualMeta, m.amanda.metaPts)}>{fmtMeta(m.amanda.metaPred)}</td>
-                    <td class="num actual" data-sort={m.actualMeta ?? ''}>
-                      {m.links.metacritic ? (
-                        <a class="actual-link" href={m.links.metacritic} target="_blank" rel="noopener noreferrer">
-                          {fmtMeta(m.actualMeta)}
-                        </a>
-                      ) : (
-                        fmtMeta(m.actualMeta)
-                      )}
-                    </td>
-                    <td class="num" data-pts={heat(m.sean.boPts, m.actualBO)} data-sort={m.sean.boPred} title={boGuessTitle(m.sean.boPred, m.actualBO, m.sean.boPts)}>{fmtBO(m.sean.boPred)}</td>
-                    <td class="num" data-pts={heat(m.amanda.boPts, m.actualBO)} data-sort={m.amanda.boPred} title={boGuessTitle(m.amanda.boPred, m.actualBO, m.amanda.boPts)}>{fmtBO(m.amanda.boPred)}</td>
-                    <td class="num actual" data-sort={m.actualBO ?? ''}>
-                      {m.links.boxOffice ? (
-                        <a class="actual-link" href={m.links.boxOffice} target="_blank" rel="noopener noreferrer">
-                          {fmtBO(m.actualBO)}
-                        </a>
-                      ) : (
-                        fmtBO(m.actualBO)
-                      )}
-                    </td>
-                    <td
-                      class={`num pts ${m.scored && m.diff > 0 ? 'win' : ''}`}
-                      title={ptsTitle(m.sean, m.scored)}
-                      data-sort={m.scored ? m.sean.totalPts : ''}
-                    >
-                      {m.scored ? m.sean.totalPts : '—'}
-                    </td>
-                    <td
-                      class={`num pts ${m.scored && m.diff < 0 ? 'win' : ''}`}
-                      title={ptsTitle(m.amanda, m.scored)}
-                      data-sort={m.scored ? m.amanda.totalPts : ''}
-                    >
-                      {m.scored ? m.amanda.totalPts : '—'}
-                    </td>
-                    <td class="diff" data-sort={m.scored ? m.diff : ''}><span class={`chip ${chip.cls}`}>{chip.text}</span></td>
-                  </tr>
-                );
-              })}
+              {
+                movies.map((m) => {
+                  const chip = diffChip(m);
+                  return (
+                    <tr class={m.scored ? '' : 'pending'}>
+                      <td class="movie-col" data-sort={m.title.toLowerCase()}>
+                        <button class="movie-btn" type="button" data-title={m.title}>
+                          {m.title}
+                        </button>
+                      </td>
+                      <td class="date" data-sort={m.releaseDate ?? ''}>
+                        {fmtDate(m.releaseDate)}
+                      </td>
+                      <td
+                        class="num"
+                        data-pts={heat(m.sean.metaPts, m.actualMeta)}
+                        data-sort={m.sean.metaPred}
+                        title={metaGuessTitle(m.sean.metaPred, m.actualMeta, m.sean.metaPts)}
+                      >
+                        {fmtMeta(m.sean.metaPred)}
+                      </td>
+                      <td
+                        class="num"
+                        data-pts={heat(m.amanda.metaPts, m.actualMeta)}
+                        data-sort={m.amanda.metaPred}
+                        title={metaGuessTitle(m.amanda.metaPred, m.actualMeta, m.amanda.metaPts)}
+                      >
+                        {fmtMeta(m.amanda.metaPred)}
+                      </td>
+                      <td class="num actual" data-sort={m.actualMeta ?? ''}>
+                        {m.links.metacritic ? (
+                          <a class="actual-link" href={m.links.metacritic} target="_blank" rel="noopener noreferrer">
+                            {fmtMeta(m.actualMeta)}
+                          </a>
+                        ) : (
+                          fmtMeta(m.actualMeta)
+                        )}
+                      </td>
+                      <td
+                        class="num"
+                        data-pts={heat(m.sean.boPts, m.actualBO)}
+                        data-sort={m.sean.boPred}
+                        title={boGuessTitle(m.sean.boPred, m.actualBO, m.sean.boPts)}
+                      >
+                        {fmtBO(m.sean.boPred)}
+                      </td>
+                      <td
+                        class="num"
+                        data-pts={heat(m.amanda.boPts, m.actualBO)}
+                        data-sort={m.amanda.boPred}
+                        title={boGuessTitle(m.amanda.boPred, m.actualBO, m.amanda.boPts)}
+                      >
+                        {fmtBO(m.amanda.boPred)}
+                      </td>
+                      <td class="num actual" data-sort={m.actualBO ?? ''}>
+                        {m.links.boxOffice ? (
+                          <a class="actual-link" href={m.links.boxOffice} target="_blank" rel="noopener noreferrer">
+                            {fmtBO(m.actualBO)}
+                          </a>
+                        ) : (
+                          fmtBO(m.actualBO)
+                        )}
+                      </td>
+                      <td
+                        class={`num pts ${m.scored && m.diff > 0 ? 'win' : ''}`}
+                        title={ptsTitle(m.sean, m.scored)}
+                        data-sort={m.scored ? m.sean.totalPts : ''}
+                      >
+                        {m.scored ? m.sean.totalPts : '—'}
+                      </td>
+                      <td
+                        class={`num pts ${m.scored && m.diff < 0 ? 'win' : ''}`}
+                        title={ptsTitle(m.amanda, m.scored)}
+                        data-sort={m.scored ? m.amanda.totalPts : ''}
+                      >
+                        {m.scored ? m.amanda.totalPts : '—'}
+                      </td>
+                      <td class="diff" data-sort={m.scored ? m.diff : ''}>
+                        <span class={`chip ${chip.cls}`}>{chip.text}</span>
+                      </td>
+                    </tr>
+                  );
+                })
+              }
             </tbody>
             <tfoot>
               <tr>
@@ -432,9 +476,13 @@ const cardData = Object.fromEntries(
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeCard();
       });
-      window.addEventListener('scroll', () => {
-        if (!pinned) card.hidden = true;
-      }, { passive: true });
+      window.addEventListener(
+        'scroll',
+        () => {
+          if (!pinned) card.hidden = true;
+        },
+        { passive: true },
+      );
 
       // ----- column sorting -----
       const tbody = document.querySelector('tbody')!;
@@ -500,8 +548,7 @@ const cardData = Object.fromEntries(
         font-family: 'Archivo', system-ui, sans-serif;
         color: var(--ink);
         background:
-          radial-gradient(1100px 500px at 50% -100px, rgba(255, 255, 255, 0.14), transparent 70%),
-          var(--green);
+          radial-gradient(1100px 500px at 50% -100px, rgba(255, 255, 255, 0.14), transparent 70%), var(--green);
         min-height: 100vh;
       }
 
@@ -545,12 +592,16 @@ const cardData = Object.fromEntries(
 
       .hero .big {
         color: var(--cream);
-        text-shadow: 3px 3px 0 var(--ink), 6px 6px 0 rgba(10, 25, 35, 0.35);
+        text-shadow:
+          3px 3px 0 var(--ink),
+          6px 6px 0 rgba(10, 25, 35, 0.35);
       }
 
       .hero .picture {
         color: var(--gold);
-        text-shadow: 3px 3px 0 var(--ink), 6px 6px 0 rgba(10, 25, 35, 0.35);
+        text-shadow:
+          3px 3px 0 var(--ink),
+          6px 6px 0 rgba(10, 25, 35, 0.35);
       }
 
       .event {
@@ -642,8 +693,12 @@ const cardData = Object.fromEntries(
         letter-spacing: 0.06em;
       }
 
-      .score-card.sean .points { color: var(--gold); }
-      .score-card.amanda .points { color: #4fd79a; }
+      .score-card.sean .points {
+        color: var(--gold);
+      }
+      .score-card.amanda .points {
+        color: #4fd79a;
+      }
 
       .score-card .points {
         font-family: 'Alfa Slab One', serif;
@@ -700,7 +755,9 @@ const cardData = Object.fromEntries(
         border-radius: 999px;
         border: 2px solid transparent;
         box-shadow: 0 4px 14px rgba(10, 25, 35, 0.3);
-        transition: transform 0.12s ease, border-color 0.12s ease;
+        transition:
+          transform 0.12s ease,
+          border-color 0.12s ease;
       }
 
       .episodes a:hover,
@@ -750,7 +807,9 @@ const cardData = Object.fromEntries(
         font-size: 0.92rem;
       }
 
-      .rules li { margin: 2px 0; }
+      .rules li {
+        margin: 2px 0;
+      }
 
       /* ---------- table ---------- */
       .table-card {
