@@ -1,5 +1,6 @@
 import predictionsCsv from '../../../summer_movie_preview_predictions.csv?raw';
 import resultsCsv from '../../../current_movie_results.csv?raw';
+import moviesCsv from '../../../movies.csv?raw';
 import tmdbDetails from '../../../tmdb_details.json';
 
 export interface TmdbInfo {
@@ -23,10 +24,17 @@ export interface HostLine {
   totalPts: number;
 }
 
+export interface MovieLinks {
+  tmdb: string | null;
+  boxOffice: string | null;
+  metacritic: string | null;
+}
+
 export interface MovieRow {
   title: string;
   releaseDate: string | null;
   tmdb: TmdbInfo | null;
+  links: MovieLinks;
   actualBO: number | null;
   actualMeta: number | null;
   sean: HostLine;
@@ -68,6 +76,22 @@ for (const line of resultsCsv.trim().split('\n').slice(1)) {
   });
 }
 
+// --- load source links from movies.csv IDs ---
+
+const NO_LINKS: MovieLinks = { tmdb: null, boxOffice: null, metacritic: null };
+const links = new Map<string, MovieLinks>();
+
+for (const line of moviesCsv.trim().split('\n').slice(1)) {
+  // title,tmdb_id,box_office_mojo_id,metacritic_id
+  const [title, tmdbId, bomId, metaId] = line.split(',');
+  links.set(title, {
+    tmdb: tmdbId ? `https://www.themoviedb.org/movie/${tmdbId}` : null,
+    boxOffice: bomId ? `https://www.boxofficemojo.com/title/${bomId}/` : null,
+    // metacritic_id sometimes carries stray slashes (e.g. "movie/power-ballad/").
+    metacritic: metaId ? `https://www.metacritic.com/${metaId.replace(/^\/+|\/+$/g, '')}/` : null,
+  });
+}
+
 // --- load predictions: title+host -> guesses ---
 
 interface Pred {
@@ -106,6 +130,7 @@ export const movies: MovieRow[] = [...byTitle.entries()].map(([title, hosts]) =>
     title,
     releaseDate: info?.release_date ?? null,
     tmdb: info,
+    links: links.get(title) ?? NO_LINKS,
     actualBO: bo,
     actualMeta: meta,
     sean,

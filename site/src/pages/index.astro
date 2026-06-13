@@ -101,6 +101,7 @@ const cardData = Object.fromEntries(
         overview: m.tmdb!.overview,
         directors: m.tmdb!.directors,
         cast: m.tmdb!.cast,
+        links: m.links,
       },
     ]),
 );
@@ -310,6 +311,11 @@ const cardData = Object.fromEntries(
         <p id="card-tagline" class="card-tagline"></p>
         <p id="card-overview" class="card-overview"></p>
         <p id="card-credits" class="card-credits"></p>
+        <p id="card-links" class="card-links">
+          <a id="card-link-tmdb" target="_blank" rel="noopener noreferrer">TMDB</a>
+          <a id="card-link-bo" target="_blank" rel="noopener noreferrer">Box Office Mojo</a>
+          <a id="card-link-mc" target="_blank" rel="noopener noreferrer">Metacritic</a>
+        </p>
       </div>
     </div>
 
@@ -324,8 +330,22 @@ const cardData = Object.fromEntries(
       const taglineEl = document.getElementById('card-tagline')!;
       const overviewEl = document.getElementById('card-overview')!;
       const creditsEl = document.getElementById('card-credits')!;
+      const linksEl = document.getElementById('card-links')!;
+      const linkTmdb = document.getElementById('card-link-tmdb') as HTMLAnchorElement;
+      const linkBo = document.getElementById('card-link-bo') as HTMLAnchorElement;
+      const linkMc = document.getElementById('card-link-mc') as HTMLAnchorElement;
 
       let pinned: string | null = null;
+
+      function setLink(a: HTMLAnchorElement, url: string | null | undefined) {
+        if (url) {
+          a.href = url;
+          a.hidden = false;
+        } else {
+          a.removeAttribute('href');
+          a.hidden = true;
+        }
+      }
 
       function fill(title: string) {
         const d = data[title];
@@ -343,6 +363,10 @@ const cardData = Object.fromEntries(
         if (d.cast?.length) credits.push(`Starring ${d.cast.join(', ')}`);
         creditsEl.textContent = credits.join(' · ');
         creditsEl.hidden = credits.length === 0;
+        const links = d.links ?? {};
+        setLink(linkTmdb, links.tmdb);
+        setLink(linkBo, links.boxOffice);
+        setLink(linkMc, links.metacritic);
         if (d.poster) {
           poster.src = d.poster;
           poster.hidden = false;
@@ -375,6 +399,14 @@ const cardData = Object.fromEntries(
         if (!pinned) card.hidden = true;
       }
 
+      // Pinning enables pointer events so the source links can be clicked;
+      // hover-only cards stay click-through so they don't block the table.
+      function closeCard() {
+        pinned = null;
+        card.hidden = true;
+        card.style.pointerEvents = '';
+      }
+
       for (const btn of document.querySelectorAll<HTMLElement>('.movie-btn')) {
         btn.addEventListener('mouseenter', () => {
           if (!pinned) show(btn);
@@ -388,24 +420,21 @@ const cardData = Object.fromEntries(
           e.stopPropagation();
           const title = btn.dataset.title!;
           if (pinned === title) {
-            pinned = null;
-            card.hidden = true;
+            closeCard();
           } else {
             pinned = title;
             show(btn);
+            card.style.pointerEvents = 'auto';
           }
         });
       }
 
-      document.addEventListener('click', () => {
-        pinned = null;
-        card.hidden = true;
-      });
+      // Clicking a source link shouldn't dismiss the pinned card.
+      linksEl.addEventListener('click', (e) => e.stopPropagation());
+
+      document.addEventListener('click', closeCard);
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          pinned = null;
-          card.hidden = true;
-        }
+        if (e.key === 'Escape') closeCard();
       });
       window.addEventListener('scroll', () => {
         if (!pinned) card.hidden = true;
@@ -1070,6 +1099,35 @@ const cardData = Object.fromEntries(
         margin: 0;
         font-size: 0.74rem;
         opacity: 0.8;
+      }
+
+      .card-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 8px;
+        margin: 12px 0 0;
+      }
+
+      .card-links a {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--gold);
+        text-decoration: none;
+        border: 1.5px solid var(--gold);
+        border-radius: 999px;
+        padding: 3px 10px;
+      }
+
+      .card-links a:hover,
+      .card-links a:focus-visible {
+        background: var(--gold);
+        color: var(--ink);
+      }
+
+      .card-links a[hidden] {
+        display: none;
       }
 
       /* ---------- footer ---------- */
