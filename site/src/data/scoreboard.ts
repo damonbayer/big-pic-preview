@@ -1,4 +1,4 @@
-import predictionsCsv from '../../../summer_movie_preview_predictions.csv?raw';
+import predictionsCsv from '../../../predictions.csv?raw';
 import resultsCsv from '../../../current_movie_results.csv?raw';
 import moviesCsv from '../../../movies.csv?raw';
 import tmdbDetails from '../../../tmdb_details.json';

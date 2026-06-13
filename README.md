@@ -6,7 +6,7 @@ Tracking Sean and Amanda's predictions from The Big Picture's Summer Movie Previ
 
 ## Data files
 
-- `summer_movie_preview_predictions.csv`: tidy host predictions transcribed from the source images.
+- `predictions.csv`: tidy host predictions transcribed from the source images.
 - `movies.csv`: movie lookup IDs generated from Wikidata.
 - `current_movie_results.csv`: latest fetched domestic box office and Metacritic scores.
 - `tmdb_details.json`: movie metadata (release dates, posters, synopses) from TMDB.
@@ -17,7 +17,7 @@ Tracking Sean and Amanda's predictions from The Big Picture's Summer Movie Previ
 uv run scripts/fetch_movie_ids.py
 ```
 
-The script reads `summer_movie_preview_predictions.csv`, queries Wikidata for TMDB,
+The script reads `movies.csv`, queries Wikidata for TMDB,
 IMDb/Box Office Mojo, and Metacritic IDs, and rewrites `movies.csv`.
 
 ## Refresh current results
@@ -44,7 +44,7 @@ variable or a git-ignored `.env` file at the repo root.
 ## Scoreboard site
 
 The site in `site/` is built with [Astro](https://astro.build). At build time
-it reads `summer_movie_preview_predictions.csv`, `current_movie_results.csv`,
+it reads `predictions.csv`, `current_movie_results.csv`,
 and `tmdb_details.json`, and computes all points, totals, and differentials —
 the scoring rules live in `site/src/data/scoreboard.ts`. A GitHub Actions workflow
 (`.github/workflows/deploy.yml`) builds and deploys it to GitHub Pages on every
