@@ -539,16 +539,19 @@ const cardData = Object.fromEntries(
         box-sizing: border-box;
       }
 
+      /* The page glow lives on <html> (not <body>) so iOS rubber-band overscroll
+         reveals the same gradient at the top instead of a flat green band that
+         doesn't match the lightened hero. */
       html {
-        background: var(--green);
+        background:
+          radial-gradient(1100px 500px at 50% -100px, rgba(255, 255, 255, 0.14), transparent 70%), var(--green);
+        background-attachment: fixed;
       }
 
       body {
         margin: 0;
         font-family: 'Archivo', system-ui, sans-serif;
         color: var(--ink);
-        background:
-          radial-gradient(1100px 500px at 50% -100px, rgba(255, 255, 255, 0.14), transparent 70%), var(--green);
         min-height: 100vh;
       }
 
@@ -816,13 +819,16 @@ const cardData = Object.fromEntries(
         background: var(--cream);
         border-radius: 18px;
         box-shadow: var(--shadow);
-        padding: 10px 10px 4px;
+        /* Even cream frame on all sides so the dark header and footer sit
+           symmetrically inside the card. */
+        padding: 10px;
         margin-bottom: 36px;
       }
 
       .table-scroll {
         overflow-x: auto;
-        border-radius: 12px;
+        /* Concentric with the card: 18px card radius − 10px padding = 8px. */
+        border-radius: 8px;
       }
 
       table {
