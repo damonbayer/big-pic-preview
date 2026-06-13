@@ -1,4 +1,6 @@
 ---
+import { EPISODES } from '../data/episodes';
+
 const base = import.meta.env.BASE_URL;
 const home = `${base}/`.replace('//', '/');
 const favicon = `${base}/favicon.svg`.replace('//', '/');
@@ -41,9 +43,11 @@ const repo = 'https://github.com/damonbayer/big_pic_summer_movie_preview';
           <em>The Big Picture</em> podcast.
         </p>
         <p>
-          Predictions are transcribed from the Summer Movie Preview and June check-in episodes. Box office and
-          review scores are fetched from Box Office Mojo and Metacritic and refresh daily; movie details come
-          from <a href="https://www.themoviedb.org/">TMDB</a>. Points and standings are computed when the site
+          Predictions are transcribed from <em>The Big Picture</em>&rsquo;s
+          <a href={EPISODES[0].url}>Summer Movie Preview</a> and
+          <a href={EPISODES[1].url}>June check-in</a> episodes. Box office and review scores are fetched from
+          Box Office Mojo and Metacritic and refresh daily; movie details come from
+          <a href="https://www.themoviedb.org/">TMDB</a>. Points and standings are computed when the site
           builds.
         </p>
         <p class="tmdb-note">
