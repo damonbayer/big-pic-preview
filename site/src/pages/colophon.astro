@@ -81,19 +81,21 @@ const repo = 'https://github.com/damonbayer/big-pic-preview';
         box-sizing: border-box;
       }
 
-      /* The page glow lives on <html> (not <body>) so iOS rubber-band overscroll
-         reveals the same gradient at the top instead of a flat green band. */
       html {
-        background:
-          radial-gradient(1100px 500px at 50% -100px, rgba(255, 255, 255, 0.14), transparent 70%), var(--green);
-        background-attachment: fixed;
+        background: var(--green);
       }
 
+      /* The glow blooms a bit below the very top edge, so the page's top reads as
+         the flat --green that iOS paints in the rubber-band overscroll above it.
+         (iOS only fills overscroll with the root's solid color, never a gradient,
+         so a glow that bled to y=0 left a visible seam when pulling down.) */
       body {
         margin: 0;
         min-height: 100vh;
         font-family: 'Archivo', system-ui, sans-serif;
         color: var(--cream);
+        background:
+          radial-gradient(1100px 480px at 50% 160px, rgba(255, 255, 255, 0.15), transparent 70%), var(--green);
       }
 
       main {
