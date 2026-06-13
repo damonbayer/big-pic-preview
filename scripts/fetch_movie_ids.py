@@ -10,13 +10,19 @@ from pathlib import Path
 
 import polars as pl
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MOVIES_CSV = ROOT / "movies.csv"
 
 TARGET_YEARS = {2025, 2026, 2027}
 
-FIELDNAMES = ["title", "wikidata_id", "tmdb_id", "box_office_mojo_id", "metacritic_id", "letterboxd_id"]
+FIELDNAMES = [
+    "title",
+    "wikidata_id",
+    "tmdb_id",
+    "box_office_mojo_id",
+    "metacritic_id",
+    "letterboxd_id",
+]
 
 # Maps the movies.csv ID column to the SPARQL variable that carries its value.
 ID_COLUMNS = {
@@ -118,17 +124,30 @@ def query_wikidata(term_by_title: dict[str, str]) -> pl.DataFrame:
 
 def parse_sparql_xml(body: bytes) -> pl.DataFrame:
     namespace = {"sparql": "http://www.w3.org/2005/sparql-results#"}
-    fields = ["sourceTitle", "item", "itemLabel", "imdb", "tmdb", "metacritic", "letterboxd", "date"]
+    fields = [
+        "sourceTitle",
+        "item",
+        "itemLabel",
+        "imdb",
+        "tmdb",
+        "metacritic",
+        "letterboxd",
+        "date",
+    ]
     root = ET.fromstring(body)
     rows = []
     for result in root.findall(".//sparql:result", namespace):
         row = {field: "" for field in fields}
         for binding in result.findall("sparql:binding", namespace):
             name = binding.attrib["name"]
-            child = list(binding)[0]
+            child = next(iter(binding))
             row[name] = child.text or ""
         rows.append(row)
-    return pl.DataFrame(rows, schema=empty_candidates().schema) if rows else empty_candidates()
+    return (
+        pl.DataFrame(rows, schema=empty_candidates().schema)
+        if rows
+        else empty_candidates()
+    )
 
 
 def empty_candidates() -> pl.DataFrame:
@@ -157,7 +176,9 @@ def candidate_score(row: dict[str, object]) -> tuple[int, int, int, str]:
     date_year = year_from_date(row.get("date"))
     has_target_year = date_year in TARGET_YEARS
     has_no_date = date_year is None
-    has_any_id = any(row.get(column) for column in ("imdb", "tmdb", "metacritic", "letterboxd"))
+    has_any_id = any(
+        row.get(column) for column in ("imdb", "tmdb", "metacritic", "letterboxd")
+    )
 
     # Avoid assigning older same-title films to the 2026 preview slate.
     if date_year is not None and date_year not in TARGET_YEARS:
@@ -171,7 +192,9 @@ def candidate_score(row: dict[str, object]) -> tuple[int, int, int, str]:
     )
 
 
-def select_best_candidates(candidates: pl.DataFrame, titles: list[str]) -> dict[str, dict[str, str]]:
+def select_best_candidates(
+    candidates: pl.DataFrame, titles: list[str]
+) -> dict[str, dict[str, str]]:
     if candidates.is_empty():
         return {}
 
@@ -202,7 +225,9 @@ def read_movies() -> list[dict[str, str]]:
 
 def write_movies(rows: list[dict[str, str]]) -> None:
     with MOVIES_CSV.open("w", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=FIELDNAMES, extrasaction="ignore")
+        writer = csv.DictWriter(
+            file, fieldnames=FIELDNAMES, extrasaction="ignore", lineterminator="\n"
+        )
         writer.writeheader()
         for row in rows:
             writer.writerow({field: row.get(field, "") for field in FIELDNAMES})
@@ -233,7 +258,9 @@ def main() -> None:
                 filled += 1
 
     write_movies(rows)
-    print(f"Checked {len(term_by_title)} movies with missing links; filled {filled} link(s).")
+    print(
+        f"Checked {len(term_by_title)} movies with missing links; filled {filled} link(s)."
+    )
 
 
 if __name__ == "__main__":

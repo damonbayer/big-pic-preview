@@ -13,13 +13,14 @@ from pathlib import Path
 import polars as pl
 from bs4 import BeautifulSoup
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MOVIES_CSV = ROOT / "movies.csv"
 OUTPUT_CSV = ROOT / "current_movie_results.csv"
 
 REQUEST_DELAY_SECONDS = 0.25
-USER_AGENT = "Mozilla/5.0 (compatible; big_pic_summer_movie_preview/0.1; local data script)"
+USER_AGENT = (
+    "Mozilla/5.0 (compatible; big_pic_summer_movie_preview/0.1; local data script)"
+)
 
 
 @dataclass(frozen=True)
@@ -129,7 +130,7 @@ def write_results(rows: list[dict[str, str | int | None]]) -> None:
         "fetched_at",
     ]
     with OUTPUT_CSV.open("w", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer = csv.DictWriter(file, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -141,9 +142,13 @@ def main() -> None:
 
     for index, movie in enumerate(movies, start=1):
         title = str(movie["title"])
-        box_url, box_office = fetch_domestic_box_office(str(movie.get("box_office_mojo_id") or ""))
+        box_url, box_office = fetch_domestic_box_office(
+            str(movie.get("box_office_mojo_id") or "")
+        )
         time.sleep(REQUEST_DELAY_SECONDS)
-        metacritic_url, metacritic = fetch_metacritic_score(str(movie.get("metacritic_id") or ""))
+        metacritic_url, metacritic = fetch_metacritic_score(
+            str(movie.get("metacritic_id") or "")
+        )
         time.sleep(REQUEST_DELAY_SECONDS)
 
         rows.append(

@@ -39,7 +39,9 @@ def fetch(tmdb_id: str) -> dict:
     movie = tmdb.Movies(int(tmdb_id))
     info = movie.info(append_to_response="credits")
     directors = [
-        c["name"] for c in info.get("credits", {}).get("crew", []) if c.get("job") == "Director"
+        c["name"]
+        for c in info.get("credits", {}).get("crew", [])
+        if c.get("job") == "Director"
     ]
     cast = [c["name"] for c in info.get("credits", {}).get("cast", [])[:4]]
     return {
@@ -50,7 +52,9 @@ def fetch(tmdb_id: str) -> dict:
         "tagline": info.get("tagline") or None,
         "runtime": info.get("runtime") or None,
         "genres": [g["name"] for g in info.get("genres", [])],
-        "poster_url": POSTER_BASE + info["poster_path"] if info.get("poster_path") else None,
+        "poster_url": POSTER_BASE + info["poster_path"]
+        if info.get("poster_path")
+        else None,
         "directors": directors,
         "cast": cast,
     }
@@ -63,7 +67,7 @@ def main() -> None:
             title = row["title"]
             try:
                 details[title] = fetch(row["tmdb_id"])
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 print(f"FAILED {title}: {exc}")
             else:
                 print(f"ok {title}")
