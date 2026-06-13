@@ -1,0 +1,147 @@
+---
+const base = import.meta.env.BASE_URL;
+const home = `${base}/`.replace('//', '/');
+const favicon = `${base}/favicon.svg`.replace('//', '/');
+const repo = 'https://github.com/damonbayer/big_pic_summer_movie_preview';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Colophon · The Big Picture Summer Movie Preview Scoreboard</title>
+    <meta name="description" content="How this site was made, who made it, and where to find the source." />
+    <link rel="icon" href={favicon} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@400;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main>
+      <a class="back" href={home}>&larr; Back to the scoreboard</a>
+      <h1>Colophon</h1>
+
+      <section>
+        <h2>Who made this</h2>
+        <p>
+          Built by <a href="https://github.com/damonbayer">Damon Bayer</a> &mdash; an unofficial fan project,
+          not affiliated with The Ringer or Spotify.
+        </p>
+      </section>
+
+      <section>
+        <h2>How it&rsquo;s built</h2>
+        <p>
+          A static site built with <a href="https://astro.build">Astro</a> and deployed on GitHub Pages. Set in
+          Alfa&nbsp;Slab&nbsp;One, Archivo, and Yellowtail. The design takes its cues from the cover art for
+          <em>The Big Picture</em> podcast.
+        </p>
+        <p>
+          Predictions are transcribed from the Summer Movie Preview and June check-in episodes. Box office and
+          review scores are fetched from Box Office Mojo and Metacritic and refresh daily; movie details come
+          from <a href="https://www.themoviedb.org/">TMDB</a>. Points and standings are computed when the site
+          builds.
+        </p>
+        <p class="tmdb-note">
+          This product uses the TMDB API but is not endorsed or certified by TMDB.
+        </p>
+      </section>
+
+      <section>
+        <h2>Source</h2>
+        <p>
+          The code and data live on <a href={repo}>GitHub</a>.
+        </p>
+      </section>
+    </main>
+
+    <style is:global>
+      :root {
+        --green: #1f9e68;
+        --ink: #142838;
+        --cream: #f4efe1;
+        --gold: #f2c94c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--green);
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Archivo', system-ui, sans-serif;
+        color: var(--cream);
+        background:
+          radial-gradient(1100px 500px at 50% -100px, rgba(255, 255, 255, 0.14), transparent 70%),
+          var(--green);
+      }
+
+      main {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 56px 20px 80px;
+      }
+
+      .back {
+        display: inline-block;
+        margin-bottom: 28px;
+        color: var(--cream);
+        opacity: 0.8;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .back:hover,
+      .back:focus-visible {
+        color: var(--gold);
+        opacity: 1;
+      }
+
+      h1 {
+        font-family: 'Alfa Slab One', serif;
+        font-size: clamp(2.2rem, 7vw, 3.2rem);
+        margin: 0 0 24px;
+        color: var(--gold);
+        text-shadow: 2px 2px 0 var(--ink);
+      }
+
+      section {
+        margin-bottom: 26px;
+      }
+
+      h2 {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--gold);
+        margin: 0 0 6px;
+      }
+
+      p {
+        margin: 0 0 8px;
+        line-height: 1.6;
+        font-size: 0.98rem;
+      }
+
+      .tmdb-note {
+        font-size: 0.8rem;
+        opacity: 0.7;
+      }
+
+      a {
+        color: var(--gold);
+        font-weight: 700;
+      }
+    </style>
+  </body>
+</html>

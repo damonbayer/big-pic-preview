@@ -298,8 +298,8 @@ const cardData = Object.fromEntries(
         Movie details from <a href="https://www.themoviedb.org/">TMDB</a>. This site uses the TMDB API but is
         not endorsed or certified by TMDB. Not affiliated with The Ringer or Spotify.
       </p>
-      <p>
-        <a href="https://github.com/damonbayer/big_pic_summer_movie_preview">Data &amp; source on GitHub</a>
+      <p class="meta-link">
+        <a href={`${import.meta.env.BASE_URL}/colophon`.replace('//', '/')}>Colophon</a>
       </p>
     </footer>
 
@@ -1146,6 +1146,28 @@ const cardData = Object.fromEntries(
       footer a {
         color: var(--gold);
         font-weight: 700;
+      }
+
+      .meta-link {
+        margin-top: 16px;
+        opacity: 0.6;
+      }
+
+      .meta-link a {
+        color: var(--cream);
+        font-weight: 400;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        text-decoration: none;
+        border-bottom: 1px dotted rgba(244, 239, 225, 0.5);
+        padding-bottom: 1px;
+      }
+
+      .meta-link a:hover,
+      .meta-link a:focus-visible {
+        color: var(--gold);
+        border-bottom-color: var(--gold);
       }
 
       /* ---------- responsive ---------- */
