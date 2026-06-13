@@ -26,6 +26,9 @@ repos:
     rev: v3.6.2
     hooks:
       - id: prettier
+        name: prettier (yaml)
+        files: \.ya?ml$
+      - id: prettier
         name: prettier (astro/typescript)
         entry: >-
           node -e "const cp=require('node:child_process'),path=require('node:path');const cmd=process.platform==='win32'?'where':'which';const prettier=cp.execFileSync(cmd,['prettier'],{encoding:'utf8'}).trim().split(/\r?\n/)[0];const plugin=path.resolve(path.dirname(prettier),'../lib/node_modules/prettier-plugin-astro/dist/index.js');const r=cp.spawnSync(prettier,['--write','--ignore-unknown','--plugin='+plugin,...process.argv.slice(1)],{stdio:'inherit'});process.exit(r.status??1);"
