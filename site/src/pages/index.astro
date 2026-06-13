@@ -235,10 +235,26 @@ const cardData = Object.fromEntries(
                     <td class="date" data-sort={m.releaseDate ?? ''}>{fmtDate(m.releaseDate)}</td>
                     <td class="num" data-pts={heat(m.sean.metaPts, m.actualMeta)} data-sort={m.sean.metaPred} title={metaGuessTitle(m.sean.metaPred, m.actualMeta, m.sean.metaPts)}>{fmtMeta(m.sean.metaPred)}</td>
                     <td class="num" data-pts={heat(m.amanda.metaPts, m.actualMeta)} data-sort={m.amanda.metaPred} title={metaGuessTitle(m.amanda.metaPred, m.actualMeta, m.amanda.metaPts)}>{fmtMeta(m.amanda.metaPred)}</td>
-                    <td class="num actual" data-sort={m.actualMeta ?? ''}>{fmtMeta(m.actualMeta)}</td>
+                    <td class="num actual" data-sort={m.actualMeta ?? ''}>
+                      {m.links.metacritic ? (
+                        <a class="actual-link" href={m.links.metacritic} target="_blank" rel="noopener noreferrer">
+                          {fmtMeta(m.actualMeta)}
+                        </a>
+                      ) : (
+                        fmtMeta(m.actualMeta)
+                      )}
+                    </td>
                     <td class="num" data-pts={heat(m.sean.boPts, m.actualBO)} data-sort={m.sean.boPred} title={boGuessTitle(m.sean.boPred, m.actualBO, m.sean.boPts)}>{fmtBO(m.sean.boPred)}</td>
                     <td class="num" data-pts={heat(m.amanda.boPts, m.actualBO)} data-sort={m.amanda.boPred} title={boGuessTitle(m.amanda.boPred, m.actualBO, m.amanda.boPts)}>{fmtBO(m.amanda.boPred)}</td>
-                    <td class="num actual" data-sort={m.actualBO ?? ''}>{fmtBO(m.actualBO)}</td>
+                    <td class="num actual" data-sort={m.actualBO ?? ''}>
+                      {m.links.boxOffice ? (
+                        <a class="actual-link" href={m.links.boxOffice} target="_blank" rel="noopener noreferrer">
+                          {fmtBO(m.actualBO)}
+                        </a>
+                      ) : (
+                        fmtBO(m.actualBO)
+                      )}
+                    </td>
                     <td
                       class={`num pts ${m.scored && m.diff > 0 ? 'win' : ''}`}
                       title={ptsTitle(m.sean, m.scored)}
@@ -912,6 +928,19 @@ const cardData = Object.fromEntries(
       td.num {
         text-align: center;
         font-variant-numeric: tabular-nums;
+      }
+
+      .actual-link {
+        color: inherit;
+        font-weight: 700;
+        text-decoration: underline dotted var(--green-deep);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 3px;
+      }
+
+      .actual-link:hover,
+      .actual-link:focus-visible {
+        color: var(--green-deep);
       }
 
       td.pts {
