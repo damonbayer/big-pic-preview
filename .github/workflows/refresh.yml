@@ -1,0 +1,52 @@
+name: Refresh results data
+
+on:
+  schedule:
+    # Box Office Mojo posts the prior day's actual domestic gross in the late
+    # morning Pacific; this runs in the early afternoon Pacific to catch the
+    # settled number. 21:00 UTC = 2pm PDT (summer) / 1pm PST (winter) — after
+    # the morning update either way. GitHub cron is UTC and ignores DST.
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Fetch current results
+        run: uv run scripts/fetch_current_results.py
+
+      - name: Commit if data changed
+        id: commit
+        # Ignore the fetched_at column (8th) so a run that finds nothing new
+        # doesn't produce a timestamp-only commit and a pointless deploy.
+        run: |
+          cut -d, -f1-7 current_movie_results.csv > /tmp/new.csv
+          git show HEAD:current_movie_results.csv | cut -d, -f1-7 > /tmp/old.csv
+          if cmp -s /tmp/old.csv /tmp/new.csv; then
+            echo "No data changes; skipping commit."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add current_movie_results.csv
+            git commit -m "Refresh box office and Metacritic results"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger site deploy
+        if: steps.commit.outputs.changed == 'true'
+        run: gh workflow run deploy.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
