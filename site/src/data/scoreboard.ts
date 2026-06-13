@@ -50,7 +50,7 @@ const tmdb = tmdbDetails as Record<string, TmdbInfo>;
 
 function boxOfficePts(pred: number, actual: number): number {
   const off = Math.abs(pred - actual);
-  if (off <= 1_000_000) return 20;
+  if (off <= 500_000) return 20;
   if (off <= 5_000_000) return 10;
   if (off <= 10_000_000) return 5;
   if (off <= 50_000_000) return 1;
