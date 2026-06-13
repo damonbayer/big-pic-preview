@@ -2,7 +2,7 @@
 
 Tracking Sean and Amanda's predictions from The Big Picture's Summer Movie Preview.
 
-**Scoreboard site:** https://damonbayer.github.io/big-pic-preview/
+**Scoreboard site:** https://bigpicpreview.com
 
 ## Data files
 
