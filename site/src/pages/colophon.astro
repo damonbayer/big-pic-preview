@@ -85,7 +85,7 @@ const repo = 'https://github.com/damonbayer/big-pic-preview';
         background: var(--green);
       }
 
-      /* The glow blooms a bit below the very top edge, so the page's top reads as
+      /* The glow blooms below the very top edge, so the page's top reads as
          the flat --green that iOS paints in the rubber-band overscroll above it.
          (iOS only fills overscroll with the root's solid color, never a gradient,
          so a glow that bled to y=0 left a visible seam when pulling down.) */
@@ -95,7 +95,7 @@ const repo = 'https://github.com/damonbayer/big-pic-preview';
         font-family: 'Archivo', system-ui, sans-serif;
         color: var(--cream);
         background:
-          radial-gradient(1100px 480px at 50% 160px, rgba(255, 255, 255, 0.15), transparent 70%), var(--green);
+          radial-gradient(1100px 480px at 50% 360px, rgba(255, 255, 255, 0.15), transparent 70%), var(--green);
       }
 
       main {
