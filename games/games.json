@@ -1,0 +1,86 @@
+{
+  "games": [
+    {
+      "id": "2025-summer",
+      "season": "Summer",
+      "year": 2025,
+      "title": "Summer Movie Preview",
+      "live": false,
+      "episodes": [
+        {
+          "label": "The Summer Movie Preview",
+          "url": "https://www.theringer.com/podcasts/the-big-picture/2025/04/25/the-summer-movie-preview-game-plus-david-cronenberg-on-the-shrouds"
+        }
+      ],
+      "scoring": {
+        "objective": "low",
+        "boxOffice": {
+          "type": "linear",
+          "per": 1,
+          "unit": 1000000,
+          "round": "nearest"
+        },
+        "metacritic": {
+          "type": "linear",
+          "per": 1,
+          "unit": 1,
+          "round": "nearest"
+        }
+      }
+    },
+    {
+      "id": "2026-summer",
+      "season": "Summer",
+      "year": 2026,
+      "title": "Summer Movie Preview",
+      "live": true,
+      "episodes": [
+        {
+          "label": "The Summer Movie Preview",
+          "url": "https://www.theringer.com/podcasts/the-big-picture/2026/04/14/the-2026-summer-movie-preview-boom-or-bust-game"
+        },
+        {
+          "label": "The June Check-In",
+          "url": "https://www.theringer.com/podcasts/the-big-picture/2026/06/02/were-so-back-for-good-backrooms-and-obsession-mania-and-10-movies-we-missed"
+        }
+      ],
+      "scoring": {
+        "objective": "high",
+        "boxOffice": {
+          "type": "bands",
+          "bands": [
+            {
+              "within": 500000,
+              "pts": 20
+            },
+            {
+              "within": 5000000,
+              "pts": 10
+            },
+            {
+              "within": 10000000,
+              "pts": 5
+            },
+            {
+              "within": 50000000,
+              "pts": 1
+            }
+          ]
+        },
+        "metacritic": {
+          "type": "bands",
+          "bands": [
+            {
+              "within": 0,
+              "pts": 5
+            },
+            {
+              "within": 5,
+              "pts": 1
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -10,10 +10,7 @@ from pathlib import Path
 
 import polars as pl
 
-ROOT = Path(__file__).resolve().parents[1]
-MOVIES_CSV = ROOT / "movies.csv"
-
-TARGET_YEARS = {2025, 2026, 2027}
+from games import live_games
 
 FIELDNAMES = [
     "title",
@@ -172,16 +169,18 @@ def year_from_date(value: str | None) -> int | None:
     return int(match.group(1)) if match else None
 
 
-def candidate_score(row: dict[str, object]) -> tuple[int, int, int, str]:
+def candidate_score(
+    row: dict[str, object], target_years: set[int]
+) -> tuple[int, int, int, str]:
     date_year = year_from_date(row.get("date"))
-    has_target_year = date_year in TARGET_YEARS
+    has_target_year = date_year in target_years
     has_no_date = date_year is None
     has_any_id = any(
         row.get(column) for column in ("imdb", "tmdb", "metacritic", "letterboxd")
     )
 
-    # Avoid assigning older same-title films to the 2026 preview slate.
-    if date_year is not None and date_year not in TARGET_YEARS:
+    # Avoid assigning older same-title films to this edition's preview slate.
+    if date_year is not None and date_year not in target_years:
         return (-1, 0, 0, "")
 
     return (
@@ -193,7 +192,7 @@ def candidate_score(row: dict[str, object]) -> tuple[int, int, int, str]:
 
 
 def select_best_candidates(
-    candidates: pl.DataFrame, titles: list[str]
+    candidates: pl.DataFrame, titles: list[str], target_years: set[int]
 ) -> dict[str, dict[str, str]]:
     if candidates.is_empty():
         return {}
@@ -203,8 +202,8 @@ def select_best_candidates(
         title_rows = candidates.filter(pl.col("sourceTitle") == title).to_dicts()
         if not title_rows:
             continue
-        best = max(title_rows, key=candidate_score)
-        if candidate_score(best)[0] < 0:
+        best = max(title_rows, key=lambda row: candidate_score(row, target_years))
+        if candidate_score(best, target_years)[0] < 0:
             continue
         selected[title] = {
             "tmdb_id": str(best.get("tmdb") or ""),
@@ -215,16 +214,16 @@ def select_best_candidates(
     return selected
 
 
-def read_movies() -> list[dict[str, str]]:
-    with MOVIES_CSV.open(newline="") as file:
+def read_movies(movies_csv: Path) -> list[dict[str, str]]:
+    with movies_csv.open(newline="") as file:
         rows = list(csv.DictReader(file))
     for row in rows:
         row.setdefault("wikidata_id", "")
     return rows
 
 
-def write_movies(rows: list[dict[str, str]]) -> None:
-    with MOVIES_CSV.open("w", newline="") as file:
+def write_movies(rows: list[dict[str, str]], movies_csv: Path) -> None:
+    with movies_csv.open("w", newline="") as file:
         writer = csv.DictWriter(
             file, fieldnames=FIELDNAMES, extrasaction="ignore", lineterminator="\n"
         )
@@ -233,8 +232,8 @@ def write_movies(rows: list[dict[str, str]]) -> None:
             writer.writerow({field: row.get(field, "") for field in FIELDNAMES})
 
 
-def main() -> None:
-    rows = read_movies()
+def fill_game(movies_csv: Path, target_years: set[int]) -> None:
+    rows = read_movies(movies_csv)
 
     term_by_title = {
         row["title"]: lookup_term(row) for row in rows if missing_columns(row)
@@ -244,7 +243,7 @@ def main() -> None:
         return
 
     candidates = query_wikidata(term_by_title)
-    selected = select_best_candidates(candidates, list(term_by_title))
+    selected = select_best_candidates(candidates, list(term_by_title), target_years)
 
     filled = 0
     for row in rows:
@@ -257,10 +256,23 @@ def main() -> None:
                 row[column] = value
                 filled += 1
 
-    write_movies(rows)
+    write_movies(rows, movies_csv)
     print(
         f"Checked {len(term_by_title)} movies with missing links; filled {filled} link(s)."
     )
+
+
+def main() -> None:
+    games = live_games()
+    if not games:
+        print("No live games in the manifest; nothing to fetch.")
+        return
+    for game in games:
+        # Films in an edition's slate cluster around its year, but some slip a
+        # year. Allow a ±1 window to disambiguate same-title Wikidata items.
+        target_years = {game.year - 1, game.year, game.year + 1}
+        print(f"== {game.id} ==")
+        fill_game(game.movies_csv, target_years)
 
 
 if __name__ == "__main__":

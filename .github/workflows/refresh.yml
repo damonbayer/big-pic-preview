@@ -28,18 +28,25 @@ jobs:
 
       - name: Commit if data changed
         id: commit
+        # Results live per game under games/<id>/results.csv.
         # Ignore the fetched_at column (8th) so a run that finds nothing new
         # doesn't produce a timestamp-only commit and a pointless deploy.
         run: |
-          cut -d, -f1-7 current_movie_results.csv > /tmp/new.csv
-          git show HEAD:current_movie_results.csv | cut -d, -f1-7 > /tmp/old.csv
-          if cmp -s /tmp/old.csv /tmp/new.csv; then
+          changed=false
+          for f in games/*/results.csv; do
+            cut -d, -f1-7 "$f" > /tmp/new.csv
+            git show "HEAD:$f" 2>/dev/null | cut -d, -f1-7 > /tmp/old.csv || : > /tmp/old.csv
+            if ! cmp -s /tmp/old.csv /tmp/new.csv; then
+              changed=true
+            fi
+          done
+          if [ "$changed" = false ]; then
             echo "No data changes; skipping commit."
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add current_movie_results.csv
+            git add games/*/results.csv
             git commit -m "Refresh box office and Metacritic results"
             git push
             echo "changed=true" >> "$GITHUB_OUTPUT"

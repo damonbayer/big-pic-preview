@@ -1,0 +1,1431 @@
+---
+import type { GameData, ScoreMethod } from '../data/games';
+
+interface Props {
+  game: GameData;
+  allGames: GameData[];
+}
+
+const { game, allGames } = Astro.props;
+const { meta, movies, totals } = game;
+
+const base = import.meta.env.BASE_URL;
+function path(p: string): string {
+  return `${base}/${p}`.replace(/\/{2,}/g, '/');
+}
+function gameUrl(id: string): string {
+  return path(`games/${id}/`);
+}
+
+// Golf-style editions (lowest total wins) flip every "who's ahead" decision.
+const lowerWins = meta.scoring.objective === 'low';
+
+// Sean's advantage over Amanda: positive means Sean is ahead, in whichever
+// direction this game's objective rewards.
+function advantage(seanPts: number, amandaPts: number): number {
+  const lead = seanPts - amandaPts;
+  return lowerWins ? -lead : lead;
+}
+
+// Guess-cell shading reads "more points = better guess", which only holds when
+// the objective is to maximize. For golf scoring (points = error) it would be
+// backwards, so leave those cells unshaded.
+const SHOW_GUESS_HEAT = !lowerWins;
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function fmtDate(iso: string | null): string {
+  if (!iso) return 'TBD';
+  const [, m, d] = iso.split('-').map(Number);
+  return `${MONTHS[m - 1]} ${d}`;
+}
+
+function fmtBO(v: number | null): string {
+  if (v === null) return '—';
+  const millions = v / 1e6;
+  const text = millions >= 100 ? Math.round(millions).toString() : millions.toFixed(1).replace(/\.0$/, '');
+  return `$${text}M`;
+}
+
+function fmtMeta(v: number | null): string {
+  return v === null ? '—' : String(v);
+}
+
+// Render a box-office scoring threshold (in dollars) for the rules panel.
+function fmtThreshold(v: number): string {
+  if (v >= 1e6) return `$${(v / 1e6).toFixed(1).replace(/\.0$/, '')}M`;
+  if (v >= 1e3) return `$${(v / 1e3).toFixed(0)}K`;
+  return `$${v}`;
+}
+
+function pluralPts(pts: number): string {
+  return `${pts} ${pts === 1 ? 'pt' : 'pts'}`;
+}
+
+// One "<label> → <pts>" line per rule, for the "How the scoring works" panel.
+// `kind` controls how the box-office vs Metacritic units read.
+function ruleLines(method: ScoreMethod, kind: 'bo' | 'meta'): { label: string; pts: string }[] {
+  if (method.type === 'bands') {
+    return method.bands.map((band) => ({
+      label:
+        kind === 'bo' ? `Within ${fmtThreshold(band.within)}` : band.within === 0 ? 'Exact' : `Within ${band.within}`,
+      pts: pluralPts(band.pts),
+    }));
+  }
+  const unitLabel = kind === 'bo' ? fmtThreshold(method.unit) : method.unit === 1 ? 'point' : `${method.unit} points`;
+  return [{ label: `Every ${unitLabel} off`, pts: pluralPts(method.per) }];
+}
+
+const objectiveNote = lowerWins ? 'Lowest combined score wins.' : 'Most combined points wins.';
+
+function diffChip(m: (typeof movies)[number]): { text: string; cls: string } {
+  if (!m.scored) return { text: 'TBD', cls: 'tbd' };
+  const adv = advantage(m.sean.totalPts, m.amanda.totalPts);
+  const gap = Math.abs(m.diff);
+  if (adv > 0) return { text: `+${gap} Sean`, cls: 'sean' };
+  if (adv < 0) return { text: `+${gap} Amanda`, cls: 'amanda' };
+  return { text: 'Tie', cls: 'tie' };
+}
+
+function ptsTitle(line: { boPts: number; metaPts: number }, scored: boolean): string | undefined {
+  return scored ? `Box office: ${line.boPts} pts · Metacritic: ${line.metaPts} pts` : undefined;
+}
+
+// data-pts value for a guess cell; undefined (no attribute) when the actual
+// isn't in yet or the shading is disabled.
+function heat(pts: number, actual: number | null): number | undefined {
+  return SHOW_GUESS_HEAT && actual !== null ? pts : undefined;
+}
+
+// More precise than fmtBO so a $1.04M miss doesn't read as "$1M".
+function fmtBODiff(v: number): string {
+  const millions = v / 1e6;
+  const text =
+    millions >= 100
+      ? Math.round(millions).toString()
+      : millions >= 10
+        ? millions.toFixed(1).replace(/\.0$/, '')
+        : millions.toFixed(2).replace(/0$/, '').replace(/\.0$/, '');
+  return `$${text}M`;
+}
+
+function metaGuessTitle(pred: number, actual: number | null, pts: number): string | undefined {
+  if (actual === null) return undefined;
+  const off = Math.abs(pred - actual);
+  return `Guessed ${pred}, actual ${actual} — ${off === 0 ? 'exact' : `off by ${off}`} → ${pluralPts(pts)}`;
+}
+
+function boGuessTitle(pred: number, actual: number | null, pts: number): string | undefined {
+  if (actual === null) return undefined;
+  const off = Math.abs(pred - actual);
+  return `Guessed ${fmtBO(pred)}, actual ${fmtBO(actual)} — off by ${fmtBODiff(off)} → ${pluralPts(pts)}`;
+}
+
+const overallAdv = advantage(totals.sean, totals.amanda);
+const overallGap = Math.abs(totals.sean - totals.amanda);
+const overall =
+  overallAdv === 0
+    ? { text: 'All tied up', cls: 'tie' }
+    : overallAdv > 0
+      ? { text: `+${overallGap} Sean`, cls: 'sean' }
+      : { text: `+${overallGap} Amanda`, cls: 'amanda' };
+
+const leader = overallAdv === 0 ? null : overallAdv > 0 ? 'sean' : 'amanda';
+
+// Live games crown whoever is "in the lead"; finished games crown the "winner".
+const leadLabel = meta.live ? 'In the lead' : 'Winner';
+
+// The event title already carries the season (e.g. "Summer Movie Preview"), so
+// the year alone distinguishes editions without repeating the season.
+const pageTitle = `The Big Picture · ${meta.title} ${meta.year} Scoreboard`;
+
+// Compact payload for the hover/click cards.
+const cardData = Object.fromEntries(
+  movies
+    .filter((m) => m.tmdb)
+    .map((m) => [
+      m.title,
+      {
+        poster: m.tmdb!.poster_url,
+        date: m.releaseDate ? `${fmtDate(m.releaseDate)}, ${m.releaseDate.slice(0, 4)}` : 'Release date TBD',
+        runtime: m.tmdb!.runtime,
+        genres: m.tmdb!.genres,
+        tagline: m.tmdb!.tagline,
+        overview: m.tmdb!.overview,
+        directors: m.tmdb!.directors,
+        cast: m.tmdb!.cast,
+        links: m.links,
+      },
+    ]),
+);
+
+// Switcher lists every edition, most recent first.
+const editions = [...allGames].reverse();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta
+      name="description"
+      content={`Sean vs. Amanda: tracking box office and Metacritic predictions from The Big Picture's ${meta.title} ${meta.year}.`}
+    />
+    <link rel="icon" href={path('favicon.svg')} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@400;600;700;900&family=Yellowtail&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="hero">
+      <p class="kicker">An unofficial scoreboard for The Ringer&rsquo;s</p>
+      <h1>
+        <span class="script">The</span>
+        <span class="slab"
+          ><span class="big">Big</span>
+          <span class="picture">Picture</span></span
+        >
+      </h1>
+      <p class="event">{meta.title}</p>
+      <p class="edition">{meta.year}</p>
+      <svg class="projector" viewBox="0 0 200 110" aria-hidden="true">
+        <g fill="var(--ink)">
+          <circle cx="62" cy="38" r="34"></circle>
+          <circle cx="138" cy="38" r="34"></circle>
+          <rect x="42" y="64" width="116" height="34" rx="6"></rect>
+          <polygon points="158,72 186,64 186,98 158,90"></polygon>
+          <rect x="20" y="76" width="26" height="14" rx="4"></rect>
+        </g>
+        <g fill="var(--gold)">
+          <circle cx="62" cy="24" r="6.5"></circle>
+          <circle cx="62" cy="52" r="6.5"></circle>
+          <circle cx="48" cy="38" r="6.5"></circle>
+          <circle cx="76" cy="38" r="6.5"></circle>
+          <circle cx="138" cy="24" r="6.5"></circle>
+          <circle cx="138" cy="52" r="6.5"></circle>
+          <circle cx="124" cy="38" r="6.5"></circle>
+          <circle cx="152" cy="38" r="6.5"></circle>
+        </g>
+        <rect x="52" y="74" width="58" height="6" rx="3" fill="var(--green)"></rect>
+      </svg>
+    </header>
+
+    <div class="filmstrip" aria-hidden="true"></div>
+
+    <main>
+      {
+        editions.length > 1 && (
+          <nav class="seasons" aria-label="Choose an edition">
+            {editions.map((g) => (
+              <a
+                href={gameUrl(g.meta.id)}
+                class={`season-pill ${g.meta.id === meta.id ? 'active' : ''}`}
+                aria-current={g.meta.id === meta.id ? 'page' : undefined}
+              >
+                {g.meta.season} {g.meta.year}
+                {g.meta.live && <span class="live-dot" aria-label="live" title="Live" />}
+              </a>
+            ))}
+          </nav>
+        )
+      }
+
+      <section class="scoreboard" aria-label="Season totals">
+        <div class={`score-card sean ${leader === 'sean' ? 'leading' : ''}`}>
+          {leader === 'sean' && <span class="badge">★ {leadLabel}</span>}
+          <span class="host">Sean</span>
+          <span class="points">{totals.sean}</span>
+          <span class="pts-label">points</span>
+        </div>
+        <div class="vs">
+          <span>VS</span>
+          <span class={`overall chip ${overall.cls}`}>{overall.text}</span>
+        </div>
+        <div class={`score-card amanda ${leader === 'amanda' ? 'leading' : ''}`}>
+          {leader === 'amanda' && <span class="badge">★ {leadLabel}</span>}
+          <span class="host">Amanda</span>
+          <span class="points">{totals.amanda}</span>
+          <span class="pts-label">points</span>
+        </div>
+      </section>
+
+      <p class="progress">
+        {
+          meta.live ? (
+            <>
+              {totals.scoredCount} of {totals.movieCount} movies scored so far &mdash; updated daily around 2&nbsp;pm
+              Pacific.
+            </>
+          ) : (
+            <>All movies scored.</>
+          )
+        }
+      </p>
+
+      {
+        meta.episodes.length > 0 && (
+          <nav class="episodes" aria-label="Listen to the episodes">
+            {meta.episodes.map((ep) => (
+              <a href={ep.url}>
+                <span aria-hidden="true">&#127911;</span> Listen: {ep.label}
+              </a>
+            ))}
+          </nav>
+        )
+      }
+
+      <details class="rules">
+        <summary>How the scoring works</summary>
+        <div class="rules-body">
+          <div>
+            <h3>Domestic box office</h3>
+            <ul>
+              {
+                ruleLines(meta.scoring.boxOffice, 'bo').map((rule) => (
+                  <li>
+                    {rule.label} &rarr; <strong>{rule.pts}</strong>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+          <div>
+            <h3>Metacritic score</h3>
+            <ul>
+              {
+                ruleLines(meta.scoring.metacritic, 'meta').map((rule) => (
+                  <li>
+                    {rule.label} &rarr; <strong>{rule.pts}</strong>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+          <p class="rules-note">{objectiveNote}</p>
+        </div>
+      </details>
+
+      <section class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr class="groups">
+                <th rowspan="2" class="movie-col"><button class="sort-btn" data-col="0">Movie</button></th>
+                <th rowspan="2" aria-sort="ascending"><button class="sort-btn" data-col="1">Release</button></th>
+                <th colspan="3" class="group">Metacritic</th>
+                <th colspan="3" class="group">Box Office</th>
+                <th colspan="2" class="group">Points</th>
+                <th rowspan="2"><button class="sort-btn" data-col="10">Differential</button></th>
+              </tr>
+              <tr class="subs">
+                <th><button class="sort-btn" data-col="2">Sean</button></th>
+                <th><button class="sort-btn" data-col="3">Amanda</button></th>
+                <th class="actual"><button class="sort-btn" data-col="4">Actual</button></th>
+                <th><button class="sort-btn" data-col="5">Sean</button></th>
+                <th><button class="sort-btn" data-col="6">Amanda</button></th>
+                <th class="actual"><button class="sort-btn" data-col="7">Actual</button></th>
+                <th><button class="sort-btn" data-col="8">Sean</button></th>
+                <th><button class="sort-btn" data-col="9">Amanda</button></th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                movies.map((m) => {
+                  const chip = diffChip(m);
+                  const adv = m.scored ? advantage(m.sean.totalPts, m.amanda.totalPts) : 0;
+                  return (
+                    <tr class={m.scored ? '' : 'pending'}>
+                      <td class="movie-col" data-sort={m.title.toLowerCase()}>
+                        <button class="movie-btn" type="button" data-title={m.title}>
+                          {m.title}
+                        </button>
+                      </td>
+                      <td class="date" data-sort={m.releaseDate ?? ''}>
+                        {fmtDate(m.releaseDate)}
+                      </td>
+                      <td
+                        class="num"
+                        data-pts={heat(m.sean.metaPts, m.actualMeta)}
+                        data-sort={m.sean.metaPred}
+                        title={metaGuessTitle(m.sean.metaPred, m.actualMeta, m.sean.metaPts)}
+                      >
+                        {fmtMeta(m.sean.metaPred)}
+                      </td>
+                      <td
+                        class="num"
+                        data-pts={heat(m.amanda.metaPts, m.actualMeta)}
+                        data-sort={m.amanda.metaPred}
+                        title={metaGuessTitle(m.amanda.metaPred, m.actualMeta, m.amanda.metaPts)}
+                      >
+                        {fmtMeta(m.amanda.metaPred)}
+                      </td>
+                      <td class="num actual" data-sort={m.actualMeta ?? ''}>
+                        {m.links.metacritic ? (
+                          <a class="actual-link" href={m.links.metacritic} target="_blank" rel="noopener noreferrer">
+                            {fmtMeta(m.actualMeta)}
+                          </a>
+                        ) : (
+                          fmtMeta(m.actualMeta)
+                        )}
+                      </td>
+                      <td
+                        class="num"
+                        data-pts={heat(m.sean.boPts, m.actualBO)}
+                        data-sort={m.sean.boPred}
+                        title={boGuessTitle(m.sean.boPred, m.actualBO, m.sean.boPts)}
+                      >
+                        {fmtBO(m.sean.boPred)}
+                      </td>
+                      <td
+                        class="num"
+                        data-pts={heat(m.amanda.boPts, m.actualBO)}
+                        data-sort={m.amanda.boPred}
+                        title={boGuessTitle(m.amanda.boPred, m.actualBO, m.amanda.boPts)}
+                      >
+                        {fmtBO(m.amanda.boPred)}
+                      </td>
+                      <td class="num actual" data-sort={m.actualBO ?? ''}>
+                        {m.links.boxOffice ? (
+                          <a class="actual-link" href={m.links.boxOffice} target="_blank" rel="noopener noreferrer">
+                            {fmtBO(m.actualBO)}
+                          </a>
+                        ) : (
+                          fmtBO(m.actualBO)
+                        )}
+                      </td>
+                      <td
+                        class={`num pts ${adv > 0 ? 'win' : ''}`}
+                        title={ptsTitle(m.sean, m.scored)}
+                        data-sort={m.scored ? m.sean.totalPts : ''}
+                      >
+                        {m.scored ? m.sean.totalPts : '—'}
+                      </td>
+                      <td
+                        class={`num pts ${adv < 0 ? 'win' : ''}`}
+                        title={ptsTitle(m.amanda, m.scored)}
+                        data-sort={m.scored ? m.amanda.totalPts : ''}
+                      >
+                        {m.scored ? m.amanda.totalPts : '—'}
+                      </td>
+                      <td class="diff" data-sort={m.scored ? m.diff : ''}>
+                        <span class={`chip ${chip.cls}`}>{chip.text}</span>
+                      </td>
+                    </tr>
+                  );
+                })
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td class="movie-col">Totals</td>
+                <td colspan="7"></td>
+                <td class="num pts">{totals.sean}</td>
+                <td class="num pts">{totals.amanda}</td>
+                <td class="diff"><span class={`chip ${overall.cls}`}>{overall.text}</span></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div class="filmstrip" aria-hidden="true"></div>
+
+    <footer>
+      <p class="meta-link">
+        <a href={path('colophon')}>Colophon &amp; credits</a>
+      </p>
+    </footer>
+
+    <div id="movie-card" hidden>
+      <img id="card-poster" alt="" loading="lazy" />
+      <div class="card-body">
+        <h2 id="card-title"></h2>
+        <p id="card-meta" class="card-meta"></p>
+        <p id="card-tagline" class="card-tagline"></p>
+        <p id="card-overview" class="card-overview"></p>
+        <p id="card-credits" class="card-credits"></p>
+        <p id="card-links" class="card-links">
+          <a id="card-link-tmdb" target="_blank" rel="noopener noreferrer">TMDB</a>
+          <a id="card-link-bo" target="_blank" rel="noopener noreferrer">Box Office Mojo</a>
+          <a id="card-link-mc" target="_blank" rel="noopener noreferrer">Metacritic</a>
+          <a id="card-link-letterboxd" target="_blank" rel="noopener noreferrer">Letterboxd</a>
+        </p>
+      </div>
+    </div>
+
+    <script type="application/json" id="movie-data" set:html={JSON.stringify(cardData)} />
+
+    <script>
+      const data = JSON.parse(document.getElementById('movie-data')!.textContent!);
+      const card = document.getElementById('movie-card')!;
+      const poster = document.getElementById('card-poster') as HTMLImageElement;
+      const titleEl = document.getElementById('card-title')!;
+      const metaEl = document.getElementById('card-meta')!;
+      const taglineEl = document.getElementById('card-tagline')!;
+      const overviewEl = document.getElementById('card-overview')!;
+      const creditsEl = document.getElementById('card-credits')!;
+      const linksEl = document.getElementById('card-links')!;
+      const linkTmdb = document.getElementById('card-link-tmdb') as HTMLAnchorElement;
+      const linkBo = document.getElementById('card-link-bo') as HTMLAnchorElement;
+      const linkMc = document.getElementById('card-link-mc') as HTMLAnchorElement;
+      const linkLetterboxd = document.getElementById('card-link-letterboxd') as HTMLAnchorElement;
+
+      let pinned: string | null = null;
+
+      function setLink(a: HTMLAnchorElement, url: string | null | undefined) {
+        if (url) {
+          a.href = url;
+          a.hidden = false;
+        } else {
+          a.removeAttribute('href');
+          a.hidden = true;
+        }
+      }
+
+      function fill(title: string) {
+        const d = data[title];
+        if (!d) return false;
+        titleEl.textContent = title;
+        const bits = [d.date];
+        if (d.runtime) bits.push(`${d.runtime} min`);
+        if (d.genres?.length) bits.push(d.genres.join(' / '));
+        metaEl.textContent = bits.join(' · ');
+        taglineEl.textContent = d.tagline ?? '';
+        taglineEl.hidden = !d.tagline;
+        overviewEl.textContent = d.overview ?? 'No synopsis yet.';
+        const credits = [];
+        if (d.directors?.length) credits.push(`Directed by ${d.directors.join(', ')}`);
+        if (d.cast?.length) credits.push(`Starring ${d.cast.join(', ')}`);
+        creditsEl.textContent = credits.join(' · ');
+        creditsEl.hidden = credits.length === 0;
+        const links = d.links ?? {};
+        setLink(linkTmdb, links.tmdb);
+        setLink(linkBo, links.boxOffice);
+        setLink(linkMc, links.metacritic);
+        setLink(linkLetterboxd, links.letterboxd);
+        if (d.poster) {
+          poster.src = d.poster;
+          poster.hidden = false;
+        } else {
+          poster.removeAttribute('src');
+          poster.hidden = true;
+        }
+        return true;
+      }
+
+      function place(anchor: Element) {
+        const r = anchor.getBoundingClientRect();
+        card.hidden = false;
+        const cw = card.offsetWidth;
+        const ch = card.offsetHeight;
+        let x = r.right + 14;
+        if (x + cw > window.innerWidth - 8) x = Math.max(8, window.innerWidth - cw - 8);
+        let y = r.top - 8;
+        if (y + ch > window.innerHeight - 8) y = Math.max(8, window.innerHeight - ch - 8);
+        card.style.left = `${x}px`;
+        card.style.top = `${y}px`;
+      }
+
+      function show(btn: Element) {
+        const title = (btn as HTMLElement).dataset.title!;
+        if (fill(title)) place(btn);
+      }
+
+      function hide() {
+        if (!pinned) card.hidden = true;
+      }
+
+      // Pinning enables pointer events so the source links can be clicked;
+      // hover-only cards stay click-through so they don't block the table.
+      function closeCard() {
+        pinned = null;
+        card.hidden = true;
+        card.style.pointerEvents = '';
+      }
+
+      for (const btn of document.querySelectorAll<HTMLElement>('.movie-btn')) {
+        btn.addEventListener('mouseenter', () => {
+          if (!pinned) show(btn);
+        });
+        btn.addEventListener('mouseleave', hide);
+        btn.addEventListener('focus', () => {
+          if (!pinned) show(btn);
+        });
+        btn.addEventListener('blur', hide);
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const title = btn.dataset.title!;
+          if (pinned === title) {
+            closeCard();
+          } else {
+            pinned = title;
+            show(btn);
+            card.style.pointerEvents = 'auto';
+          }
+        });
+      }
+
+      // Clicking a source link shouldn't dismiss the pinned card.
+      linksEl.addEventListener('click', (e) => e.stopPropagation());
+
+      document.addEventListener('click', closeCard);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeCard();
+      });
+      window.addEventListener(
+        'scroll',
+        () => {
+          if (!pinned) card.hidden = true;
+        },
+        { passive: true },
+      );
+
+      // ----- column sorting -----
+      const tbody = document.querySelector('tbody')!;
+      // The server renders rows sorted by release date ascending.
+      let sortCol: number | null = 1;
+      let sortDir: 'asc' | 'desc' = 'asc';
+
+      function sortKey(row: HTMLTableRowElement, col: number): string {
+        const cell = row.cells[col];
+        return cell.dataset.sort ?? cell.textContent!.trim();
+      }
+
+      for (const btn of document.querySelectorAll<HTMLButtonElement>('.sort-btn')) {
+        btn.addEventListener('click', () => {
+          const col = Number(btn.dataset.col);
+          // Text-ish columns sort ascending first, numeric ones biggest-first.
+          const firstDir = col <= 1 ? 'asc' : 'desc';
+          sortDir = sortCol === col ? (sortDir === 'asc' ? 'desc' : 'asc') : firstDir;
+          sortCol = col;
+
+          const mult = sortDir === 'asc' ? 1 : -1;
+          const rows = [...tbody.rows];
+          rows.sort((a, b) => {
+            const ka = sortKey(a, col);
+            const kb = sortKey(b, col);
+            if (ka === '' || kb === '') return (ka === '' ? 1 : 0) - (kb === '' ? 1 : 0);
+            const na = Number(ka);
+            const nb = Number(kb);
+            if (!Number.isNaN(na) && !Number.isNaN(nb)) return (na - nb) * mult;
+            return ka.localeCompare(kb) * mult;
+          });
+          for (const row of rows) tbody.appendChild(row);
+
+          for (const th of document.querySelectorAll('th[aria-sort]')) th.removeAttribute('aria-sort');
+          btn.closest('th')!.setAttribute('aria-sort', sortDir === 'asc' ? 'ascending' : 'descending');
+        });
+      }
+    </script>
+
+    <style is:global>
+      :root {
+        --green: #1f9e68;
+        --green-deep: #15875a;
+        --ink: #142838;
+        --ink-soft: #1d3850;
+        --cream: #f4efe1;
+        --cream-dim: #e7e0c9;
+        --gold: #f2c94c;
+        --gold-deep: #c79a25;
+        --shadow: 0 10px 30px rgba(10, 25, 35, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--green);
+      }
+
+      /* The glow blooms below the very top edge, so the page's top reads as
+         the flat --green that iOS paints in the rubber-band overscroll above it.
+         (iOS only fills overscroll with the root's solid color, never a gradient,
+         so a glow that bled to y=0 left a visible seam when pulling down.) */
+      body {
+        margin: 0;
+        font-family: 'Archivo', system-ui, sans-serif;
+        color: var(--ink);
+        min-height: 100vh;
+        background:
+          radial-gradient(1100px 480px at 50% 360px, rgba(255, 255, 255, 0.15), transparent 70%), var(--green);
+      }
+
+      /* ---------- hero ---------- */
+      .hero {
+        text-align: center;
+        padding: 56px 16px 18px;
+      }
+
+      .kicker {
+        margin: 0 0 4px;
+        color: var(--cream);
+        opacity: 0.85;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+      }
+
+      .hero h1 {
+        margin: 0;
+        line-height: 0.95;
+      }
+
+      .hero .script {
+        display: block;
+        font-family: 'Yellowtail', cursive;
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        color: var(--gold);
+        transform: rotate(-4deg);
+        text-shadow: 2px 2px 0 var(--ink);
+        margin-bottom: -0.2em;
+      }
+
+      .hero .slab {
+        font-family: 'Alfa Slab One', serif;
+        font-size: clamp(3rem, 10vw, 6.5rem);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      .hero .big {
+        color: var(--cream);
+        text-shadow:
+          3px 3px 0 var(--ink),
+          6px 6px 0 rgba(10, 25, 35, 0.35);
+      }
+
+      .hero .picture {
+        color: var(--gold);
+        text-shadow:
+          3px 3px 0 var(--ink),
+          6px 6px 0 rgba(10, 25, 35, 0.35);
+      }
+
+      .event {
+        margin: 18px 0 0;
+        color: var(--cream);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.35em;
+        font-size: clamp(0.85rem, 2.4vw, 1.25rem);
+      }
+
+      .edition {
+        margin: 6px 0 0;
+        color: var(--gold);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        font-size: 0.8rem;
+      }
+
+      .projector {
+        width: 130px;
+        margin-top: 22px;
+        filter: drop-shadow(0 6px 0 rgba(10, 25, 35, 0.25));
+      }
+
+      .filmstrip {
+        height: 26px;
+        background:
+          repeating-linear-gradient(
+            90deg,
+            transparent 0 14px,
+            rgba(244, 239, 225, 0.85) 14px 26px,
+            transparent 26px 40px
+          ),
+          var(--ink);
+        background-clip: content-box, border-box;
+        padding: 7px 0;
+        opacity: 0.92;
+      }
+
+      /* ---------- layout ---------- */
+      main {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 34px 18px 10px;
+      }
+
+      /* ---------- season switcher ---------- */
+      .seasons {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 0 0 26px;
+      }
+
+      .season-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: rgba(20, 40, 56, 0.55);
+        color: var(--cream);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 7px 16px;
+        border-radius: 999px;
+        border: 2px solid transparent;
+        transition:
+          transform 0.12s ease,
+          border-color 0.12s ease,
+          background 0.12s ease;
+      }
+
+      .season-pill:hover,
+      .season-pill:focus-visible {
+        border-color: var(--gold);
+        transform: translateY(-2px);
+      }
+
+      .season-pill.active {
+        background: var(--gold);
+        color: var(--ink);
+        border-color: var(--gold);
+      }
+
+      .live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #4fd79a;
+        box-shadow: 0 0 0 3px rgba(79, 215, 154, 0.25);
+      }
+
+      .season-pill.active .live-dot {
+        background: var(--green-deep);
+        box-shadow: 0 0 0 3px rgba(21, 135, 90, 0.25);
+      }
+
+      /* ---------- scoreboard ---------- */
+      .scoreboard {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: stretch;
+        gap: 18px;
+        max-width: 760px;
+        margin: 0 auto;
+      }
+
+      .score-card {
+        position: relative;
+        background: var(--ink);
+        color: var(--cream);
+        border-radius: 18px;
+        border: 3px solid var(--ink);
+        padding: 22px 16px 18px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        box-shadow: var(--shadow);
+      }
+
+      .score-card.leading {
+        border-color: var(--gold);
+      }
+
+      .score-card .badge {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        background: var(--gold);
+        color: var(--ink);
+        font-weight: 900;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 4px 12px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+
+      .score-card .host {
+        font-family: 'Alfa Slab One', serif;
+        font-size: 1.35rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .score-card.sean .points {
+        color: var(--gold);
+      }
+      .score-card.amanda .points {
+        color: #4fd79a;
+      }
+
+      .score-card .points {
+        font-family: 'Alfa Slab One', serif;
+        font-size: clamp(2.6rem, 7vw, 4rem);
+        line-height: 1;
+      }
+
+      .pts-label {
+        text-transform: uppercase;
+        letter-spacing: 0.25em;
+        font-size: 0.7rem;
+        opacity: 0.7;
+      }
+
+      .vs {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .vs > span:first-child {
+        font-family: 'Yellowtail', cursive;
+        font-size: 2rem;
+        color: var(--cream);
+        text-shadow: 2px 2px 0 var(--ink);
+      }
+
+      .progress {
+        text-align: center;
+        color: var(--cream);
+        opacity: 0.9;
+        margin: 20px 0 6px;
+        font-weight: 600;
+      }
+
+      /* ---------- episode links ---------- */
+      .episodes {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 4px 0 8px;
+      }
+
+      .episodes a {
+        background: var(--ink);
+        color: var(--gold);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 9px 18px;
+        border-radius: 999px;
+        border: 2px solid transparent;
+        box-shadow: 0 4px 14px rgba(10, 25, 35, 0.3);
+        transition:
+          transform 0.12s ease,
+          border-color 0.12s ease;
+      }
+
+      .episodes a:hover,
+      .episodes a:focus-visible {
+        border-color: var(--gold);
+        transform: translateY(-2px);
+      }
+
+      /* ---------- rules ---------- */
+      .rules {
+        max-width: 760px;
+        margin: 14px auto 30px;
+        background: var(--cream);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .rules summary {
+        cursor: pointer;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.85rem;
+        padding: 14px 18px;
+        user-select: none;
+      }
+
+      .rules-body {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0 24px;
+        padding: 0 22px 16px;
+      }
+
+      .rules h3 {
+        margin: 6px 0 4px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--green-deep);
+      }
+
+      .rules ul {
+        margin: 0;
+        padding-left: 18px;
+        font-size: 0.92rem;
+      }
+
+      .rules li {
+        margin: 2px 0;
+      }
+
+      .rules-note {
+        grid-column: 1 / -1;
+        margin: 10px 0 0;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--green-deep);
+      }
+
+      /* ---------- table ---------- */
+      .table-card {
+        background: var(--cream);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        /* Even cream frame on all sides so the dark header and footer sit
+           symmetrically inside the card. */
+        padding: 10px;
+        margin-bottom: 36px;
+      }
+
+      .table-scroll {
+        overflow-x: auto;
+        /* Concentric with the card: 18px card radius − 10px padding = 8px. */
+        border-radius: 8px;
+      }
+
+      table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        font-size: 0.92rem;
+        min-width: 980px;
+      }
+
+      thead th {
+        background: var(--ink);
+        color: var(--cream);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.72rem;
+        padding: 8px 10px;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+
+      thead .groups th.group {
+        border-bottom: 1px solid rgba(244, 239, 225, 0.25);
+      }
+
+      thead .groups th.group,
+      thead .subs th {
+        text-align: center;
+      }
+
+      thead th.actual,
+      td.actual {
+        background-color: rgba(20, 40, 56, 0.08);
+      }
+
+      thead th.actual {
+        background-color: var(--ink-soft);
+        color: var(--gold);
+      }
+
+      th.movie-col {
+        text-align: left;
+      }
+
+      .sort-btn {
+        all: unset;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+        text-transform: inherit;
+        letter-spacing: inherit;
+        white-space: nowrap;
+      }
+
+      .sort-btn::after {
+        content: '\21C5';
+        display: inline-block;
+        margin-left: 4px;
+        opacity: 0.4;
+      }
+
+      .sort-btn:hover::after,
+      .sort-btn:focus-visible::after {
+        opacity: 1;
+      }
+
+      th[aria-sort='ascending'] .sort-btn::after {
+        content: '\25B2';
+        color: var(--gold);
+        opacity: 1;
+      }
+
+      th[aria-sort='descending'] .sort-btn::after {
+        content: '\25BC';
+        color: var(--gold);
+        opacity: 1;
+      }
+
+      .movie-col {
+        position: sticky;
+        left: 0;
+      }
+
+      thead th.movie-col {
+        z-index: 3;
+      }
+
+      tbody td.movie-col,
+      tfoot td.movie-col {
+        z-index: 1;
+      }
+
+      tbody td.movie-col {
+        background-color: var(--cream);
+      }
+
+      .movie-col {
+        box-shadow: 5px 0 8px -5px rgba(20, 40, 56, 0.3);
+      }
+
+      tbody tr:nth-child(even) td.movie-col {
+        background-color: #ece6d6;
+      }
+
+      tbody tr:hover td.movie-col {
+        background-color: #f3e8c6;
+      }
+
+      tbody td,
+      tfoot td {
+        padding: 9px 10px;
+        border-bottom: 1px solid rgba(20, 40, 56, 0.12);
+        white-space: nowrap;
+      }
+
+      tbody tr:nth-child(even) td {
+        background-color: rgba(20, 40, 56, 0.035);
+      }
+
+      tbody tr:nth-child(even) td.actual {
+        background-color: rgba(20, 40, 56, 0.1);
+      }
+
+      tbody tr:hover td {
+        background-color: rgba(242, 201, 76, 0.18);
+      }
+
+      td.movie-col {
+        font-weight: 700;
+        /* Sized so the three longest titles (≥269px) wrap to two lines while
+           the next-longest (~196px) still fits on one. Override the table-wide
+           nowrap to allow that wrapping. */
+        max-width: 210px;
+        white-space: normal;
+        line-height: 1.2;
+      }
+
+      .movie-btn {
+        all: unset;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+        /* text-decoration (not border-bottom) so the dotted underline follows
+           each line when a long title wraps. */
+        text-decoration: underline dotted var(--green-deep);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 3px;
+      }
+
+      .movie-btn:hover,
+      .movie-btn:focus-visible {
+        color: var(--green-deep);
+      }
+
+      td.date {
+        color: var(--ink-soft);
+        font-weight: 600;
+      }
+
+      td.num {
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .actual-link {
+        color: inherit;
+        font-weight: 700;
+        text-decoration: underline dotted var(--green-deep);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 3px;
+      }
+
+      .actual-link:hover,
+      .actual-link:focus-visible {
+        color: var(--green-deep);
+      }
+
+      td.pts {
+        font-weight: 700;
+      }
+
+      /* Guess-cell shading by points earned (see SHOW_GUESS_HEAT). The extra
+         specificity keeps it above the stripe and row-hover backgrounds. */
+      tbody tr td.num[data-pts='1'] {
+        background-color: rgba(31, 158, 104, 0.14);
+      }
+
+      tbody tr td.num[data-pts='5'] {
+        background-color: rgba(31, 158, 104, 0.3);
+      }
+
+      tbody tr td.num[data-pts='10'] {
+        background-color: rgba(31, 158, 104, 0.48);
+      }
+
+      tbody tr td.num[data-pts='20'] {
+        background-color: rgba(31, 158, 104, 0.68);
+        color: var(--cream);
+        font-weight: 700;
+      }
+
+      td.pts.win {
+        color: var(--green-deep);
+        font-weight: 900;
+      }
+
+      tr.pending td:not(.movie-col):not(.date) {
+        opacity: 0.55;
+      }
+
+      td.diff {
+        text-align: center;
+      }
+
+      .chip {
+        display: inline-block;
+        font-weight: 900;
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 3px 10px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+
+      .chip.sean {
+        background: var(--gold);
+        color: var(--ink);
+      }
+
+      .chip.amanda {
+        background: var(--green-deep);
+        color: var(--cream);
+      }
+
+      .chip.tie {
+        background: transparent;
+        color: var(--ink);
+        border: 1.5px solid var(--ink);
+      }
+
+      .chip.tbd {
+        background: rgba(20, 40, 56, 0.08);
+        color: var(--ink-soft);
+      }
+
+      tfoot td {
+        background: var(--ink);
+        color: var(--cream);
+        font-weight: 900;
+        border-bottom: none;
+      }
+
+      tfoot td.pts {
+        color: var(--gold);
+        font-size: 1.05rem;
+      }
+
+      tfoot td.movie-col {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      /* ---------- hover card ---------- */
+      #movie-card {
+        position: fixed;
+        z-index: 50;
+        width: min(400px, calc(100vw - 24px));
+        background: var(--ink);
+        color: var(--cream);
+        border: 2px solid var(--gold);
+        border-radius: 14px;
+        box-shadow: 0 18px 50px rgba(5, 15, 22, 0.55);
+        display: flex;
+        gap: 14px;
+        padding: 14px;
+        pointer-events: none;
+      }
+
+      #movie-card[hidden] {
+        display: none;
+      }
+
+      #card-poster {
+        width: 104px;
+        height: 156px;
+        object-fit: cover;
+        border-radius: 8px;
+        flex-shrink: 0;
+        background: var(--ink-soft);
+      }
+
+      #movie-card .card-body {
+        min-width: 0;
+      }
+
+      #card-title {
+        font-family: 'Alfa Slab One', serif;
+        font-size: 1.02rem;
+        margin: 0 0 4px;
+        color: var(--gold);
+        line-height: 1.15;
+      }
+
+      .card-meta {
+        margin: 0 0 6px;
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.8;
+      }
+
+      .card-tagline {
+        margin: 0 0 6px;
+        font-style: italic;
+        font-size: 0.84rem;
+        color: var(--gold);
+        opacity: 0.95;
+      }
+
+      .card-overview {
+        margin: 0 0 8px;
+        font-size: 0.82rem;
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 6;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .card-credits {
+        margin: 0;
+        font-size: 0.74rem;
+        opacity: 0.8;
+      }
+
+      .card-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 8px;
+        margin: 12px 0 0;
+      }
+
+      .card-links a {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--gold);
+        text-decoration: none;
+        border: 1.5px solid var(--gold);
+        border-radius: 999px;
+        padding: 3px 10px;
+      }
+
+      .card-links a:hover,
+      .card-links a:focus-visible {
+        background: var(--gold);
+        color: var(--ink);
+      }
+
+      .card-links a[hidden] {
+        display: none;
+      }
+
+      /* ---------- footer ---------- */
+      footer {
+        text-align: center;
+        color: var(--cream);
+        padding: 26px 18px 40px;
+        font-size: 0.82rem;
+        opacity: 0.92;
+      }
+
+      footer p {
+        margin: 4px 0;
+      }
+
+      footer a {
+        color: var(--gold);
+        font-weight: 700;
+      }
+
+      .meta-link {
+        margin: 0;
+      }
+
+      .meta-link a {
+        color: var(--gold);
+        font-weight: 700;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(242, 201, 76, 0.5);
+        padding-bottom: 2px;
+      }
+
+      .meta-link a:hover,
+      .meta-link a:focus-visible {
+        border-bottom-color: var(--gold);
+      }
+
+      /* ---------- responsive ---------- */
+      @media (max-width: 640px) {
+        .scoreboard {
+          grid-template-columns: 1fr;
+        }
+
+        .vs {
+          flex-direction: row;
+        }
+
+        .hero {
+          padding-top: 36px;
+        }
+
+        td.movie-col {
+          max-width: 190px;
+        }
+      }
+    </style>
+  </body>
+</html>

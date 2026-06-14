@@ -1,8 +1,9 @@
-"""Fetch TMDB details for every movie in movies.csv.
+"""Fetch TMDB details for every movie in each live game's movies.csv.
 
-Writes tmdb_details.json keyed by the title used in the prediction CSVs.
-Reads the API key from the TMDB_API_KEY environment variable or a
-git-ignored .env file at the repo root (TMDB_API_KEY=...).
+Writes games/<id>/tmdb_details.json keyed by the title used in the prediction
+CSVs. Only live games are refreshed; finished editions stay frozen. Reads the
+API key from the TMDB_API_KEY environment variable or a git-ignored .env file at
+the repo root (TMDB_API_KEY=...).
 """
 
 import csv
@@ -14,7 +15,7 @@ from pathlib import Path
 
 import tmdbsimple as tmdb
 
-ROOT = Path(__file__).resolve().parent.parent
+from games import ROOT, live_games
 
 
 def load_api_key() -> str:
@@ -60,11 +61,14 @@ def fetch(tmdb_id: str) -> dict:
     }
 
 
-def main() -> None:
+def refresh_game(movies_csv: Path, out: Path) -> None:
     details: dict[str, dict] = {}
-    with open(ROOT / "movies.csv", newline="") as f:
+    with open(movies_csv, newline="") as f:
         for row in csv.DictReader(f):
             title = row["title"]
+            if not row.get("tmdb_id"):
+                print(f"skip {title}: no tmdb_id")
+                continue
             try:
                 details[title] = fetch(row["tmdb_id"])
             except Exception as exc:
@@ -73,9 +77,18 @@ def main() -> None:
                 print(f"ok {title}")
             time.sleep(0.25)
 
-    out = ROOT / "tmdb_details.json"
     out.write_text(json.dumps(details, indent=2) + "\n")
-    print(f"wrote {out} ({len(details)} movies)")
+    print(f"wrote {out.relative_to(ROOT)} ({len(details)} movies)")
+
+
+def main() -> None:
+    games = live_games()
+    if not games:
+        print("No live games in the manifest; nothing to fetch.")
+        return
+    for game in games:
+        print(f"== {game.id} ==")
+        refresh_game(game.movies_csv, game.tmdb_json)
 
 
 if __name__ == "__main__":

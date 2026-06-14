@@ -14,9 +14,7 @@ from pathlib import Path
 import polars as pl
 from bs4 import BeautifulSoup
 
-ROOT = Path(__file__).resolve().parents[1]
-MOVIES_CSV = ROOT / "movies.csv"
-OUTPUT_CSV = ROOT / "current_movie_results.csv"
+from games import ROOT, live_games
 
 REQUEST_DELAY_SECONDS = 0.25
 
@@ -154,7 +152,7 @@ def fetch_metacritic_score(metacritic_id: str) -> tuple[str, FetchResult]:
     return url, FetchResult(value, "")
 
 
-def write_results(rows: list[dict[str, str | int | None]]) -> None:
+def write_results(rows: list[dict[str, str | int | None]], output_csv: Path) -> None:
     fieldnames = [
         "title",
         "box_office",
@@ -165,14 +163,14 @@ def write_results(rows: list[dict[str, str | int | None]]) -> None:
         "metacritic_error",
         "fetched_at",
     ]
-    with OUTPUT_CSV.open("w", newline="") as file:
+    with output_csv.open("w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
 
-def main() -> None:
-    movies = pl.read_csv(MOVIES_CSV).to_dicts()
+def refresh_game(movies_csv: Path, output_csv: Path) -> None:
+    movies = pl.read_csv(movies_csv).to_dicts()
     fetched_at = datetime.now(UTC).isoformat(timespec="seconds")
     rows = []
 
@@ -201,12 +199,22 @@ def main() -> None:
         )
         print(f"{index:02d}/{len(movies)} {title}")
 
-    write_results(rows)
+    write_results(rows, output_csv)
     box_count = sum(row["box_office"] is not None for row in rows)
     metacritic_count = sum(row["metacritic"] is not None for row in rows)
-    print(f"Wrote {OUTPUT_CSV.relative_to(ROOT)} with {len(rows)} titles.")
+    print(f"Wrote {output_csv.relative_to(ROOT)} with {len(rows)} titles.")
     print(f"Found domestic box office for {box_count} titles.")
     print(f"Found Metacritic scores for {metacritic_count} titles.")
+
+
+def main() -> None:
+    games = live_games()
+    if not games:
+        print("No live games in the manifest; nothing to refresh.")
+        return
+    for game in games:
+        print(f"== {game.id} ==")
+        refresh_game(game.movies_csv, game.results_csv)
 
 
 if __name__ == "__main__":

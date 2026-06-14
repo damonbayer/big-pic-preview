@@ -1,0 +1,15 @@
+---
+import Scoreboard from '../../components/Scoreboard.astro';
+import { games } from '../../data/games';
+
+export function getStaticPaths() {
+  return games.map((game) => ({
+    params: { id: game.meta.id },
+    props: { game },
+  }));
+}
+
+const { game } = Astro.props;
+---
+
+<Scoreboard game={game} allGames={games} />
