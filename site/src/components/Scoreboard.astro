@@ -38,21 +38,24 @@ const SHOW_GUESS_HEAT = !lowerWins;
 // Bind the objective-dependent helpers to this game's direction so the markup
 // can keep calling them without repeating `lowerWins`.
 const advantage = (seanPts: number, amandaPts: number) => advantageOf(seanPts, amandaPts, lowerWins);
-const diffChip = (m: (typeof movies)[number]) => diffChipOf(m, lowerWins);
 const heat = (pts: number, actual: number | null) => heatOf(pts, actual, SHOW_GUESS_HEAT);
 
 const objectiveNote = lowerWins ? 'Lowest combined score wins.' : 'Most combined points wins.';
 
+// The leader (who's winning) is objective-aware; the differential is a plain
+// Sean−Amanda point gap. They can point at different hosts in a golf-style game,
+// which is intended: the gap just reports the points, the badge says who's ahead.
 const overallAdv = advantage(totals.sean, totals.amanda);
-const overallGap = Math.abs(totals.sean - totals.amanda);
+const leader = overallAdv === 0 ? null : overallAdv > 0 ? 'sean' : 'amanda';
+
+const overallDiff = totals.sean - totals.amanda;
+const overallGap = Math.abs(overallDiff);
 const overall =
-  overallAdv === 0
+  overallDiff === 0
     ? { text: 'All tied up', cls: 'tie' }
-    : overallAdv > 0
+    : overallDiff > 0
       ? { text: `+${overallGap} Sean`, cls: 'sean' }
       : { text: `+${overallGap} Amanda`, cls: 'amanda' };
-
-const leader = overallAdv === 0 ? null : overallAdv > 0 ? 'sean' : 'amanda';
 
 // Live games crown whoever is "in the lead"; finished games crown the "winner".
 const leadLabel = meta.live ? 'In the lead' : 'Winner';
@@ -258,7 +261,7 @@ const editions = [...allGames].reverse();
             <tbody>
               {
                 movies.map((m) => {
-                  const chip = diffChip(m);
+                  const chip = diffChipOf(m);
                   const adv = m.scored ? advantage(m.sean.totalPts, m.amanda.totalPts) : 0;
                   return (
                     <tr class={m.scored ? '' : 'pending'}>
