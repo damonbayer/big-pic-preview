@@ -17,3 +17,9 @@ package = false
 dev = [
     "ipykernel>=7.3.0",
 ]
+
+[tool.ruff]
+fix = true
+
+[tool.ruff.lint]
+select = ["I", "E4", "E7", "E9", "F", "UP"]
