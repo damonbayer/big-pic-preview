@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "vitest run"
+    "test": "vitest run --config vitest.config.mjs"
   },
   "dependencies": {
     "astro": "^5.8.0",
