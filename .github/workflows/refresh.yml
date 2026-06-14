@@ -23,30 +23,21 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
 
-      - name: Fetch current results
-        run: uv run scripts/fetch_current_results.py
+      - name: Fetch results
+        run: uv run scripts/fetch_results.py
 
       - name: Commit if data changed
         id: commit
-        # Results live per game under games/<id>/results.csv.
-        # Ignore the fetched_at column (8th) so a run that finds nothing new
-        # doesn't produce a timestamp-only commit and a pointless deploy.
+        # results.csv now holds only meaningful data (no fetched_at timestamp), so
+        # any change to a tracked file is a real result change worth committing.
         run: |
-          changed=false
-          for f in games/*/results.csv; do
-            cut -d, -f1-7 "$f" > /tmp/new.csv
-            git show "HEAD:$f" 2>/dev/null | cut -d, -f1-7 > /tmp/old.csv || : > /tmp/old.csv
-            if ! cmp -s /tmp/old.csv /tmp/new.csv; then
-              changed=true
-            fi
-          done
-          if [ "$changed" = false ]; then
+          git add games/*/results.csv
+          if git diff --cached --quiet; then
             echo "No data changes; skipping commit."
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add games/*/results.csv
             git commit -m "Refresh box office and Metacritic results"
             git push
             echo "changed=true" >> "$GITHUB_OUTPUT"

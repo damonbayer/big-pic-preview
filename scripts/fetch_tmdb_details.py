@@ -1,9 +1,9 @@
-"""Fetch TMDB details for every movie in each live game's movies.csv.
+"""Fetch TMDB details for every movie in a game's movies.csv.
 
-Writes games/<id>/tmdb_details.json keyed by the title used in the prediction
-CSVs. Only live games are refreshed; finished editions stay frozen. Reads the
-API key from the TMDB_API_KEY environment variable or a git-ignored .env file at
-the repo root (TMDB_API_KEY=...).
+Writes games/<id>/tmdb_details.json keyed by each movie's canonical TMDB title.
+Defaults to the live games; pass game ids or --all to refresh finished editions
+too. Reads the API key from the TMDB_API_KEY environment variable or a git-ignored
+.env file at the repo root (TMDB_API_KEY=...).
 """
 
 import csv
@@ -15,7 +15,7 @@ from pathlib import Path
 
 import tmdbsimple as tmdb
 
-from games import ROOT, live_games
+from games import ROOT, parse_game_selection
 
 
 def load_api_key() -> str:
@@ -123,9 +123,9 @@ def refresh_game(
 
 
 def main() -> None:
-    games = live_games()
+    games = parse_game_selection("Fetch TMDB details and canonical titles.")
     if not games:
-        print("No live games in the manifest; nothing to fetch.")
+        print("No games selected; nothing to fetch.")
         return
     for game in games:
         print(f"== {game.id} ==")

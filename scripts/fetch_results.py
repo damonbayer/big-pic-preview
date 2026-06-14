@@ -8,13 +8,12 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
 
 import polars as pl
 from bs4 import BeautifulSoup
 
-from games import ROOT, live_games
+from games import ROOT, parse_game_selection
 
 REQUEST_DELAY_SECONDS = 0.25
 
@@ -112,44 +111,44 @@ def parse_metacritic_score(page: str) -> int | None:
     return int(match.group(1)) if match else None
 
 
-def fetch_domestic_box_office(box_office_mojo_id: str) -> tuple[str, FetchResult]:
+def fetch_domestic_box_office(box_office_mojo_id: str) -> FetchResult:
     if not box_office_mojo_id:
-        return "", FetchResult(None, "missing Box Office Mojo ID")
+        return FetchResult(None, "missing Box Office Mojo ID")
 
     url = f"https://www.boxofficemojo.com/title/{box_office_mojo_id}/"
     try:
         page = fetch_text(url)
         value = parse_domestic_box_office(page)
     except urllib.error.HTTPError as error:
-        return url, FetchResult(None, f"HTTP {error.code}")
+        return FetchResult(None, f"HTTP {error.code}")
     except urllib.error.URLError as error:
-        return url, FetchResult(None, str(error.reason))
+        return FetchResult(None, str(error.reason))
     except TimeoutError:
-        return url, FetchResult(None, "timeout")
+        return FetchResult(None, "timeout")
 
     if value is None:
-        return url, FetchResult(None, "domestic gross not found")
-    return url, FetchResult(value, "")
+        return FetchResult(None, "domestic gross not found")
+    return FetchResult(value, "")
 
 
-def fetch_metacritic_score(metacritic_id: str) -> tuple[str, FetchResult]:
+def fetch_metacritic_score(metacritic_id: str) -> FetchResult:
     if not metacritic_id:
-        return "", FetchResult(None, "missing Metacritic ID")
+        return FetchResult(None, "missing Metacritic ID")
 
     url = f"https://www.metacritic.com/{metacritic_id.strip('/')}/"
     try:
         page = fetch_text(url)
         value = parse_metacritic_score(page)
     except urllib.error.HTTPError as error:
-        return url, FetchResult(None, f"HTTP {error.code}")
+        return FetchResult(None, f"HTTP {error.code}")
     except urllib.error.URLError as error:
-        return url, FetchResult(None, str(error.reason))
+        return FetchResult(None, str(error.reason))
     except TimeoutError:
-        return url, FetchResult(None, "timeout")
+        return FetchResult(None, "timeout")
 
     if value is None:
-        return url, FetchResult(None, "Metascore not found")
-    return url, FetchResult(value, "")
+        return FetchResult(None, "Metascore not found")
+    return FetchResult(value, "")
 
 
 def write_results(rows: list[dict[str, str | int | None]], output_csv: Path) -> None:
@@ -157,11 +156,8 @@ def write_results(rows: list[dict[str, str | int | None]], output_csv: Path) -> 
         "title",
         "box_office",
         "metacritic",
-        "box_office_url",
-        "metacritic_url",
         "box_office_error",
         "metacritic_error",
-        "fetched_at",
     ]
     with output_csv.open("w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames, lineterminator="\n")
@@ -171,18 +167,15 @@ def write_results(rows: list[dict[str, str | int | None]], output_csv: Path) -> 
 
 def refresh_game(movies_csv: Path, output_csv: Path) -> None:
     movies = pl.read_csv(movies_csv).to_dicts()
-    fetched_at = datetime.now(UTC).isoformat(timespec="seconds")
     rows = []
 
     for index, movie in enumerate(movies, start=1):
         title = str(movie["title"])
-        box_url, box_office = fetch_domestic_box_office(
+        box_office = fetch_domestic_box_office(
             str(movie.get("box_office_mojo_id") or "")
         )
         time.sleep(REQUEST_DELAY_SECONDS)
-        metacritic_url, metacritic = fetch_metacritic_score(
-            str(movie.get("metacritic_id") or "")
-        )
+        metacritic = fetch_metacritic_score(str(movie.get("metacritic_id") or ""))
         time.sleep(REQUEST_DELAY_SECONDS)
 
         rows.append(
@@ -190,11 +183,8 @@ def refresh_game(movies_csv: Path, output_csv: Path) -> None:
                 "title": title,
                 "box_office": box_office.value,
                 "metacritic": metacritic.value,
-                "box_office_url": box_url,
-                "metacritic_url": metacritic_url,
                 "box_office_error": box_office.error,
                 "metacritic_error": metacritic.error,
-                "fetched_at": fetched_at,
             }
         )
         print(f"{index:02d}/{len(movies)} {title}")
@@ -208,9 +198,9 @@ def refresh_game(movies_csv: Path, output_csv: Path) -> None:
 
 
 def main() -> None:
-    games = live_games()
+    games = parse_game_selection("Fetch box office and Metacritic results.")
     if not games:
-        print("No live games in the manifest; nothing to refresh.")
+        print("No games selected; nothing to refresh.")
         return
     for game in games:
         print(f"== {game.id} ==")

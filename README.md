@@ -34,9 +34,22 @@ games/
 3. Run the fetch scripts (they only touch live games) to fill in IDs, results,
    and TMDB details.
 
-`live` controls behavior: the update scripts only refresh live games, and the
-site shows "in the lead" / "updated daily" for live games versus "winner" /
-"all movies scored" for finished ones.
+`live` controls behavior: the update scripts default to refreshing only live
+games, and the site shows "in the lead" / "updated daily" for live games versus
+"winner" / "all movies scored" for finished ones.
+
+### Choosing which games to update
+
+All three fetch scripts below share the same selection options:
+
+```sh
+uv run scripts/fetch_results.py                       # live games (default)
+uv run scripts/fetch_results.py --all                 # every game in the manifest
+uv run scripts/fetch_results.py 2025-summer           # one or more specific game ids
+```
+
+Passing explicit ids lets you refresh a finished (non-live) edition; `--all` and a
+list of ids are mutually exclusive.
 
 ## Refresh movie IDs
 
@@ -49,16 +62,17 @@ titles in `predictions.csv` if it is missing), queries Wikidata for the Wikidata
 item plus TMDB, IMDb/Box Office Mojo, and Metacritic IDs, and rewrites that file.
 Only blank ID cells are filled, so IDs you enter by hand are left untouched.
 
-## Refresh current results
+## Refresh results
 
 ```sh
-uv run scripts/fetch_current_results.py
+uv run scripts/fetch_results.py
 ```
 
 For each live game, reads `games/<id>/movies.csv`, fetches Box Office Mojo title
-pages and Metacritic movie pages, and rewrites `games/<id>/results.csv`.
-Empty result fields are paired with an error column explaining whether the source
-page, score, or ID was missing.
+pages and Metacritic movie pages, and rewrites `games/<id>/results.csv` with
+`title`, `box_office`, `metacritic`, and a per-source error column. Empty result
+fields are paired with the error explaining whether the source page, score, or ID
+was missing.
 
 ## Refresh TMDB details
 

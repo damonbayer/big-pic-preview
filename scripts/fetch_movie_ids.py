@@ -10,7 +10,7 @@ from pathlib import Path
 
 import polars as pl
 
-from games import live_games
+from games import parse_game_selection
 
 WIKIDATA_SPARQL = "https://query.wikidata.org/sparql?format=csv"
 USER_AGENT = "big_pic_summer_movie_preview/0.1 (local reproducible data script)"
@@ -326,9 +326,9 @@ def fill_game(movies_csv: Path, predictions_csv: Path, target_years: set[int]) -
 
 
 def main() -> None:
-    games = live_games()
+    games = parse_game_selection("Fill movie IDs from Wikidata.")
     if not games:
-        print("No live games in the manifest; nothing to fetch.")
+        print("No games selected; nothing to fetch.")
         return
     for game in games:
         # Films in an edition's slate cluster around its year, but some slip a
