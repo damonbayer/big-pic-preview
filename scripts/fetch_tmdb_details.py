@@ -16,6 +16,7 @@ from pathlib import Path
 
 import polars as pl
 import tmdbsimple as tmdb
+from dotenv import load_dotenv
 from schemas import (
     MOVIES_SCHEMA,
     PREDICTIONS_SCHEMA,
@@ -31,14 +32,9 @@ POSTER_BASE = "https://image.tmdb.org/t/p/w342"
 
 
 def load_api_key() -> str:
+    # An exported env var wins; otherwise fall back to the git-ignored .env.
+    load_dotenv(ROOT / ".env")
     key = os.environ.get("TMDB_API_KEY")
-    if not key:
-        env_file = ROOT / ".env"
-        if env_file.exists():
-            for line in env_file.read_text().splitlines():
-                name, _, value = line.partition("=")
-                if name.strip() == "TMDB_API_KEY":
-                    key = value.strip()
     if not key:
         sys.exit("TMDB_API_KEY is not set (export it or add it to .env)")
     return key
