@@ -120,6 +120,21 @@ window.addEventListener(
   { passive: true },
 );
 
+// ----- leader badge wiggle -----
+// The "Winner" / "In the lead" badge does a little shimmy on load and whenever
+// the leading card is clicked. Re-adding the class after a forced reflow
+// restarts the one-shot CSS animation.
+const badge = document.querySelector<HTMLElement>('.score-card.leading .badge');
+if (badge) {
+  const wiggle = () => {
+    badge.classList.remove('wiggle');
+    void badge.offsetWidth;
+    badge.classList.add('wiggle');
+  };
+  wiggle();
+  badge.closest('.score-card')?.addEventListener('click', wiggle);
+}
+
 // ----- column sorting -----
 const tbody = document.querySelector('tbody')!;
 // The server renders rows sorted by release date ascending.

@@ -106,6 +106,37 @@ body {
   filter: drop-shadow(0 6px 0 rgba(10, 25, 35, 0.25));
 }
 
+/* The two film reels turn slowly, like the projector's threading up.
+   transform-box: view-box keeps the px origin in the SVG's coordinate system,
+   so each reel spins about its own hub. */
+.projector .reel {
+  transform-box: view-box;
+  animation: reel-spin 7s linear infinite;
+}
+
+.projector .reel-left {
+  transform-origin: 62px 38px;
+}
+
+.projector .reel-right {
+  transform-origin: 138px 38px;
+}
+
+@keyframes reel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projector .reel,
+  .live-dot,
+  .score-card .badge.wiggle,
+  .progress .emoji {
+    animation: none;
+  }
+}
+
 .filmstrip {
   height: 26px;
   background:
@@ -170,6 +201,21 @@ main {
   border-radius: 50%;
   background: #4fd79a;
   box-shadow: 0 0 0 3px rgba(79, 215, 154, 0.25);
+  animation: live-pulse 1.8s ease-out infinite;
+}
+
+/* A radar-style ring that expands and fades, so the "live" dot reads as a
+   heartbeat rather than a static bullet. */
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 215, 154, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(79, 215, 154, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 215, 154, 0);
+  }
 }
 
 .season-pill.active .live-dot {
@@ -220,6 +266,29 @@ main {
   padding: 4px 12px;
   border-radius: 999px;
   white-space: nowrap;
+}
+
+/* JS adds .wiggle on load and on each click of the leading card, re-triggering
+   this one-shot shimmy. The keyframes keep the badge's resting -2deg tilt and
+   translateX(-50%) centering at both ends so it settles back into place. */
+.score-card .badge.wiggle {
+  animation: badge-wiggle 0.7s ease-in-out;
+}
+
+@keyframes badge-wiggle {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(-2deg);
+  }
+  20% {
+    transform: translateX(-50%) rotate(-8deg) scale(1.06);
+  }
+  45% {
+    transform: translateX(-50%) rotate(5deg) scale(1.06);
+  }
+  70% {
+    transform: translateX(-50%) rotate(-3deg);
+  }
 }
 
 .score-card .host {
@@ -306,6 +375,35 @@ main {
   opacity: 0.9;
   margin: 20px 0 6px;
   font-weight: 600;
+}
+
+.progress .wrap {
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.progress .wrap strong {
+  color: var(--gold);
+  font-weight: 900;
+}
+
+/* The popcorn/clapper emoji does a slow, gentle sway — enough to catch the eye
+   without becoming a distraction. */
+.progress .emoji {
+  display: inline-block;
+  margin-right: 4px;
+  animation: emoji-dance 2.4s ease-in-out infinite;
+  transform-origin: 70% 80%;
+}
+
+@keyframes emoji-dance {
+  0%,
+  100% {
+    transform: rotate(-9deg);
+  }
+  50% {
+    transform: rotate(9deg);
+  }
 }
 
 /* ---------- episode links ---------- */

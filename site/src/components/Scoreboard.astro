@@ -108,7 +108,7 @@ const editions = [...allGames].reverse();
       rel="stylesheet"
     />
   </head>
-  <body>
+  <body data-celebrate={!meta.live && leader ? '' : undefined}>
     <header class="hero">
       <p class="kicker">An unofficial scoreboard for The Ringer&rsquo;s</p>
       <h1>
@@ -129,14 +129,18 @@ const editions = [...allGames].reverse();
           <rect x="20" y="76" width="26" height="14" rx="4"></rect>
         </g>
         <g fill="var(--gold)">
-          <circle cx="62" cy="24" r="6.5"></circle>
-          <circle cx="62" cy="52" r="6.5"></circle>
-          <circle cx="48" cy="38" r="6.5"></circle>
-          <circle cx="76" cy="38" r="6.5"></circle>
-          <circle cx="138" cy="24" r="6.5"></circle>
-          <circle cx="138" cy="52" r="6.5"></circle>
-          <circle cx="124" cy="38" r="6.5"></circle>
-          <circle cx="152" cy="38" r="6.5"></circle>
+          <g class="reel reel-left">
+            <circle cx="62" cy="24" r="6.5"></circle>
+            <circle cx="62" cy="52" r="6.5"></circle>
+            <circle cx="48" cy="38" r="6.5"></circle>
+            <circle cx="76" cy="38" r="6.5"></circle>
+          </g>
+          <g class="reel reel-right">
+            <circle cx="138" cy="24" r="6.5"></circle>
+            <circle cx="138" cy="52" r="6.5"></circle>
+            <circle cx="124" cy="38" r="6.5"></circle>
+            <circle cx="152" cy="38" r="6.5"></circle>
+          </g>
         </g>
         <rect x="52" y="74" width="58" height="6" rx="3" fill="var(--green)"></rect>
       </svg>
@@ -188,12 +192,20 @@ const editions = [...allGames].reverse();
       <p class="progress">
         {
           meta.live ? (
-            <>
-              {totals.scoredCount} of {totals.movieCount} movies scored so far &mdash; updated daily around 2&nbsp;pm
-              Pacific.
-            </>
+            <span class="wrap">
+              <span class="emoji" aria-hidden="true">
+                &#127871;
+              </span>
+              <strong>{totals.scoredCount}</strong> of {totals.movieCount} movies scored so far &mdash; fresh scores
+              served daily around 2&nbsp;pm Pacific.
+            </span>
           ) : (
-            <>All movies scored.</>
+            <span class="wrap">
+              <span class="emoji" aria-hidden="true">
+                &#127916;
+              </span>{' '}
+              That&rsquo;s a wrap! All movies have been scored.
+            </span>
           )
         }
       </p>
@@ -393,6 +405,7 @@ const editions = [...allGames].reverse();
 
     <script>
       import '../scripts/scoreboard.ts';
+      import '../scripts/confetti.ts';
     </script>
   </body>
 </html>
