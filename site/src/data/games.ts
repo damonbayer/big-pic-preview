@@ -95,6 +95,7 @@ export interface HostLine {
 
 export interface MovieLinks {
   tmdb: string | null;
+  imdb: string | null;
   boxOffice: string | null;
   metacritic: string | null;
   letterboxd: string | null;
@@ -128,6 +129,7 @@ export interface GameData {
 
 const NO_LINKS: MovieLinks = {
   tmdb: null,
+  imdb: null,
   boxOffice: null,
   metacritic: null,
   letterboxd: null,
@@ -160,6 +162,7 @@ function computeGame(meta: GameMeta): GameData {
     const { tmdb_id: tmdbId, box_office_mojo_id: bomId, metacritic_id: metaId, letterboxd_id: letterboxdId } = row;
     links.set(row.title, {
       tmdb: tmdbId ? `https://www.themoviedb.org/movie/${tmdbId}` : null,
+      imdb: bomId ? `https://www.imdb.com/title/${bomId}/` : null,
       boxOffice: bomId ? `https://www.boxofficemojo.com/title/${bomId}/` : null,
       // metacritic_id sometimes carries stray slashes (e.g. "movie/power-ballad/").
       metacritic: metaId ? `https://www.metacritic.com/${metaId.replace(/^\/+|\/+$/g, '')}/` : null,

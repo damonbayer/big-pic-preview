@@ -8,8 +8,7 @@ const overviewEl = document.getElementById('card-overview')!;
 const creditsEl = document.getElementById('card-credits')!;
 const linksEl = document.getElementById('card-links')!;
 const linkTmdb = document.getElementById('card-link-tmdb') as HTMLAnchorElement;
-const linkBo = document.getElementById('card-link-bo') as HTMLAnchorElement;
-const linkMc = document.getElementById('card-link-mc') as HTMLAnchorElement;
+const linkImdb = document.getElementById('card-link-imdb') as HTMLAnchorElement;
 const linkLetterboxd = document.getElementById('card-link-letterboxd') as HTMLAnchorElement;
 
 let pinned: string | null = null;
@@ -42,8 +41,7 @@ function fill(title: string) {
   creditsEl.hidden = credits.length === 0;
   const links = d.links ?? {};
   setLink(linkTmdb, links.tmdb);
-  setLink(linkBo, links.boxOffice);
-  setLink(linkMc, links.metacritic);
+  setLink(linkImdb, links.imdb);
   setLink(linkLetterboxd, links.letterboxd);
   if (d.poster) {
     poster.src = d.poster;
