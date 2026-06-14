@@ -41,6 +41,8 @@ const advantage = (seanPts: number, amandaPts: number) => advantageOf(seanPts, a
 const heat = (pts: number, actual: number | null) => heatOf(pts, actual, SHOW_GUESS_HEAT);
 
 const objectiveNote = lowerWins ? 'Lowest combined score wins.' : 'Most combined points wins.';
+const objectiveLabel = lowerWins ? 'Low score wins' : 'High score wins';
+const objectiveIcon = lowerWins ? '↓' : '↑';
 
 // The leader (who's winning) is objective-aware; the differential is a plain
 // Sean−Amanda point gap. They can point at different hosts in a golf-style game,
@@ -169,7 +171,6 @@ const editions = [...allGames].reverse();
         </div>
         <div class="vs">
           <span>VS</span>
-          <span class={`overall chip ${overall.cls}`}>{overall.text}</span>
         </div>
         <div class={`score-card amanda ${leader === 'amanda' ? 'leading' : ''}`}>
           {leader === 'amanda' && <span class="badge">★ {leadLabel}</span>}
@@ -178,6 +179,11 @@ const editions = [...allGames].reverse();
           <span class="pts-label">points</span>
         </div>
       </section>
+
+      <p class={`objective ${lowerWins ? 'low' : 'high'}`}>
+        <span class="objective-icon" aria-hidden="true">{objectiveIcon}</span>
+        {objectiveLabel}
+      </p>
 
       <p class="progress">
         {
