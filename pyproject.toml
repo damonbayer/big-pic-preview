@@ -18,7 +18,17 @@ package = false
 [dependency-groups]
 dev = [
     "ipykernel>=7.3.0",
+    "pytest>=9.1.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["scripts"]
+
+# Mirror pytest's pythonpath so editors/type-checkers resolve the flat imports
+# between scripts (e.g. `import schemas`, `import fetch_movie_ids`).
+[tool.pyright]
+extraPaths = ["scripts"]
 
 [tool.ruff]
 fix = true

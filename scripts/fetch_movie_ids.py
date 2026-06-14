@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 
 import polars as pl
 from schemas import MOVIES_SCHEMA, PREDICTIONS_SCHEMA, read_csv, write_csv
@@ -105,11 +106,12 @@ def query_wikidata(term_by_title: dict[str, str]) -> pl.DataFrame:
     sparql.setTimeout(60)
     sparql.setQuery(build_query(term_by_title))
 
+    # convert() is typed as a broad JSON/XML/CSV/RDF union; we requested JSON.
+    response: Any = sparql.query().convert()
     schema = empty_candidates().schema
-    bindings = sparql.query().convert()["results"]["bindings"]
     rows = [
         {field: binding.get(field, {}).get("value", "") for field in schema}
-        for binding in bindings
+        for binding in response["results"]["bindings"]
     ]
     return pl.DataFrame(rows, schema=schema) if rows else empty_candidates()
 
@@ -129,10 +131,11 @@ def empty_candidates() -> pl.DataFrame:
     )
 
 
-def year_from_date(value: str | None) -> int | None:
+def year_from_date(value: object) -> int | None:
+    # Fed from to_dicts() values typed as object; coerce before matching.
     if not value:
         return None
-    match = re.match(r"^(\d{4})", value)
+    match = re.match(r"^(\d{4})", str(value))
     return int(match.group(1)) if match else None
 
 
