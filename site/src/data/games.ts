@@ -1,3 +1,4 @@
+import Papa from 'papaparse';
 import manifest from '../../../games/games.json';
 
 // Per-game data lives in games/<id>/. Vite's import.meta.glob pulls every
@@ -35,6 +36,18 @@ const predictionsById = byGameId(predictionFiles);
 const resultsById = byGameId(resultFiles);
 const moviesById = byGameId(movieFiles);
 const tmdbById = byGameId(tmdbFiles);
+
+// Parse a CSV into records keyed by its header row, so callers join on column
+// names rather than fragile positional indices. PapaParse handles the quoting
+// the Python fetch scripts emit — a title like "Sorry, Baby" stays one field
+// instead of shifting every column and mis-mapping results to the wrong movie.
+function parseCsvRecords(text: string): Record<string, string>[] {
+  const parsed = Papa.parse<Record<string, string>>(text.trim(), {
+    header: true,
+    skipEmptyLines: true,
+  });
+  return parsed.data;
+}
 
 // --- types ---
 
@@ -194,24 +207,20 @@ function computeGame(meta: GameMeta): GameData {
   const tmdb = tmdbById[meta.id] ?? {};
 
   // --- load actuals: title -> { box_office, metacritic } ---
+  // columns: title,box_office,metacritic,box_office_error,metacritic_error
   const actuals = new Map<string, { bo: number | null; meta: number | null }>();
-  for (const line of resultsCsv.trim().split('\n').slice(1)) {
-    if (!line) continue;
-    // title,box_office,metacritic,box_office_url,metacritic_url,...
-    const cols = line.split(',');
-    actuals.set(cols[0], {
-      bo: cols[1] === '' ? null : Number(cols[1]),
-      meta: cols[2] === '' ? null : Number(cols[2]),
+  for (const row of parseCsvRecords(resultsCsv)) {
+    actuals.set(row.title, {
+      bo: row.box_office === '' ? null : Number(row.box_office),
+      meta: row.metacritic === '' ? null : Number(row.metacritic),
     });
   }
 
   // --- load source links from movies.csv IDs ---
   const links = new Map<string, MovieLinks>();
-  for (const line of moviesCsv.trim().split('\n').slice(1)) {
-    if (!line) continue;
-    // title,wikidata_id,tmdb_id,box_office_mojo_id,metacritic_id,letterboxd_id
-    const [title, , tmdbId, bomId, metaId, letterboxdId] = line.split(',');
-    links.set(title, {
+  for (const row of parseCsvRecords(moviesCsv)) {
+    const { tmdb_id: tmdbId, box_office_mojo_id: bomId, metacritic_id: metaId, letterboxd_id: letterboxdId } = row;
+    links.set(row.title, {
       tmdb: tmdbId ? `https://www.themoviedb.org/movie/${tmdbId}` : null,
       boxOffice: bomId ? `https://www.boxofficemojo.com/title/${bomId}/` : null,
       // metacritic_id sometimes carries stray slashes (e.g. "movie/power-ballad/").
@@ -222,18 +231,18 @@ function computeGame(meta: GameMeta): GameData {
 
   // --- load predictions: title+host -> guesses ---
   const byTitle = new Map<string, Partial<Record<'sean' | 'amanda', Pred>>>();
-  for (const line of predictionsCsv.trim().split('\n').slice(1)) {
-    if (!line) continue;
-    // title,host,box_office_pred_millions,metacritic_pred
-    const cols = line.split(',');
-    const title = cols[0];
-    const host = cols[1] as 'sean' | 'amanda';
-    const entry = byTitle.get(title) ?? {};
+  for (const row of parseCsvRecords(predictionsCsv)) {
+    const host = row.host;
+    // Fail loudly on a transcription typo rather than silently dropping the row.
+    if (host !== 'sean' && host !== 'amanda') {
+      throw new Error(`${meta.id}: unexpected host "${host}" for "${row.title}" (expected "sean" or "amanda")`);
+    }
+    const entry = byTitle.get(row.title) ?? {};
     entry[host] = {
-      boPred: Number(cols[2]) * 1_000_000,
-      metaPred: Number(cols[3]),
+      boPred: Number(row.box_office_pred_millions) * 1_000_000,
+      metaPred: Number(row.metacritic_pred),
     };
-    byTitle.set(title, entry);
+    byTitle.set(row.title, entry);
   }
 
   // --- score every guess ---
@@ -245,8 +254,11 @@ function computeGame(meta: GameMeta): GameData {
       const metaPts = metaActual === null ? 0 : pointsFor(meta.scoring.metacritic, pred.metaPred, metaActual);
       return { ...pred, boPts, metaPts, totalPts: boPts + metaPts };
     };
-    const sean = score(hosts.sean!);
-    const amanda = score(hosts.amanda!);
+    if (!hosts.sean || !hosts.amanda) {
+      throw new Error(`${meta.id}: "${title}" is missing a prediction for ${hosts.sean ? 'amanda' : 'sean'}`);
+    }
+    const sean = score(hosts.sean);
+    const amanda = score(hosts.amanda);
     return {
       title,
       releaseDate: info?.release_date ?? null,

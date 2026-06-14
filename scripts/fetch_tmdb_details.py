@@ -6,6 +6,8 @@ too. Reads the API key from the TMDB_API_KEY environment variable or a git-ignor
 .env file at the repo root (TMDB_API_KEY=...).
 """
 
+from __future__ import annotations
+
 import csv
 import json
 import os
@@ -16,6 +18,9 @@ from pathlib import Path
 import tmdbsimple as tmdb
 
 from games import ROOT, parse_game_selection
+
+REQUEST_DELAY_SECONDS = 0.25
+POSTER_BASE = "https://image.tmdb.org/t/p/w342"
 
 
 def load_api_key() -> str:
@@ -30,10 +35,6 @@ def load_api_key() -> str:
     if not key:
         sys.exit("TMDB_API_KEY is not set (export it or add it to .env)")
     return key
-
-
-tmdb.API_KEY = load_api_key()
-POSTER_BASE = "https://image.tmdb.org/t/p/w342"
 
 
 def fetch(tmdb_id: str) -> dict:
@@ -65,7 +66,7 @@ def rename_titles(path: Path, renames: dict[str, str]) -> int:
     """Apply a title -> canonical-title map to a CSV, preserving its columns."""
     if not path.exists():
         return 0
-    with open(path, newline="") as f:
+    with path.open(newline="") as f:
         reader = csv.DictReader(f)
         fieldnames = reader.fieldnames or []
         rows = list(reader)
@@ -77,7 +78,7 @@ def rename_titles(path: Path, renames: dict[str, str]) -> int:
             row["title"] = canonical
             changed += 1
 
-    with open(path, "w", newline="") as f:
+    with path.open("w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
@@ -89,17 +90,21 @@ def refresh_game(
 ) -> None:
     details: dict[str, dict] = {}
     renames: dict[str, str] = {}
-    with open(movies_csv, newline="") as f:
+    expected = 0
+    failed = 0
+    with movies_csv.open(newline="") as f:
         for row in csv.DictReader(f):
             title = row["title"]
             if not row.get("tmdb_id"):
                 print(f"skip {title}: no tmdb_id")
                 continue
+            expected += 1
             try:
                 info = fetch(row["tmdb_id"])
             except Exception as exc:
                 print(f"FAILED {title}: {exc}")
-                time.sleep(0.25)
+                failed += 1
+                time.sleep(REQUEST_DELAY_SECONDS)
                 continue
             # The canonical name from TMDB becomes the title every file keys on.
             canonical = info.get("tmdb_title") or title
@@ -107,7 +112,14 @@ def refresh_game(
             renames[title] = canonical
             note = f" -> {canonical}" if canonical != title else ""
             print(f"ok {title}{note}")
-            time.sleep(0.25)
+            time.sleep(REQUEST_DELAY_SECONDS)
+
+    # Don't overwrite a good file with nothing: if every movie that should have
+    # fetched failed (bad key, TMDB outage), fail loudly instead of wiping data.
+    if expected and failed == expected:
+        raise RuntimeError(
+            f"all {expected} TMDB fetches failed; leaving {out.relative_to(ROOT)} untouched"
+        )
 
     out.write_text(json.dumps(details, indent=2) + "\n")
     print(f"wrote {out.relative_to(ROOT)} ({len(details)} movies)")
@@ -127,6 +139,7 @@ def main() -> None:
     if not games:
         print("No games selected; nothing to fetch.")
         return
+    tmdb.API_KEY = load_api_key()
     for game in games:
         print(f"== {game.id} ==")
         refresh_game(
@@ -135,4 +148,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except RuntimeError as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        raise SystemExit(1) from error

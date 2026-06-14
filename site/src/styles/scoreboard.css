@@ -1,0 +1,795 @@
+:root {
+  --green: #1f9e68;
+  --green-deep: #15875a;
+  --ink: #142838;
+  --ink-soft: #1d3850;
+  --cream: #f4efe1;
+  --cream-dim: #e7e0c9;
+  --gold: #f2c94c;
+  --gold-deep: #c79a25;
+  --shadow: 0 10px 30px rgba(10, 25, 35, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--green);
+}
+
+/* The glow blooms below the very top edge, so the page's top reads as
+   the flat --green that iOS paints in the rubber-band overscroll above it.
+   (iOS only fills overscroll with the root's solid color, never a gradient,
+   so a glow that bled to y=0 left a visible seam when pulling down.) */
+body {
+  margin: 0;
+  font-family: 'Archivo', system-ui, sans-serif;
+  color: var(--ink);
+  min-height: 100vh;
+  background: radial-gradient(1100px 480px at 50% 360px, rgba(255, 255, 255, 0.15), transparent 70%), var(--green);
+}
+
+/* ---------- hero ---------- */
+.hero {
+  text-align: center;
+  padding: 56px 16px 18px;
+}
+
+.kicker {
+  margin: 0 0 4px;
+  color: var(--cream);
+  opacity: 0.85;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.hero h1 {
+  margin: 0;
+  line-height: 0.95;
+}
+
+.hero .script {
+  display: block;
+  font-family: 'Yellowtail', cursive;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  color: var(--gold);
+  transform: rotate(-4deg);
+  text-shadow: 2px 2px 0 var(--ink);
+  margin-bottom: -0.2em;
+}
+
+.hero .slab {
+  font-family: 'Alfa Slab One', serif;
+  font-size: clamp(3rem, 10vw, 6.5rem);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.hero .big {
+  color: var(--cream);
+  text-shadow:
+    3px 3px 0 var(--ink),
+    6px 6px 0 rgba(10, 25, 35, 0.35);
+}
+
+.hero .picture {
+  color: var(--gold);
+  text-shadow:
+    3px 3px 0 var(--ink),
+    6px 6px 0 rgba(10, 25, 35, 0.35);
+}
+
+.event {
+  margin: 18px 0 0;
+  color: var(--cream);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  font-size: clamp(0.85rem, 2.4vw, 1.25rem);
+}
+
+.edition {
+  margin: 6px 0 0;
+  color: var(--gold);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.8rem;
+}
+
+.projector {
+  width: 130px;
+  margin-top: 22px;
+  filter: drop-shadow(0 6px 0 rgba(10, 25, 35, 0.25));
+}
+
+.filmstrip {
+  height: 26px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 14px, rgba(244, 239, 225, 0.85) 14px 26px, transparent 26px 40px),
+    var(--ink);
+  background-clip: content-box, border-box;
+  padding: 7px 0;
+  opacity: 0.92;
+}
+
+/* ---------- layout ---------- */
+main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 34px 18px 10px;
+}
+
+/* ---------- season switcher ---------- */
+.seasons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 26px;
+}
+
+.season-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(20, 40, 56, 0.55);
+  color: var(--cream);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  transition:
+    transform 0.12s ease,
+    border-color 0.12s ease,
+    background 0.12s ease;
+}
+
+.season-pill:hover,
+.season-pill:focus-visible {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.season-pill.active {
+  background: var(--gold);
+  color: var(--ink);
+  border-color: var(--gold);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4fd79a;
+  box-shadow: 0 0 0 3px rgba(79, 215, 154, 0.25);
+}
+
+.season-pill.active .live-dot {
+  background: var(--green-deep);
+  box-shadow: 0 0 0 3px rgba(21, 135, 90, 0.25);
+}
+
+/* ---------- scoreboard ---------- */
+.scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 18px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.score-card {
+  position: relative;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 18px;
+  border: 3px solid var(--ink);
+  padding: 22px 16px 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  box-shadow: var(--shadow);
+}
+
+.score-card.leading {
+  border-color: var(--gold);
+}
+
+.score-card .badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  background: var(--gold);
+  color: var(--ink);
+  font-weight: 900;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.score-card .host {
+  font-family: 'Alfa Slab One', serif;
+  font-size: 1.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.score-card.sean .points {
+  color: var(--gold);
+}
+.score-card.amanda .points {
+  color: #4fd79a;
+}
+
+.score-card .points {
+  font-family: 'Alfa Slab One', serif;
+  font-size: clamp(2.6rem, 7vw, 4rem);
+  line-height: 1;
+}
+
+.pts-label {
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.vs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.vs > span:first-child {
+  font-family: 'Yellowtail', cursive;
+  font-size: 2rem;
+  color: var(--cream);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+.progress {
+  text-align: center;
+  color: var(--cream);
+  opacity: 0.9;
+  margin: 20px 0 6px;
+  font-weight: 600;
+}
+
+/* ---------- episode links ---------- */
+.episodes {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 4px 0 8px;
+}
+
+.episodes a {
+  background: var(--ink);
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 14px rgba(10, 25, 35, 0.3);
+  transition:
+    transform 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.episodes a:hover,
+.episodes a:focus-visible {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+/* ---------- rules ---------- */
+.rules {
+  max-width: 760px;
+  margin: 14px auto 30px;
+  background: var(--cream);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.rules summary {
+  cursor: pointer;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  padding: 14px 18px;
+  user-select: none;
+}
+
+.rules-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0 24px;
+  padding: 0 22px 16px;
+}
+
+.rules h3 {
+  margin: 6px 0 4px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--green-deep);
+}
+
+.rules ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.92rem;
+}
+
+.rules li {
+  margin: 2px 0;
+}
+
+.rules-note {
+  grid-column: 1 / -1;
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--green-deep);
+}
+
+/* ---------- table ---------- */
+.table-card {
+  background: var(--cream);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  /* Even cream frame on all sides so the dark header and footer sit
+     symmetrically inside the card. */
+  padding: 10px;
+  margin-bottom: 36px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  /* Concentric with the card: 18px card radius − 10px padding = 8px. */
+  border-radius: 8px;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-size: 0.92rem;
+  min-width: 980px;
+}
+
+thead th {
+  background: var(--ink);
+  color: var(--cream);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+  padding: 8px 10px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+thead .groups th.group {
+  border-bottom: 1px solid rgba(244, 239, 225, 0.25);
+}
+
+thead .groups th.group,
+thead .subs th {
+  text-align: center;
+}
+
+thead th.actual,
+td.actual {
+  background-color: rgba(20, 40, 56, 0.08);
+}
+
+thead th.actual {
+  background-color: var(--ink-soft);
+  color: var(--gold);
+}
+
+th.movie-col {
+  text-align: left;
+}
+
+.sort-btn {
+  all: unset;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  white-space: nowrap;
+}
+
+.sort-btn::after {
+  content: '\21C5';
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0.4;
+}
+
+.sort-btn:hover::after,
+.sort-btn:focus-visible::after {
+  opacity: 1;
+}
+
+th[aria-sort='ascending'] .sort-btn::after {
+  content: '\25B2';
+  color: var(--gold);
+  opacity: 1;
+}
+
+th[aria-sort='descending'] .sort-btn::after {
+  content: '\25BC';
+  color: var(--gold);
+  opacity: 1;
+}
+
+.movie-col {
+  position: sticky;
+  left: 0;
+}
+
+thead th.movie-col {
+  z-index: 3;
+}
+
+tbody td.movie-col,
+tfoot td.movie-col {
+  z-index: 1;
+}
+
+tbody td.movie-col {
+  background-color: var(--cream);
+}
+
+.movie-col {
+  box-shadow: 5px 0 8px -5px rgba(20, 40, 56, 0.3);
+}
+
+tbody tr:nth-child(even) td.movie-col {
+  background-color: #ece6d6;
+}
+
+tbody tr:hover td.movie-col {
+  background-color: #f3e8c6;
+}
+
+tbody td,
+tfoot td {
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(20, 40, 56, 0.12);
+  white-space: nowrap;
+}
+
+tbody tr:nth-child(even) td {
+  background-color: rgba(20, 40, 56, 0.035);
+}
+
+tbody tr:nth-child(even) td.actual {
+  background-color: rgba(20, 40, 56, 0.1);
+}
+
+tbody tr:hover td {
+  background-color: rgba(242, 201, 76, 0.18);
+}
+
+td.movie-col {
+  font-weight: 700;
+  /* Sized so the three longest titles (≥269px) wrap to two lines while
+     the next-longest (~196px) still fits on one. Override the table-wide
+     nowrap to allow that wrapping. */
+  max-width: 210px;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+.movie-btn {
+  all: unset;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  /* text-decoration (not border-bottom) so the dotted underline follows
+     each line when a long title wraps. */
+  text-decoration: underline dotted var(--green-deep);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.movie-btn:hover,
+.movie-btn:focus-visible {
+  color: var(--green-deep);
+}
+
+td.date {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+td.num {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.actual-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline dotted var(--green-deep);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.actual-link:hover,
+.actual-link:focus-visible {
+  color: var(--green-deep);
+}
+
+td.pts {
+  font-weight: 700;
+}
+
+/* Guess-cell shading by points earned (see SHOW_GUESS_HEAT). The extra
+   specificity keeps it above the stripe and row-hover backgrounds. */
+tbody tr td.num[data-pts='1'] {
+  background-color: rgba(31, 158, 104, 0.14);
+}
+
+tbody tr td.num[data-pts='5'] {
+  background-color: rgba(31, 158, 104, 0.3);
+}
+
+tbody tr td.num[data-pts='10'] {
+  background-color: rgba(31, 158, 104, 0.48);
+}
+
+tbody tr td.num[data-pts='20'] {
+  background-color: rgba(31, 158, 104, 0.68);
+  color: var(--cream);
+  font-weight: 700;
+}
+
+td.pts.win {
+  color: var(--green-deep);
+  font-weight: 900;
+}
+
+tr.pending td:not(.movie-col):not(.date) {
+  opacity: 0.55;
+}
+
+td.diff {
+  text-align: center;
+}
+
+.chip {
+  display: inline-block;
+  font-weight: 900;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.chip.sean {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.chip.amanda {
+  background: var(--green-deep);
+  color: var(--cream);
+}
+
+.chip.tie {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+}
+
+.chip.tbd {
+  background: rgba(20, 40, 56, 0.08);
+  color: var(--ink-soft);
+}
+
+tfoot td {
+  background: var(--ink);
+  color: var(--cream);
+  font-weight: 900;
+  border-bottom: none;
+}
+
+tfoot td.pts {
+  color: var(--gold);
+  font-size: 1.05rem;
+}
+
+tfoot td.movie-col {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ---------- hover card ---------- */
+#movie-card {
+  position: fixed;
+  z-index: 50;
+  width: min(400px, calc(100vw - 24px));
+  background: var(--ink);
+  color: var(--cream);
+  border: 2px solid var(--gold);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(5, 15, 22, 0.55);
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  pointer-events: none;
+}
+
+#movie-card[hidden] {
+  display: none;
+}
+
+#card-poster {
+  width: 104px;
+  height: 156px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: var(--ink-soft);
+}
+
+#movie-card .card-body {
+  min-width: 0;
+}
+
+#card-title {
+  font-family: 'Alfa Slab One', serif;
+  font-size: 1.02rem;
+  margin: 0 0 4px;
+  color: var(--gold);
+  line-height: 1.15;
+}
+
+.card-meta {
+  margin: 0 0 6px;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+
+.card-tagline {
+  margin: 0 0 6px;
+  font-style: italic;
+  font-size: 0.84rem;
+  color: var(--gold);
+  opacity: 0.95;
+}
+
+.card-overview {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-credits {
+  margin: 0;
+  font-size: 0.74rem;
+  opacity: 0.8;
+}
+
+.card-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 12px 0 0;
+}
+
+.card-links a {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  text-decoration: none;
+  border: 1.5px solid var(--gold);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.card-links a:hover,
+.card-links a:focus-visible {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.card-links a[hidden] {
+  display: none;
+}
+
+/* ---------- footer ---------- */
+footer {
+  text-align: center;
+  color: var(--cream);
+  padding: 26px 18px 40px;
+  font-size: 0.82rem;
+  opacity: 0.92;
+}
+
+footer p {
+  margin: 4px 0;
+}
+
+footer a {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.meta-link {
+  margin: 0;
+}
+
+.meta-link a {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(242, 201, 76, 0.5);
+  padding-bottom: 2px;
+}
+
+.meta-link a:hover,
+.meta-link a:focus-visible {
+  border-bottom-color: var(--gold);
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 640px) {
+  .scoreboard {
+    grid-template-columns: 1fr;
+  }
+
+  .vs {
+    flex-direction: row;
+  }
+
+  .hero {
+    padding-top: 36px;
+  }
+
+  td.movie-col {
+    max-width: 190px;
+  }
+}
