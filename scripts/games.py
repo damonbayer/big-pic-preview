@@ -34,6 +34,10 @@ class Game:
         return self.dir / "movies.csv"
 
     @property
+    def predictions_csv(self) -> Path:
+        return self.dir / "predictions.csv"
+
+    @property
     def results_csv(self) -> Path:
         return self.dir / "results.csv"
 

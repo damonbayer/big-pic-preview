@@ -12,6 +12,9 @@ import polars as pl
 
 from games import live_games
 
+WIKIDATA_SPARQL = "https://query.wikidata.org/sparql?format=csv"
+USER_AGENT = "big_pic_summer_movie_preview/0.1 (local reproducible data script)"
+
 FIELDNAMES = [
     "title",
     "wikidata_id",
@@ -30,6 +33,7 @@ ID_COLUMNS = {
 }
 
 QID_PATTERN = re.compile(r"^Q\d+$")
+QID_FROM_URI = re.compile(r"(Q\d+)$")
 
 
 def lookup_term(row: dict[str, str]) -> str:
@@ -37,8 +41,18 @@ def lookup_term(row: dict[str, str]) -> str:
     return (row.get("wikidata_id") or "").strip() or row["title"]
 
 
+def qid_from_item(item: str) -> str:
+    """Pull the bare Q-id out of a Wikidata entity URI (or pass one through)."""
+    match = QID_FROM_URI.search(item or "")
+    return match.group(1) if match else ""
+
+
 def missing_columns(row: dict[str, str]) -> list[str]:
     return [column for column in ID_COLUMNS if not (row.get(column) or "").strip()]
+
+
+def needs_fetch(row: dict[str, str]) -> bool:
+    return not (row.get("wikidata_id") or "").strip() or bool(missing_columns(row))
 
 
 def sparql_literal(value: str) -> str:
@@ -47,13 +61,15 @@ def sparql_literal(value: str) -> str:
 
 
 def build_query(term_by_title: dict[str, str]) -> str:
+    """One batched query: match titles by Wikidata label/alias, or by Q-id when
+    a wikidata_id is already filled in."""
     label_pairs = []
     item_pairs = []
-    for title, name in term_by_title.items():
-        if QID_PATTERN.match(name):
-            item_pairs.append(f"({sparql_literal(title)} wd:{name})")
+    for title, term in term_by_title.items():
+        if QID_PATTERN.match(term):
+            item_pairs.append(f"({sparql_literal(title)} wd:{term})")
         else:
-            label_pairs.append(f"({sparql_literal(title)} {sparql_literal(name)})")
+            label_pairs.append(f"({sparql_literal(title)} {sparql_literal(term)})")
 
     blocks = []
     if label_pairs:
@@ -98,12 +114,12 @@ def query_wikidata(term_by_title: dict[str, str]) -> pl.DataFrame:
     query = build_query(term_by_title)
     data = urllib.parse.urlencode({"query": query, "format": "csv"}).encode()
     request = urllib.request.Request(
-        "https://query.wikidata.org/sparql?format=csv",
+        WIKIDATA_SPARQL,
         data=data,
         headers={
             "Accept": "text/csv",
             "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "big_pic_summer_movie_preview/0.1 (local reproducible data script)",
+            "User-Agent": USER_AGENT,
         },
         method="POST",
     )
@@ -191,27 +207,70 @@ def candidate_score(
     )
 
 
+def pick_candidate(
+    title_rows: list[dict[str, object]], explicit: str, target_years: set[int]
+) -> dict[str, object] | None:
+    # An explicit wikidata_id is trusted as-is; only searched titles are scored.
+    if explicit:
+        return next(
+            (
+                r
+                for r in title_rows
+                if qid_from_item(str(r.get("item") or "")) == explicit
+            ),
+            None,
+        )
+    if not title_rows:
+        return None
+    best = max(title_rows, key=lambda row: candidate_score(row, target_years))
+    return best if candidate_score(best, target_years)[0] >= 0 else None
+
+
 def select_best_candidates(
-    candidates: pl.DataFrame, titles: list[str], target_years: set[int]
+    candidates: pl.DataFrame, rows: list[dict[str, str]], target_years: set[int]
 ) -> dict[str, dict[str, str]]:
     if candidates.is_empty():
         return {}
 
+    by_title: dict[str, list[dict[str, object]]] = {}
+    for row in candidates.to_dicts():
+        by_title.setdefault(str(row.get("sourceTitle") or ""), []).append(row)
+
     selected = {}
-    for title in titles:
-        title_rows = candidates.filter(pl.col("sourceTitle") == title).to_dicts()
-        if not title_rows:
-            continue
-        best = max(title_rows, key=lambda row: candidate_score(row, target_years))
-        if candidate_score(best, target_years)[0] < 0:
+    for row in rows:
+        title = row["title"]
+        explicit = (row.get("wikidata_id") or "").strip()
+        best = pick_candidate(by_title.get(title, []), explicit, target_years)
+        if not best:
             continue
         selected[title] = {
+            "wikidata_id": qid_from_item(str(best.get("item") or "")),
             "tmdb_id": str(best.get("tmdb") or ""),
             "box_office_mojo_id": str(best.get("imdb") or ""),
             "metacritic_id": str(best.get("metacritic") or ""),
             "letterboxd_id": str(best.get("letterboxd") or ""),
         }
     return selected
+
+
+def titles_from_predictions(predictions_csv: Path) -> list[str]:
+    """Unique movie titles from predictions.csv, in first-seen order."""
+    titles: list[str] = []
+    seen: set[str] = set()
+    with predictions_csv.open(newline="") as file:
+        for row in csv.DictReader(file):
+            title = (row.get("title") or "").strip()
+            if title and title not in seen:
+                seen.add(title)
+                titles.append(title)
+    return titles
+
+
+def init_movies(movies_csv: Path, predictions_csv: Path) -> None:
+    """Seed movies.csv from predictions.csv when it doesn't exist yet."""
+    rows = [{"title": title} for title in titles_from_predictions(predictions_csv)]
+    write_movies(rows, movies_csv)
+    print(f"Initialized {movies_csv.name} with {len(rows)} movie(s) from predictions.")
 
 
 def read_movies(movies_csv: Path) -> list[dict[str, str]]:
@@ -232,34 +291,38 @@ def write_movies(rows: list[dict[str, str]], movies_csv: Path) -> None:
             writer.writerow({field: row.get(field, "") for field in FIELDNAMES})
 
 
-def fill_game(movies_csv: Path, target_years: set[int]) -> None:
-    rows = read_movies(movies_csv)
+def fill_game(movies_csv: Path, predictions_csv: Path, target_years: set[int]) -> None:
+    # Seed from predictions.csv when movies.csv is absent or just a header stub.
+    rows = read_movies(movies_csv) if movies_csv.exists() else []
+    if not rows:
+        init_movies(movies_csv, predictions_csv)
+        rows = read_movies(movies_csv)
 
-    term_by_title = {
-        row["title"]: lookup_term(row) for row in rows if missing_columns(row)
-    }
-    if not term_by_title:
+    pending = [row for row in rows if needs_fetch(row)]
+    if not pending:
         print("All movies already have every link; nothing to fetch.")
         return
 
+    term_by_title = {row["title"]: lookup_term(row) for row in pending}
     candidates = query_wikidata(term_by_title)
-    selected = select_best_candidates(candidates, list(term_by_title), target_years)
+    selected = select_best_candidates(candidates, pending, target_years)
 
     filled = 0
     for row in rows:
         ids = selected.get(row["title"])
         if not ids:
             continue
-        for column in missing_columns(row):
+        # Only ever fill blanks — manually entered IDs are left untouched.
+        for column in ["wikidata_id", *missing_columns(row)]:
+            if (row.get(column) or "").strip():
+                continue
             value = ids.get(column, "")
             if value:
                 row[column] = value
                 filled += 1
 
     write_movies(rows, movies_csv)
-    print(
-        f"Checked {len(term_by_title)} movies with missing links; filled {filled} link(s)."
-    )
+    print(f"Checked {len(pending)} movies with missing links; filled {filled} link(s).")
 
 
 def main() -> None:
@@ -272,7 +335,7 @@ def main() -> None:
         # year. Allow a ±1 window to disambiguate same-title Wikidata items.
         target_years = {game.year - 1, game.year, game.year + 1}
         print(f"== {game.id} ==")
-        fill_game(game.movies_csv, target_years)
+        fill_game(game.movies_csv, game.predictions_csv, target_years)
 
 
 if __name__ == "__main__":

@@ -61,8 +61,34 @@ def fetch(tmdb_id: str) -> dict:
     }
 
 
-def refresh_game(movies_csv: Path, out: Path) -> None:
+def rename_titles(path: Path, renames: dict[str, str]) -> int:
+    """Apply a title -> canonical-title map to a CSV, preserving its columns."""
+    if not path.exists():
+        return 0
+    with open(path, newline="") as f:
+        reader = csv.DictReader(f)
+        fieldnames = reader.fieldnames or []
+        rows = list(reader)
+
+    changed = 0
+    for row in rows:
+        canonical = renames.get(row.get("title", ""))
+        if canonical and canonical != row["title"]:
+            row["title"] = canonical
+            changed += 1
+
+    with open(path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+    return changed
+
+
+def refresh_game(
+    movies_csv: Path, predictions_csv: Path, results_csv: Path, out: Path
+) -> None:
     details: dict[str, dict] = {}
+    renames: dict[str, str] = {}
     with open(movies_csv, newline="") as f:
         for row in csv.DictReader(f):
             title = row["title"]
@@ -70,15 +96,30 @@ def refresh_game(movies_csv: Path, out: Path) -> None:
                 print(f"skip {title}: no tmdb_id")
                 continue
             try:
-                details[title] = fetch(row["tmdb_id"])
+                info = fetch(row["tmdb_id"])
             except Exception as exc:
                 print(f"FAILED {title}: {exc}")
-            else:
-                print(f"ok {title}")
+                time.sleep(0.25)
+                continue
+            # The canonical name from TMDB becomes the title every file keys on.
+            canonical = info.get("tmdb_title") or title
+            details[canonical] = info
+            renames[title] = canonical
+            note = f" -> {canonical}" if canonical != title else ""
+            print(f"ok {title}{note}")
             time.sleep(0.25)
 
     out.write_text(json.dumps(details, indent=2) + "\n")
     print(f"wrote {out.relative_to(ROOT)} ({len(details)} movies)")
+
+    movies_renamed = rename_titles(movies_csv, renames)
+    preds_renamed = rename_titles(predictions_csv, renames)
+    results_renamed = rename_titles(results_csv, renames)
+    print(
+        f"renamed {movies_renamed} title(s) in {movies_csv.name}, "
+        f"{preds_renamed} row(s) in {predictions_csv.name}, "
+        f"{results_renamed} row(s) in {results_csv.name}"
+    )
 
 
 def main() -> None:
@@ -88,7 +129,9 @@ def main() -> None:
         return
     for game in games:
         print(f"== {game.id} ==")
-        refresh_game(game.movies_csv, game.tmdb_json)
+        refresh_game(
+            game.movies_csv, game.predictions_csv, game.results_csv, game.tmdb_json
+        )
 
 
 if __name__ == "__main__":

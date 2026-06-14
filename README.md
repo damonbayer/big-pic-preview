@@ -26,9 +26,7 @@ games/
 
 ### Adding a game
 
-1. Create `games/<id>/` with `predictions.csv`, `movies.csv` (the
-   `title` column is enough to start), an empty `results.csv`
-   header row, and `tmdb_details.json` (`{}`).
+1. Create `games/<id>/` with `predictions.csv`.
 2. Add an entry to `games/games.json` in chronological order. Set `live: true`
    while the game is running. Optionally override `scoring` (it always pairs box
    office with Metacritic, but the thresholds can change); omitting it uses the
@@ -46,8 +44,10 @@ site shows "in the lead" / "updated daily" for live games versus "winner" /
 uv run scripts/fetch_movie_ids.py
 ```
 
-For each live game, reads `games/<id>/movies.csv`, queries Wikidata for TMDB,
-IMDb/Box Office Mojo, and Metacritic IDs, and rewrites that file.
+For each live game, reads `games/<id>/movies.csv` (creating it from the unique
+titles in `predictions.csv` if it is missing), queries Wikidata for the Wikidata
+item plus TMDB, IMDb/Box Office Mojo, and Metacritic IDs, and rewrites that file.
+Only blank ID cells are filled, so IDs you enter by hand are left untouched.
 
 ## Refresh current results
 
@@ -67,8 +67,12 @@ uv run scripts/fetch_tmdb_details.py
 ```
 
 For each live game, reads `games/<id>/movies.csv`, fetches details from TMDB, and
-rewrites `games/<id>/tmdb_details.json`. The API key comes from the `TMDB_API_KEY`
-environment variable or a git-ignored `.env` file at the repo root.
+rewrites `games/<id>/tmdb_details.json` keyed by each movie's canonical TMDB
+title. That canonical title is also written back to the `title` column of
+`movies.csv`, `predictions.csv`, and `results.csv`, keeping every file joined on
+the same key.
+The API key comes from the `TMDB_API_KEY` environment variable or a git-ignored
+`.env` file at the repo root.
 
 ## Scoreboard site
 
