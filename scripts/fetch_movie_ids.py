@@ -1,28 +1,16 @@
 from __future__ import annotations
 
-import csv
-import io
 import re
-import urllib.parse
-import urllib.request
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import polars as pl
+from schemas import MOVIES_SCHEMA, PREDICTIONS_SCHEMA, read_csv, write_csv
+from SPARQLWrapper import JSON, POST, SPARQLWrapper
 
 from games import parse_game_selection
 
-WIKIDATA_SPARQL = "https://query.wikidata.org/sparql?format=csv"
+WIKIDATA_SPARQL = "https://query.wikidata.org/sparql"
 USER_AGENT = "big_pic_summer_movie_preview/0.1 (local reproducible data script)"
-
-FIELDNAMES = [
-    "title",
-    "wikidata_id",
-    "tmdb_id",
-    "box_office_mojo_id",
-    "metacritic_id",
-    "letterboxd_id",
-]
 
 # Maps the movies.csv ID column to the SPARQL variable that carries its value.
 ID_COLUMNS = {
@@ -111,56 +99,19 @@ def query_wikidata(term_by_title: dict[str, str]) -> pl.DataFrame:
     if not term_by_title:
         return empty_candidates()
 
-    query = build_query(term_by_title)
-    data = urllib.parse.urlencode({"query": query, "format": "csv"}).encode()
-    request = urllib.request.Request(
-        WIKIDATA_SPARQL,
-        data=data,
-        headers={
-            "Accept": "text/csv",
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": USER_AGENT,
-        },
-        method="POST",
-    )
+    sparql = SPARQLWrapper(WIKIDATA_SPARQL, agent=USER_AGENT)
+    sparql.setMethod(POST)
+    sparql.setReturnFormat(JSON)
+    sparql.setTimeout(60)
+    sparql.setQuery(build_query(term_by_title))
 
-    with urllib.request.urlopen(request, timeout=60) as response:
-        body = response.read()
-
-    body = body.strip()
-    if not body:
-        return empty_candidates()
-    if body.startswith(b"<?xml"):
-        return parse_sparql_xml(body)
-    return pl.read_csv(io.BytesIO(body))
-
-
-def parse_sparql_xml(body: bytes) -> pl.DataFrame:
-    namespace = {"sparql": "http://www.w3.org/2005/sparql-results#"}
-    fields = [
-        "sourceTitle",
-        "item",
-        "itemLabel",
-        "imdb",
-        "tmdb",
-        "metacritic",
-        "letterboxd",
-        "date",
+    schema = empty_candidates().schema
+    bindings = sparql.query().convert()["results"]["bindings"]
+    rows = [
+        {field: binding.get(field, {}).get("value", "") for field in schema}
+        for binding in bindings
     ]
-    root = ET.fromstring(body)
-    rows = []
-    for result in root.findall(".//sparql:result", namespace):
-        row = {field: "" for field in fields}
-        for binding in result.findall("sparql:binding", namespace):
-            name = binding.attrib["name"]
-            child = next(iter(binding))
-            row[name] = child.text or ""
-        rows.append(row)
-    return (
-        pl.DataFrame(rows, schema=empty_candidates().schema)
-        if rows
-        else empty_candidates()
-    )
+    return pl.DataFrame(rows, schema=schema) if rows else empty_candidates()
 
 
 def empty_candidates() -> pl.DataFrame:
@@ -255,15 +206,14 @@ def select_best_candidates(
 
 def titles_from_predictions(predictions_csv: Path) -> list[str]:
     """Unique movie titles from predictions.csv, in first-seen order."""
-    titles: list[str] = []
-    seen: set[str] = set()
-    with predictions_csv.open(newline="") as file:
-        for row in csv.DictReader(file):
-            title = (row.get("title") or "").strip()
-            if title and title not in seen:
-                seen.add(title)
-                titles.append(title)
-    return titles
+    return (
+        read_csv(predictions_csv, PREDICTIONS_SCHEMA)
+        .select(pl.col("title").str.strip_chars())
+        .filter(pl.col("title").str.len_chars() > 0)
+        .unique(maintain_order=True)
+        .get_column("title")
+        .to_list()
+    )
 
 
 def init_movies(movies_csv: Path, predictions_csv: Path) -> None:
@@ -274,21 +224,11 @@ def init_movies(movies_csv: Path, predictions_csv: Path) -> None:
 
 
 def read_movies(movies_csv: Path) -> list[dict[str, str]]:
-    with movies_csv.open(newline="") as file:
-        rows = list(csv.DictReader(file))
-    for row in rows:
-        row.setdefault("wikidata_id", "")
-    return rows
+    return read_csv(movies_csv, MOVIES_SCHEMA).to_dicts()
 
 
 def write_movies(rows: list[dict[str, str]], movies_csv: Path) -> None:
-    with movies_csv.open("w", newline="") as file:
-        writer = csv.DictWriter(
-            file, fieldnames=FIELDNAMES, extrasaction="ignore", lineterminator="\n"
-        )
-        writer.writeheader()
-        for row in rows:
-            writer.writerow({field: row.get(field, "") for field in FIELDNAMES})
+    write_csv(pl.DataFrame(rows), movies_csv, MOVIES_SCHEMA)
 
 
 def fill_game(movies_csv: Path, predictions_csv: Path, target_years: set[int]) -> None:

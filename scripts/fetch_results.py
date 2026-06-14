@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import csv
 import html
 import re
 import sys
@@ -12,6 +11,7 @@ from pathlib import Path
 
 import polars as pl
 from bs4 import BeautifulSoup
+from schemas import MOVIES_SCHEMA, RESULTS_SCHEMA, read_csv, write_csv
 
 from games import ROOT, parse_game_selection
 
@@ -152,21 +152,11 @@ def fetch_metacritic_score(metacritic_id: str) -> FetchResult:
 
 
 def write_results(rows: list[dict[str, str | int | None]], output_csv: Path) -> None:
-    fieldnames = [
-        "title",
-        "box_office",
-        "metacritic",
-        "box_office_error",
-        "metacritic_error",
-    ]
-    with output_csv.open("w", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames, lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(rows)
+    write_csv(pl.DataFrame(rows), output_csv, RESULTS_SCHEMA)
 
 
 def refresh_game(movies_csv: Path, output_csv: Path) -> None:
-    movies = pl.read_csv(movies_csv).to_dicts()
+    movies = read_csv(movies_csv, MOVIES_SCHEMA).to_dicts()
     rows = []
 
     for index, movie in enumerate(movies, start=1):
@@ -183,8 +173,8 @@ def refresh_game(movies_csv: Path, output_csv: Path) -> None:
                 "title": title,
                 "box_office": box_office.value,
                 "metacritic": metacritic.value,
-                "box_office_error": box_office.error,
-                "metacritic_error": metacritic.error,
+                "box_office_error": box_office.error or None,
+                "metacritic_error": metacritic.error or None,
             }
         )
         print(f"{index:02d}/{len(movies)} {title}")

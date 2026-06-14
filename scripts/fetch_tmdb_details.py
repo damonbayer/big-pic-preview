@@ -8,14 +8,21 @@ too. Reads the API key from the TMDB_API_KEY environment variable or a git-ignor
 
 from __future__ import annotations
 
-import csv
 import json
 import os
 import sys
 import time
 from pathlib import Path
 
+import polars as pl
 import tmdbsimple as tmdb
+from schemas import (
+    MOVIES_SCHEMA,
+    PREDICTIONS_SCHEMA,
+    RESULTS_SCHEMA,
+    read_csv,
+    write_csv,
+)
 
 from games import ROOT, parse_game_selection
 
@@ -62,26 +69,14 @@ def fetch(tmdb_id: str) -> dict:
     }
 
 
-def rename_titles(path: Path, renames: dict[str, str]) -> int:
-    """Apply a title -> canonical-title map to a CSV, preserving its columns."""
+def rename_titles(path: Path, schema: dict, renames: dict[str, str]) -> int:
+    """Apply a title -> canonical-title map to a CSV with the given schema."""
     if not path.exists():
         return 0
-    with path.open(newline="") as f:
-        reader = csv.DictReader(f)
-        fieldnames = reader.fieldnames or []
-        rows = list(reader)
-
-    changed = 0
-    for row in rows:
-        canonical = renames.get(row.get("title", ""))
-        if canonical and canonical != row["title"]:
-            row["title"] = canonical
-            changed += 1
-
-    with path.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(rows)
+    df = read_csv(path, schema)
+    renamed = df.with_columns(pl.col("title").replace(renames))
+    changed = int((df["title"] != renamed["title"]).sum())
+    write_csv(renamed, path, schema)
     return changed
 
 
@@ -92,27 +87,26 @@ def refresh_game(
     renames: dict[str, str] = {}
     expected = 0
     failed = 0
-    with movies_csv.open(newline="") as f:
-        for row in csv.DictReader(f):
-            title = row["title"]
-            if not row.get("tmdb_id"):
-                print(f"skip {title}: no tmdb_id")
-                continue
-            expected += 1
-            try:
-                info = fetch(row["tmdb_id"])
-            except Exception as exc:
-                print(f"FAILED {title}: {exc}")
-                failed += 1
-                time.sleep(REQUEST_DELAY_SECONDS)
-                continue
-            # The canonical name from TMDB becomes the title every file keys on.
-            canonical = info.get("tmdb_title") or title
-            details[canonical] = info
-            renames[title] = canonical
-            note = f" -> {canonical}" if canonical != title else ""
-            print(f"ok {title}{note}")
+    for row in read_csv(movies_csv, MOVIES_SCHEMA).to_dicts():
+        title = row["title"]
+        if not row.get("tmdb_id"):
+            print(f"skip {title}: no tmdb_id")
+            continue
+        expected += 1
+        try:
+            info = fetch(row["tmdb_id"])
+        except Exception as exc:
+            print(f"FAILED {title}: {exc}")
+            failed += 1
             time.sleep(REQUEST_DELAY_SECONDS)
+            continue
+        # The canonical name from TMDB becomes the title every file keys on.
+        canonical = info.get("tmdb_title") or title
+        details[canonical] = info
+        renames[title] = canonical
+        note = f" -> {canonical}" if canonical != title else ""
+        print(f"ok {title}{note}")
+        time.sleep(REQUEST_DELAY_SECONDS)
 
     # Don't overwrite a good file with nothing: if every movie that should have
     # fetched failed (bad key, TMDB outage), fail loudly instead of wiping data.
@@ -124,9 +118,9 @@ def refresh_game(
     out.write_text(json.dumps(details, indent=2) + "\n")
     print(f"wrote {out.relative_to(ROOT)} ({len(details)} movies)")
 
-    movies_renamed = rename_titles(movies_csv, renames)
-    preds_renamed = rename_titles(predictions_csv, renames)
-    results_renamed = rename_titles(results_csv, renames)
+    movies_renamed = rename_titles(movies_csv, MOVIES_SCHEMA, renames)
+    preds_renamed = rename_titles(predictions_csv, PREDICTIONS_SCHEMA, renames)
+    results_renamed = rename_titles(results_csv, RESULTS_SCHEMA, renames)
     print(
         f"renamed {movies_renamed} title(s) in {movies_csv.name}, "
         f"{preds_renamed} row(s) in {predictions_csv.name}, "
