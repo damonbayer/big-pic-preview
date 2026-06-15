@@ -52,7 +52,10 @@ const ogImage = new URL('og.png', Astro.site).href;
 
       <section>
         <h2>What</h2>
-        <p>This is an unofficial fan project, not affiliated with The Ringer or Spotify.</p>
+        <p>
+          This is an unofficial fan project for tracking The Big Picture&rsquo;s Summer Movie Preview game. It is not
+          affiliated with The Ringer or Spotify.
+        </p>
       </section>
 
       <section>
@@ -73,6 +76,12 @@ const ogImage = new URL('og.png', Astro.site).href;
         <p>
           The code and data live on <a href={repo}>GitHub</a>.
         </p>
+      </section>
+
+      <section>
+        <h2>Data Sources</h2>
+        <p>The predictions are transcribed by hand into tidy CSVs for each edition.</p>
+        <p>Domestic box office comes from Box Office Mojo. Review scores come from Metacritic.</p>
         <p class="tmdb-attr">
           Movie details and posters provided by
           <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">
@@ -168,6 +177,20 @@ const ogImage = new URL('og.png', Astro.site).href;
         margin: 0 0 8px;
         line-height: 1.6;
         font-size: 0.98rem;
+      }
+
+      ul {
+        margin: 10px 0 0;
+        padding-left: 1.2rem;
+        line-height: 1.55;
+      }
+
+      li {
+        margin-bottom: 8px;
+      }
+
+      li::marker {
+        color: var(--gold);
       }
 
       .tmdb-attr {
