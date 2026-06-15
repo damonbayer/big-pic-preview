@@ -570,6 +570,32 @@ main {
   opacity: 1;
 }
 
+.heat-key {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 4px 4px 10px;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.heat-ramp {
+  width: 80px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 40, 56, 0.14);
+  background: linear-gradient(90deg, rgba(31, 158, 104, 0.12), rgba(31, 158, 104, 0.68));
+  background-clip: padding-box;
+}
+
+.heat-key-arrow {
+  color: var(--green-deep);
+}
+
 .table-scroll {
   overflow-x: auto;
   /* Concentric with the card: 18px card radius − 10px padding = 8px. */
@@ -757,23 +783,9 @@ td.pts {
   font-weight: 700;
 }
 
-/* Guess-cell shading by points earned (see SHOW_GUESS_HEAT). The extra
-   specificity keeps it above the stripe and row-hover backgrounds. */
-tbody tr td.num[data-pts='1'] {
-  background-color: rgba(31, 158, 104, 0.14);
-}
-
-tbody tr td.num[data-pts='5'] {
-  background-color: rgba(31, 158, 104, 0.3);
-}
-
-tbody tr td.num[data-pts='10'] {
-  background-color: rgba(31, 158, 104, 0.48);
-}
-
-tbody tr td.num[data-pts='20'] {
-  background-color: rgba(31, 158, 104, 0.68);
-  color: var(--cream);
+/* Guess-cell shading scales across the current board's realized score range. */
+tbody tr td.num[style*='--heat'] {
+  background-color: rgb(31 158 104 / calc(0.12 + var(--heat) * 0.56));
   font-weight: 700;
 }
 

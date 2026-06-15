@@ -8,7 +8,6 @@ import {
   fmtBO,
   fmtDate,
   fmtMeta,
-  heat as heatOf,
   metaGuessTitle,
   ptsTitle,
   ruleLines,
@@ -30,15 +29,27 @@ function gameUrl(id: string): string {
   return path(`games/${id}/`);
 }
 
-// Golf-style editions (lowest total wins) flip every "who's ahead" decision,
-// and disable guess-cell heat shading (which reads "more points = better").
+// Golf-style editions (lowest total wins) flip every "who's ahead" decision.
 const lowerWins = meta.scoring.objective === 'low';
-const SHOW_GUESS_HEAT = !lowerWins;
 
 // Bind the objective-dependent helpers to this game's direction so the markup
 // can keep calling them without repeating `lowerWins`.
 const advantage = (seanPts: number, amandaPts: number) => advantageOf(seanPts, amandaPts, lowerWins);
-const heat = (pts: number, actual: number | null) => heatOf(pts, actual, SHOW_GUESS_HEAT);
+
+const realizedScores = movies.flatMap((m) => [
+  ...(m.actualMeta === null ? [] : [m.sean.metaPts, m.amanda.metaPts]),
+  ...(m.actualBO === null ? [] : [m.sean.boPts, m.amanda.boPts]),
+]);
+const heatMin = realizedScores.length ? Math.min(...realizedScores) : 0;
+const heatMax = realizedScores.length ? Math.max(...realizedScores) : 0;
+const heatRange = heatMax - heatMin;
+const heat = (pts: number, actual: number | null): string | undefined => {
+  if (actual === null || realizedScores.length === 0) return undefined;
+  const intensity = heatRange === 0 ? 1 : Math.log1p(pts - heatMin) / Math.log1p(heatRange);
+  return `--heat: ${Math.max(0, Math.min(1, intensity)).toFixed(3)}`;
+};
+const heatLegendMin = Math.floor(heatMin / 10) * 10;
+const heatLegendMax = Math.ceil(heatMax / 10) * 10;
 
 const objectiveNote = lowerWins ? 'Lowest combined score wins.' : 'Most combined points wins.';
 const objectiveLabel = lowerWins ? 'Low score wins' : 'High score wins';
@@ -275,6 +286,18 @@ const editions = [...allGames].reverse();
       </details>
 
       <section class="table-card">
+        {
+          realizedScores.length > 0 && (
+            <div class="heat-key" aria-label="Green highlight key">
+              <span class="heat-ramp" aria-hidden="true" />
+              <span>{heatLegendMin} pts</span>
+              <span class="heat-key-arrow" aria-hidden="true">
+                &rarr;
+              </span>
+              <span>{heatLegendMax} pts</span>
+            </div>
+          )
+        }
         <div class="table-scroll">
           <table>
             <thead>
@@ -339,7 +362,7 @@ const editions = [...allGames].reverse();
                       </td>
                       <td
                         class="num"
-                        data-pts={heat(m.sean.metaPts, m.actualMeta)}
+                        style={heat(m.sean.metaPts, m.actualMeta)}
                         data-sort={m.sean.metaPred}
                         title={metaGuessTitle(m.sean.metaPred, m.actualMeta, m.sean.metaPts)}
                       >
@@ -347,7 +370,7 @@ const editions = [...allGames].reverse();
                       </td>
                       <td
                         class="num"
-                        data-pts={heat(m.amanda.metaPts, m.actualMeta)}
+                        style={heat(m.amanda.metaPts, m.actualMeta)}
                         data-sort={m.amanda.metaPred}
                         title={metaGuessTitle(m.amanda.metaPred, m.actualMeta, m.amanda.metaPts)}
                       >
@@ -370,7 +393,7 @@ const editions = [...allGames].reverse();
                       </td>
                       <td
                         class="num"
-                        data-pts={heat(m.sean.boPts, m.actualBO)}
+                        style={heat(m.sean.boPts, m.actualBO)}
                         data-sort={m.sean.boPred}
                         title={boGuessTitle(m.sean.boPred, m.actualBO, m.sean.boPts)}
                       >
@@ -378,7 +401,7 @@ const editions = [...allGames].reverse();
                       </td>
                       <td
                         class="num"
-                        data-pts={heat(m.amanda.boPts, m.actualBO)}
+                        style={heat(m.amanda.boPts, m.actualBO)}
                         data-sort={m.amanda.boPred}
                         title={boGuessTitle(m.amanda.boPred, m.actualBO, m.amanda.boPts)}
                       >

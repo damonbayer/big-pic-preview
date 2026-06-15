@@ -1,7 +1,7 @@
 // Pure formatting and scoring-display helpers for the scoreboard. Kept free of
 // component state so they can be unit-tested in isolation; the objective-aware
-// ones (advantage, heat) take the game's direction as an argument rather than
-// closing over it.
+// one (advantage) takes the game's direction as an argument rather than closing
+// over it.
 import type { MovieRow, ScoreMethod } from '../data/games';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -95,11 +95,4 @@ export function diffChip(m: MovieRow): { text: string; cls: string } {
   if (m.diff > 0) return { text: `+${gap} Sean`, cls: 'sean' };
   if (m.diff < 0) return { text: `+${gap} Amanda`, cls: 'amanda' };
   return { text: 'Tie', cls: 'tie' };
-}
-
-// data-pts value for a guess cell; undefined (no attribute) when the actual
-// isn't in yet or the shading is disabled. Guess-cell shading reads "more
-// points = better guess", which only holds when the objective is to maximize.
-export function heat(pts: number, actual: number | null, showHeat: boolean): number | undefined {
-  return showHeat && actual !== null ? pts : undefined;
 }
