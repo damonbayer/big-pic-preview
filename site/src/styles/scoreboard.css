@@ -20,6 +20,18 @@
   line-height: 0.95;
 }
 
+.hero-logo {
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.hero-logo:focus-visible {
+  outline: 3px solid var(--cream);
+  outline-offset: 8px;
+}
+
 .hero .script {
   display: block;
   font-family: 'Yellowtail', cursive;

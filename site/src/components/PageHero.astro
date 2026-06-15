@@ -6,16 +6,20 @@ interface Props {
 }
 
 const { meta } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const home = `${base}/`.replace('//', '/');
 ---
 
 <header class="hero">
   <p class="kicker">An unofficial scoreboard for The Ringer&rsquo;s</p>
   <h1>
-    <span class="script">The</span>
-    <span class="slab"
-      ><span class="big">Big</span>
-      <span class="picture">Picture</span></span
-    >
+    <a class="hero-logo" href={home} aria-label="The Big Picture Scoreboard home">
+      <span class="script">The</span>
+      <span class="slab"
+        ><span class="big">Big</span>
+        <span class="picture">Picture</span></span
+      >
+    </a>
   </h1>
   <p class="event">{meta.title}</p>
   <p class="edition">{meta.year}</p>
