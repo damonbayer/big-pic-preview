@@ -137,6 +137,9 @@ body {
   .projector .reel,
   .live-dot,
   .score-card .badge.wiggle,
+  .score-card .badge.wiggle::after,
+  .episodes a:hover .episode-emoji,
+  .episodes a:focus-visible .episode-emoji,
   .progress .emoji {
     animation: none;
   }
@@ -284,6 +287,7 @@ main {
   position: absolute;
   top: -14px;
   left: 50%;
+  overflow: hidden;
   transform: translateX(-50%) rotate(-2deg);
   background: var(--gold);
   color: var(--ink);
@@ -303,6 +307,19 @@ main {
   animation: badge-wiggle 0.7s ease-in-out;
 }
 
+.score-card .badge::after {
+  content: '';
+  position: absolute;
+  inset: -45% auto -45% -35%;
+  width: 28px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: translateX(-120%) rotate(18deg);
+}
+
+.score-card .badge.wiggle::after {
+  animation: badge-glint 0.75s ease-out;
+}
+
 @keyframes badge-wiggle {
   0%,
   100% {
@@ -316,6 +333,16 @@ main {
   }
   70% {
     transform: translateX(-50%) rotate(-3deg);
+  }
+}
+
+@keyframes badge-glint {
+  0%,
+  28% {
+    transform: translateX(-120%) rotate(18deg);
+  }
+  100% {
+    transform: translateX(520%) rotate(18deg);
   }
 }
 
@@ -492,6 +519,29 @@ main {
 .episodes a:focus-visible {
   border-color: var(--gold);
   transform: translateY(-2px);
+}
+
+.episode-emoji {
+  display: inline-block;
+  transform-origin: 50% 85%;
+}
+
+.episodes a:hover .episode-emoji,
+.episodes a:focus-visible .episode-emoji {
+  animation: headphones-bob 0.65s ease-in-out;
+}
+
+@keyframes headphones-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  30% {
+    transform: translateY(-2px) rotate(-8deg);
+  }
+  60% {
+    transform: translateY(1px) rotate(6deg);
+  }
 }
 
 /* ---------- rules ---------- */

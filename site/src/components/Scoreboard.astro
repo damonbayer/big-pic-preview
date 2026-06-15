@@ -247,7 +247,10 @@ const editions = [...allGames].reverse();
           <nav class="episodes" aria-label="Listen to the episodes">
             {meta.episodes.map((ep) => (
               <a href={ep.url}>
-                <span aria-hidden="true">&#127911;</span> Listen: {ep.label}
+                <span class="episode-emoji" aria-hidden="true">
+                  &#127911;
+                </span>{' '}
+                Listen: {ep.label}
               </a>
             ))}
           </nav>
