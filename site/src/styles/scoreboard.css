@@ -418,29 +418,49 @@ main {
 .progress .emoji {
   display: inline-block;
   margin-right: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
   font-size: 1.2em;
+  line-height: 1;
   vertical-align: -0.08em;
-  animation: emoji-dance 7s ease-in-out infinite;
+  transform: rotate(-4deg) scale(1);
   transform-origin: 70% 80%;
 }
 
-@keyframes emoji-dance {
+.progress .emoji:hover,
+.progress .emoji:focus-visible {
+  filter: drop-shadow(0 0 5px rgba(242, 201, 76, 0.6));
+}
+
+.progress .emoji:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.progress .emoji.dance-now {
+  animation: emoji-dance-now 1.15s ease-in-out;
+}
+
+@keyframes emoji-dance-now {
   0%,
   100% {
     transform: rotate(-4deg) scale(1);
   }
-  4% {
-    transform: translateY(-3px) rotate(16deg) scale(1.12);
+  18% {
+    transform: translateY(-5px) rotate(20deg) scale(1.18);
   }
-  8% {
-    transform: translateY(1px) rotate(-18deg) scale(1.08);
+  36% {
+    transform: translateY(2px) rotate(-22deg) scale(1.1);
   }
-  12% {
-    transform: translateY(-2px) rotate(12deg) scale(1.14);
+  54% {
+    transform: translateY(-3px) rotate(16deg) scale(1.2);
   }
-  18%,
-  92% {
-    transform: rotate(-4deg) scale(1);
+  72% {
+    transform: translateY(1px) rotate(-10deg) scale(1.08);
   }
 }
 

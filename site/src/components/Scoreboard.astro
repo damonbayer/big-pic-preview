@@ -225,17 +225,17 @@ const editions = [...allGames].reverse();
         {
           meta.live ? (
             <span class="wrap">
-              <span class="emoji" aria-hidden="true">
+              <button class="emoji" type="button" aria-label="Make the popcorn dance">
                 &#127871;
-              </span>
+              </button>
               <strong>{totals.scoredCount}</strong> of {totals.movieCount} movies scored so far &mdash; fresh scores
               served daily around 2&nbsp;pm Pacific.
             </span>
           ) : (
             <span class="wrap">
-              <span class="emoji" aria-hidden="true">
+              <button class="emoji" type="button" aria-label="Make the clapperboard dance">
                 &#127916;
-              </span>{' '}
+              </button>{' '}
               That&rsquo;s a wrap! All movies have been scored.
             </span>
           )

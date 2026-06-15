@@ -135,6 +135,21 @@ if (badge) {
   badge.closest('.score-card')?.addEventListener('click', wiggle);
 }
 
+// ----- progress emoji dance -----
+// The emoji dances on load; later dances are user-triggered.
+for (const emoji of document.querySelectorAll<HTMLElement>('.progress .emoji')) {
+  const dance = () => {
+    emoji.classList.remove('dance-now');
+    void emoji.offsetWidth;
+    emoji.classList.add('dance-now');
+  };
+  dance();
+  emoji.addEventListener('click', dance);
+  emoji.addEventListener('animationend', (event) => {
+    if (event.animationName === 'emoji-dance-now') emoji.classList.remove('dance-now');
+  });
+}
+
 // ----- horizontal scroll shadows -----
 // Toggle edge shadows on the table card so the off-screen Points/Differential
 // columns are discoverable on narrow viewports.
