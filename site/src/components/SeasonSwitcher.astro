@@ -1,0 +1,37 @@
+---
+import type { GameData } from '../data/games';
+
+interface Props {
+  games: GameData[];
+  currentId: string;
+}
+
+const { games, currentId } = Astro.props;
+const base = import.meta.env.BASE_URL;
+function path(p: string): string {
+  return `${base}/${p}`.replace(/\/{2,}/g, '/');
+}
+function gameUrl(id: string): string {
+  return path(`games/${id}/`);
+}
+
+// Switcher lists every edition, most recent first.
+const editions = [...games].reverse();
+---
+
+{
+  editions.length > 1 && (
+    <nav class="seasons" aria-label="Choose an edition">
+      {editions.map((game) => (
+        <a
+          href={gameUrl(game.meta.id)}
+          class={`season-pill ${game.meta.id === currentId ? 'active' : ''}`}
+          aria-current={game.meta.id === currentId ? 'page' : undefined}
+        >
+          {`${game.meta.season} ${game.meta.year}`}
+          {game.meta.live && <span class="live-dot" aria-label="live" title="Live" />}
+        </a>
+      ))}
+    </nav>
+  )
+}

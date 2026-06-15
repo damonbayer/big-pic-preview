@@ -1,0 +1,36 @@
+:root {
+  /* Background green darkened to clear WCAG AA (≈4.7:1) for cream body text;
+     green-deep follows so the "+N AMANDA" chip and rule headings stay legible. */
+  --green: #137a49;
+  --green-deep: #0f6b40;
+  --green-accent: #1f9e68;
+  --green-accent-rgb: 31 158 104;
+  --ink: #142838;
+  --ink-soft: #1d3850;
+  --cream: #f4efe1;
+  --cream-dim: #e7e0c9;
+  --gold: #f2c94c;
+  --gold-deep: #c79a25;
+  --shadow: 0 10px 30px rgba(10, 25, 35, 0.35);
+  --page-text: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--green);
+}
+
+/* The glow blooms below the very top edge, so the page's top reads as
+   the flat --green that iOS paints in the rubber-band overscroll above it.
+   (iOS only fills overscroll with the root's solid color, never a gradient,
+   so a glow that bled to y=0 left a visible seam when pulling down.) */
+body {
+  margin: 0;
+  font-family: 'Archivo', system-ui, sans-serif;
+  color: var(--page-text);
+  min-height: 100vh;
+  background: radial-gradient(1100px 480px at 50% 360px, rgba(255, 255, 255, 0.12), transparent 70%), var(--green);
+}

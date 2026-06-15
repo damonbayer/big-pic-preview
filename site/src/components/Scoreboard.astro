@@ -1,17 +1,15 @@
 ---
 import '../styles/scoreboard.css';
+import EpisodeLinks from './EpisodeLinks.astro';
+import MovieCard from './MovieCard.astro';
+import PageHero from './PageHero.astro';
+import RulesPanel from './RulesPanel.astro';
+import ScoreSummary from './ScoreSummary.astro';
+import ScoreTable from './ScoreTable.astro';
+import SeasonSwitcher from './SeasonSwitcher.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import type { GameData } from '../data/games';
-import {
-  advantage as advantageOf,
-  boGuessTitle,
-  diffChip as diffChipOf,
-  fmtBO,
-  fmtDate,
-  fmtMeta,
-  metaGuessTitle,
-  ptsTitle,
-  ruleLines,
-} from '../lib/format';
+import { advantage as advantageOf, fmtDate } from '../lib/format';
 
 interface Props {
   game: GameData;
@@ -25,480 +23,64 @@ const base = import.meta.env.BASE_URL;
 function path(p: string): string {
   return `${base}/${p}`.replace(/\/{2,}/g, '/');
 }
-function gameUrl(id: string): string {
-  return path(`games/${id}/`);
-}
 
-// Golf-style editions (lowest total wins) flip every "who's ahead" decision.
 const lowerWins = meta.scoring.objective === 'low';
-
-// Bind the objective-dependent helpers to this game's direction so the markup
-// can keep calling them without repeating `lowerWins`.
-const advantage = (seanPts: number, amandaPts: number) => advantageOf(seanPts, amandaPts, lowerWins);
-
-const realizedScores = movies.flatMap((m) => [
-  ...(m.actualMeta === null ? [] : [m.sean.metaPts, m.amanda.metaPts]),
-  ...(m.actualBO === null ? [] : [m.sean.boPts, m.amanda.boPts]),
-]);
-const heatMin = realizedScores.length ? Math.min(...realizedScores) : 0;
-const heatMax = realizedScores.length ? Math.max(...realizedScores) : 0;
-const heatRange = heatMax - heatMin;
-const heat = (pts: number, actual: number | null): string | undefined => {
-  if (actual === null || realizedScores.length === 0) return undefined;
-  const intensity = heatRange === 0 ? 1 : Math.log1p(pts - heatMin) / Math.log1p(heatRange);
-  return `--heat: ${Math.max(0, Math.min(1, intensity)).toFixed(3)}`;
-};
-const heatLegendMin = Math.floor(heatMin / 10) * 10;
-const heatLegendMax = Math.ceil(heatMax / 10) * 10;
-
-const objectiveNote = lowerWins ? 'Lowest combined score wins.' : 'Most combined points wins.';
-const objectiveLabel = lowerWins ? 'Low score wins' : 'High score wins';
-const objectiveIcon = lowerWins ? '↓' : '↑';
-
-// The leader (who's winning) is objective-aware; the differential is a plain
-// Sean−Amanda point gap. They can point at different hosts in a golf-style game,
-// which is intended: the gap just reports the points, the badge says who's ahead.
-const overallAdv = advantage(totals.sean, totals.amanda);
-const leader = overallAdv === 0 ? null : overallAdv > 0 ? 'sean' : 'amanda';
-
-const overallDiff = totals.sean - totals.amanda;
-const overallGap = Math.abs(overallDiff);
-const overall =
-  overallDiff === 0
-    ? { text: 'All tied up', cls: 'tie' }
-    : overallDiff > 0
-      ? { text: `+${overallGap} Sean`, cls: 'sean' }
-      : { text: `+${overallGap} Amanda`, cls: 'amanda' };
-
-// Live games crown whoever is "in the lead"; finished games crown the "winner".
-const leadLabel = meta.live ? 'In the lead' : 'Winner';
+const overallAdvantage = advantageOf(totals.sean, totals.amanda, lowerWins);
+const leader = overallAdvantage === 0 ? null : overallAdvantage > 0 ? 'sean' : 'amanda';
 
 // The event title already carries the season (e.g. "Summer Movie Preview"), so
 // the year alone distinguishes editions without repeating the season.
 const pageTitle = `The Big Picture · ${meta.title} ${meta.year} Scoreboard`;
 const description = `Sean vs. Amanda: tracking box office and Metacritic predictions from The Big Picture's ${meta.title} ${meta.year}.`;
 
-// Absolute URLs for social/canonical tags (Astro.site is set in astro.config).
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const ogImage = new URL(path('og.png'), Astro.site).href;
-
 // Compact payload for the hover/click cards.
 const cardData = Object.fromEntries(
   movies
-    .filter((m) => m.tmdb)
-    .map((m) => [
-      m.title,
+    .filter((movie) => movie.tmdb)
+    .map((movie) => [
+      movie.title,
       {
-        poster: m.tmdb!.poster_url,
-        date: m.releaseDate ? `${fmtDate(m.releaseDate)}, ${m.releaseDate.slice(0, 4)}` : 'Release date TBD',
-        runtime: m.tmdb!.runtime,
-        genres: m.tmdb!.genres,
-        tagline: m.tmdb!.tagline,
-        overview: m.tmdb!.overview,
-        directors: m.tmdb!.directors,
-        cast: m.tmdb!.cast,
-        links: m.links,
+        poster: movie.tmdb!.poster_url,
+        date: movie.releaseDate
+          ? `${fmtDate(movie.releaseDate)}, ${movie.releaseDate.slice(0, 4)}`
+          : 'Release date TBD',
+        runtime: movie.tmdb!.runtime,
+        genres: movie.tmdb!.genres,
+        tagline: movie.tmdb!.tagline,
+        overview: movie.tmdb!.overview,
+        directors: movie.tmdb!.directors,
+        cast: movie.tmdb!.cast,
+        links: movie.links,
       },
     ]),
 );
-
-// Switcher lists every edition, most recent first.
-const editions = [...allGames].reverse();
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{pageTitle}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    <meta name="theme-color" content="#137a49" />
+<BaseLayout title={pageTitle} description={description} bodyCelebrate={!meta.live && leader !== null}>
+  <PageHero meta={meta} />
 
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="The Big Picture Scoreboard" />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="The Big Picture — Summer Movie Preview scoreboard" />
+  <div class="filmstrip" aria-hidden="true"></div>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={pageTitle} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+  <main>
+    <SeasonSwitcher games={allGames} currentId={meta.id} />
+    <ScoreSummary game={game} leader={leader} />
+    <EpisodeLinks episodes={meta.episodes} />
+    <RulesPanel scoring={meta.scoring} />
+    <ScoreTable game={game} />
+  </main>
 
-    <link rel="icon" href={path('favicon.svg')} type="image/svg+xml" />
-    <link rel="apple-touch-icon" href={path('apple-touch-icon.png')} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@400;600;700;900&family=Yellowtail&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body data-celebrate={!meta.live && leader ? '' : undefined}>
-    <header class="hero">
-      <p class="kicker">An unofficial scoreboard for The Ringer&rsquo;s</p>
-      <h1>
-        <span class="script">The</span>
-        <span class="slab"
-          ><span class="big">Big</span>
-          <span class="picture">Picture</span></span
-        >
-      </h1>
-      <p class="event">{meta.title}</p>
-      <p class="edition">{meta.year}</p>
-      <svg class="projector" viewBox="0 0 200 110" aria-hidden="true">
-        <g fill="var(--ink)">
-          <circle cx="62" cy="38" r="34"></circle>
-          <circle cx="138" cy="38" r="34"></circle>
-          <rect x="42" y="64" width="116" height="34" rx="6"></rect>
-          <polygon points="158,72 186,64 186,98 158,90"></polygon>
-          <rect x="20" y="76" width="26" height="14" rx="4"></rect>
-        </g>
-        <g fill="var(--gold)">
-          <g class="reel reel-left">
-            <circle cx="62" cy="24" r="6.5"></circle>
-            <circle cx="62" cy="52" r="6.5"></circle>
-            <circle cx="48" cy="38" r="6.5"></circle>
-            <circle cx="76" cy="38" r="6.5"></circle>
-          </g>
-          <g class="reel reel-right">
-            <circle cx="138" cy="24" r="6.5"></circle>
-            <circle cx="138" cy="52" r="6.5"></circle>
-            <circle cx="124" cy="38" r="6.5"></circle>
-            <circle cx="152" cy="38" r="6.5"></circle>
-          </g>
-        </g>
-        <rect x="52" y="74" width="58" height="6" rx="3" fill="var(--green)"></rect>
-      </svg>
-    </header>
+  <div class="filmstrip" aria-hidden="true"></div>
 
-    <div class="filmstrip" aria-hidden="true"></div>
+  <footer>
+    <p class="meta-link">
+      <a href={path('colophon')}>Colophon &amp; credits</a>
+    </p>
+  </footer>
 
-    <main>
-      {
-        editions.length > 1 && (
-          <nav class="seasons" aria-label="Choose an edition">
-            {editions.map((g) => (
-              <a
-                href={gameUrl(g.meta.id)}
-                class={`season-pill ${g.meta.id === meta.id ? 'active' : ''}`}
-                aria-current={g.meta.id === meta.id ? 'page' : undefined}
-              >
-                {g.meta.season} {g.meta.year}
-                {g.meta.live && <span class="live-dot" aria-label="live" title="Live" />}
-              </a>
-            ))}
-          </nav>
-        )
-      }
+  <MovieCard cardData={cardData} />
 
-      <section class="scoreboard" aria-label="Season totals">
-        <div class={`score-card sean ${leader === 'sean' ? 'leading' : ''}`}>
-          {leader === 'sean' && <span class="badge">★ {leadLabel}</span>}
-          <span class="host">Sean</span>
-          <span class="points">{totals.sean}</span>
-          <span class="pts-label">points</span>
-        </div>
-        <div class="vs">
-          <span>VS</span>
-        </div>
-        <div class={`score-card amanda ${leader === 'amanda' ? 'leading' : ''}`}>
-          {leader === 'amanda' && <span class="badge">★ {leadLabel}</span>}
-          <span class="host">Amanda</span>
-          <span class="points">{totals.amanda}</span>
-          <span class="pts-label">points</span>
-        </div>
-      </section>
-
-      <p class={`objective ${lowerWins ? 'low' : 'high'}`}>
-        <span class="objective-icon" aria-hidden="true">{objectiveIcon}</span>
-        {objectiveLabel}
-      </p>
-
-      <p class="progress">
-        {
-          meta.live ? (
-            <span class="wrap">
-              <button class="emoji" type="button" aria-label="Make the popcorn dance">
-                &#127871;
-              </button>
-              <strong>{totals.scoredCount}</strong> of {totals.movieCount} movies scored so far &mdash; fresh scores
-              served daily around 2&nbsp;pm Pacific.
-            </span>
-          ) : (
-            <span class="wrap">
-              <button class="emoji" type="button" aria-label="Make the clapperboard dance">
-                &#127916;
-              </button>{' '}
-              That&rsquo;s a wrap! All movies have been scored.
-            </span>
-          )
-        }
-      </p>
-
-      {
-        meta.episodes.length > 0 && (
-          <nav class="episodes" aria-label="Listen to the episodes">
-            {meta.episodes.map((ep) => (
-              <a href={ep.url}>
-                <span class="episode-emoji" aria-hidden="true">
-                  &#127911;
-                </span>{' '}
-                Listen: {ep.label}
-              </a>
-            ))}
-          </nav>
-        )
-      }
-
-      <details class="rules">
-        <summary>How the scoring works</summary>
-        <div class="rules-body">
-          <div>
-            <h3>Domestic box office</h3>
-            <ul>
-              {
-                ruleLines(meta.scoring.boxOffice, 'bo').map((rule) => (
-                  <li>
-                    {rule.label} &rarr; <strong>{rule.pts}</strong>
-                  </li>
-                ))
-              }
-            </ul>
-          </div>
-          <div>
-            <h3>Metacritic score</h3>
-            <ul>
-              {
-                ruleLines(meta.scoring.metacritic, 'meta').map((rule) => (
-                  <li>
-                    {rule.label} &rarr; <strong>{rule.pts}</strong>
-                  </li>
-                ))
-              }
-            </ul>
-          </div>
-          <p class="rules-note">{objectiveNote}</p>
-        </div>
-      </details>
-
-      <section class="table-card">
-        {
-          realizedScores.length > 0 && (
-            <div class="heat-key" aria-label="Green highlight key">
-              <span class="heat-ramp" aria-hidden="true" />
-              <span>{heatLegendMin} pts</span>
-              <span class="heat-key-arrow" aria-hidden="true">
-                &rarr;
-              </span>
-              <span>{heatLegendMax} pts</span>
-            </div>
-          )
-        }
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr class="groups">
-                <th rowspan="2" class="movie-col"
-                  ><button class="sort-btn" data-col="0" aria-label="Sort by movie title">Movie</button></th
-                >
-                <th rowspan="2" aria-sort="ascending"
-                  ><button class="sort-btn" data-col="1" aria-label="Sort by release date">Release</button></th
-                >
-                <th colspan="3" class="group">Metacritic</th>
-                <th colspan="3" class="group">Box Office</th>
-                <th colspan="2" class="group">Points</th>
-                <th rowspan="2"
-                  ><button class="sort-btn" data-col="10" aria-label="Sort by differential">Differential</button></th
-                >
-              </tr>
-              <tr class="subs">
-                <th
-                  ><button class="sort-btn" data-col="2" aria-label="Sort by Sean's Metacritic prediction">Sean</button
-                  ></th
-                >
-                <th
-                  ><button class="sort-btn" data-col="3" aria-label="Sort by Amanda's Metacritic prediction"
-                    >Amanda</button
-                  ></th
-                >
-                <th class="actual"
-                  ><button class="sort-btn" data-col="4" aria-label="Sort by actual Metacritic score">Actual</button
-                  ></th
-                >
-                <th
-                  ><button class="sort-btn" data-col="5" aria-label="Sort by Sean's box office prediction">Sean</button
-                  ></th
-                >
-                <th
-                  ><button class="sort-btn" data-col="6" aria-label="Sort by Amanda's box office prediction"
-                    >Amanda</button
-                  ></th
-                >
-                <th class="actual"
-                  ><button class="sort-btn" data-col="7" aria-label="Sort by actual box office">Actual</button></th
-                >
-                <th><button class="sort-btn" data-col="8" aria-label="Sort by Sean's points">Sean</button></th>
-                <th><button class="sort-btn" data-col="9" aria-label="Sort by Amanda's points">Amanda</button></th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                movies.map((m) => {
-                  const chip = diffChipOf(m);
-                  const adv = m.scored ? advantage(m.sean.totalPts, m.amanda.totalPts) : 0;
-                  return (
-                    <tr class={m.scored ? '' : 'pending'}>
-                      <td class="movie-col" data-sort={m.title.toLowerCase()}>
-                        <button class="movie-btn" type="button" data-title={m.title}>
-                          {m.title}
-                        </button>
-                      </td>
-                      <td class="date" data-sort={m.releaseDate ?? ''}>
-                        {fmtDate(m.releaseDate)}
-                      </td>
-                      <td
-                        class="num"
-                        style={heat(m.sean.metaPts, m.actualMeta)}
-                        data-sort={m.sean.metaPred}
-                        title={metaGuessTitle(m.sean.metaPred, m.actualMeta, m.sean.metaPts)}
-                      >
-                        {fmtMeta(m.sean.metaPred)}
-                      </td>
-                      <td
-                        class="num"
-                        style={heat(m.amanda.metaPts, m.actualMeta)}
-                        data-sort={m.amanda.metaPred}
-                        title={metaGuessTitle(m.amanda.metaPred, m.actualMeta, m.amanda.metaPts)}
-                      >
-                        {fmtMeta(m.amanda.metaPred)}
-                      </td>
-                      <td class="num actual" data-sort={m.actualMeta ?? ''}>
-                        {m.links.metacritic ? (
-                          <a
-                            class="actual-link"
-                            href={m.links.metacritic}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={`${m.title}: Metacritic ${fmtMeta(m.actualMeta)} — opens Metacritic in a new tab`}
-                          >
-                            {fmtMeta(m.actualMeta)}
-                          </a>
-                        ) : (
-                          fmtMeta(m.actualMeta)
-                        )}
-                      </td>
-                      <td
-                        class="num"
-                        style={heat(m.sean.boPts, m.actualBO)}
-                        data-sort={m.sean.boPred}
-                        title={boGuessTitle(m.sean.boPred, m.actualBO, m.sean.boPts)}
-                      >
-                        {fmtBO(m.sean.boPred)}
-                      </td>
-                      <td
-                        class="num"
-                        style={heat(m.amanda.boPts, m.actualBO)}
-                        data-sort={m.amanda.boPred}
-                        title={boGuessTitle(m.amanda.boPred, m.actualBO, m.amanda.boPts)}
-                      >
-                        {fmtBO(m.amanda.boPred)}
-                      </td>
-                      <td class="num actual" data-sort={m.actualBO ?? ''}>
-                        {m.links.boxOffice ? (
-                          <a
-                            class="actual-link"
-                            href={m.links.boxOffice}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={`${m.title}: box office ${fmtBO(m.actualBO)} — opens Box Office Mojo in a new tab`}
-                          >
-                            {fmtBO(m.actualBO)}
-                          </a>
-                        ) : (
-                          fmtBO(m.actualBO)
-                        )}
-                      </td>
-                      <td
-                        class={`num pts ${adv > 0 ? 'win' : ''}`}
-                        title={ptsTitle(m.sean, m.scored)}
-                        data-sort={m.scored ? m.sean.totalPts : ''}
-                      >
-                        {m.scored ? m.sean.totalPts : '—'}
-                      </td>
-                      <td
-                        class={`num pts ${adv < 0 ? 'win' : ''}`}
-                        title={ptsTitle(m.amanda, m.scored)}
-                        data-sort={m.scored ? m.amanda.totalPts : ''}
-                      >
-                        {m.scored ? m.amanda.totalPts : '—'}
-                      </td>
-                      <td class="diff" data-sort={m.scored ? m.diff : ''}>
-                        <span class={`chip ${chip.cls}`}>{chip.text}</span>
-                      </td>
-                    </tr>
-                  );
-                })
-              }
-            </tbody>
-            <tfoot>
-              <tr>
-                <td class="movie-col">Totals</td>
-                <td colspan="7"></td>
-                <td class="num pts">{totals.sean}</td>
-                <td class="num pts">{totals.amanda}</td>
-                <td class="diff"><span class={`chip ${overall.cls}`}>{overall.text}</span></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </section>
-    </main>
-
-    <div class="filmstrip" aria-hidden="true"></div>
-
-    <footer>
-      <p class="meta-link">
-        <a href={path('colophon')}>Colophon &amp; credits</a>
-      </p>
-    </footer>
-
-    <div id="movie-card" hidden>
-      <img id="card-poster" alt="" loading="lazy" />
-      <div class="card-body">
-        <h2 id="card-title"></h2>
-        <p id="card-meta" class="card-meta"></p>
-        <p id="card-tagline" class="card-tagline"></p>
-        <p id="card-overview" class="card-overview"></p>
-        <p id="card-credits" class="card-credits"></p>
-        <p id="card-links" class="card-links">
-          <a id="card-link-tmdb" target="_blank" rel="noopener noreferrer" aria-label="TMDB — opens in a new tab"
-            >TMDB</a
-          >
-          <a id="card-link-imdb" target="_blank" rel="noopener noreferrer" aria-label="IMDb — opens in a new tab"
-            >IMDb</a
-          >
-          <a
-            id="card-link-letterboxd"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Letterboxd — opens in a new tab">Letterboxd</a
-          >
-        </p>
-      </div>
-    </div>
-
-    <script type="application/json" id="movie-data" set:html={JSON.stringify(cardData)} />
-
-    <script>
-      import '../scripts/scoreboard.ts';
-      import '../scripts/confetti.ts';
-    </script>
-  </body>
-</html>
+  <script>
+    import '../scripts/scoreboard.ts';
+    import '../scripts/confetti.ts';
+  </script>
+</BaseLayout>

@@ -168,28 +168,62 @@ if (scroller && tableCard) {
 
 // ----- column sorting -----
 const tbody = document.querySelector('tbody')!;
+type SortKey =
+  | 'movieTitle'
+  | 'releaseDate'
+  | 'seanMeta'
+  | 'amandaMeta'
+  | 'actualMeta'
+  | 'seanBoxOffice'
+  | 'amandaBoxOffice'
+  | 'actualBoxOffice'
+  | 'seanPoints'
+  | 'amandaPoints'
+  | 'diff';
+
+const SORT_DATASET_KEYS: Record<SortKey, string> = {
+  movieTitle: 'sortMovieTitle',
+  releaseDate: 'sortReleaseDate',
+  seanMeta: 'sortSeanMeta',
+  amandaMeta: 'sortAmandaMeta',
+  actualMeta: 'sortActualMeta',
+  seanBoxOffice: 'sortSeanBoxOffice',
+  amandaBoxOffice: 'sortAmandaBoxOffice',
+  actualBoxOffice: 'sortActualBoxOffice',
+  seanPoints: 'sortSeanPoints',
+  amandaPoints: 'sortAmandaPoints',
+  diff: 'sortDiff',
+};
+const ASC_FIRST_SORT_KEYS = new Set<SortKey>(['movieTitle', 'releaseDate']);
+
+function isSortKey(key: string | undefined): key is SortKey {
+  return key !== undefined && key in SORT_DATASET_KEYS;
+}
+
 // The server renders rows sorted by release date ascending.
-let sortCol: number | null = 1;
+let activeSortKey: SortKey | null = 'releaseDate';
 let sortDir: 'asc' | 'desc' = 'asc';
 
-function sortKey(row: HTMLTableRowElement, col: number): string {
-  const cell = row.cells[col];
-  return cell.dataset.sort ?? cell.textContent!.trim();
+function sortValue(row: HTMLTableRowElement, key: SortKey): string {
+  return row.dataset[SORT_DATASET_KEYS[key]] ?? '';
 }
 
 for (const btn of document.querySelectorAll<HTMLButtonElement>('.sort-btn')) {
   btn.addEventListener('click', () => {
-    const col = Number(btn.dataset.col);
+    const key = btn.dataset.sortKey;
+    if (!isSortKey(key)) {
+      throw new Error(`Sort button has an unknown data-sort-key: ${key ?? '(missing)'}`);
+    }
     // Text-ish columns sort ascending first, numeric ones biggest-first.
-    const firstDir = col <= 1 ? 'asc' : 'desc';
-    sortDir = sortCol === col ? (sortDir === 'asc' ? 'desc' : 'asc') : firstDir;
-    sortCol = col;
+    const firstDir = ASC_FIRST_SORT_KEYS.has(key) ? 'asc' : 'desc';
+    sortDir = activeSortKey === key ? (sortDir === 'asc' ? 'desc' : 'asc') : firstDir;
+    activeSortKey = key;
 
     const mult = sortDir === 'asc' ? 1 : -1;
     const rows = [...tbody.rows];
     rows.sort((a, b) => {
-      const ka = sortKey(a, col);
-      const kb = sortKey(b, col);
+      const ka = sortValue(a, key);
+      const kb = sortValue(b, key);
       if (ka === '' || kb === '') return (ka === '' ? 1 : 0) - (kb === '' ? 1 : 0);
       const na = Number(ka);
       const nb = Number(kb);

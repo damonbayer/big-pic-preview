@@ -1,0 +1,24 @@
+---
+import type { Episode } from '../data/games';
+
+interface Props {
+  episodes: Episode[];
+}
+
+const { episodes } = Astro.props;
+---
+
+{
+  episodes.length > 0 && (
+    <nav class="episodes" aria-label="Listen to the episodes">
+      {episodes.map((episode) => (
+        <a href={episode.url}>
+          <span class="episode-emoji" aria-hidden="true">
+            &#127911;
+          </span>{' '}
+          Listen: {episode.label}
+        </a>
+      ))}
+    </nav>
+  )
+}

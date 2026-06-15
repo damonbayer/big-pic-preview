@@ -1,240 +1,68 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/colophon.css';
+
 const base = import.meta.env.BASE_URL;
 const home = `${base}/`.replace('//', '/');
-const favicon = `${base}/favicon.svg`.replace('//', '/');
-const appleTouchIcon = `${base}/apple-touch-icon.png`.replace('//', '/');
 const repo = 'https://github.com/damonbayer/big-pic-preview';
 
 const title = 'Colophon · The Big Picture Summer Movie Preview Scoreboard';
 const description = 'How this site was made, who made it, and where to find the source.';
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const ogImage = new URL('og.png', Astro.site).href;
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    <meta name="theme-color" content="#137a49" />
+<BaseLayout title={title} description={description}>
+  <main>
+    <a class="back" href={home}>&larr; Back to the scoreboard</a>
+    <h1>Colophon</h1>
 
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="The Big Picture Scoreboard" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="The Big Picture — Summer Movie Preview scoreboard" />
+    <section>
+      <h2>What</h2>
+      <p>
+        This is an unofficial fan project for tracking The Big Picture&rsquo;s Summer Movie Preview game. It is not
+        affiliated with The Ringer or Spotify.
+      </p>
+    </section>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    <section>
+      <h2>Who</h2>
+      <p>
+        Built by <a href="https://damon.phd">Damon Bayer</a> &mdash; Follow me on <a
+          href="https://letterboxd.com/Damon/">Letterboxd</a
+        >.
+      </p>
+    </section>
 
-    <link rel="icon" href={favicon} type="image/svg+xml" />
-    <link rel="apple-touch-icon" href={appleTouchIcon} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@400;600;700;900&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <main>
-      <a class="back" href={home}>&larr; Back to the scoreboard</a>
-      <h1>Colophon</h1>
+    <section>
+      <h2>How</h2>
+      <p>
+        A static site built with <a href="https://astro.build">Astro</a> and deployed on GitHub Pages. Set in Alfa&nbsp;Slab&nbsp;One,
+        Archivo, and Yellowtail.
+      </p>
+      <p>
+        The code and data live on <a href={repo}>GitHub</a>.
+      </p>
+    </section>
 
-      <section>
-        <h2>What</h2>
-        <p>
-          This is an unofficial fan project for tracking The Big Picture&rsquo;s Summer Movie Preview game. It is not
-          affiliated with The Ringer or Spotify.
-        </p>
-      </section>
-
-      <section>
-        <h2>Who</h2>
-        <p>
-          Built by <a href="https://damon.phd">Damon Bayer</a> &mdash; Follow me on <a
-            href="https://letterboxd.com/Damon/">Letterboxd</a
-          >.
-        </p>
-      </section>
-
-      <section>
-        <h2>How</h2>
-        <p>
-          A static site built with <a href="https://astro.build">Astro</a> and deployed on GitHub Pages. Set in Alfa&nbsp;Slab&nbsp;One,
-          Archivo, and Yellowtail.
-        </p>
-        <p>
-          The code and data live on <a href={repo}>GitHub</a>.
-        </p>
-      </section>
-
-      <section>
-        <h2>Data Sources</h2>
-        <p>The predictions are transcribed by hand into tidy CSVs for each edition.</p>
-        <p>Domestic box office comes from Box Office Mojo. Review scores come from Metacritic.</p>
-        <p class="tmdb-attr">
-          Movie details and posters provided by
-          <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">
-            <img
-              class="tmdb-logo"
-              src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg"
-              alt="The Movie Database (TMDB)"
-              width="300"
-              height="22"
-              loading="lazy"
-            />
-          </a>
-        </p>
-        <p class="tmdb-note">
-          This website uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.
-        </p>
-      </section>
-    </main>
-
-    <style is:global>
-      :root {
-        /* Matches the scoreboard's AA-compliant green so cream body text and
-           links stay legible on the page background. */
-        --green: #137a49;
-        --ink: #142838;
-        --cream: #f4efe1;
-        --gold: #f2c94c;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      html {
-        background: var(--green);
-      }
-
-      /* The glow blooms below the very top edge, so the page's top reads as
-         the flat --green that iOS paints in the rubber-band overscroll above it.
-         (iOS only fills overscroll with the root's solid color, never a gradient,
-         so a glow that bled to y=0 left a visible seam when pulling down.) */
-      body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: 'Archivo', system-ui, sans-serif;
-        color: var(--cream);
-        background:
-          radial-gradient(1100px 480px at 50% 360px, rgba(255, 255, 255, 0.12), transparent 70%), var(--green);
-      }
-
-      main {
-        max-width: 640px;
-        margin: 0 auto;
-        padding: 56px 20px 80px;
-      }
-
-      .back {
-        display: inline-block;
-        margin-bottom: 28px;
-        color: var(--cream);
-        text-decoration: none;
-        font-size: 0.85rem;
-        font-weight: 600;
-      }
-
-      .back:hover,
-      .back:focus-visible {
-        color: var(--gold);
-      }
-
-      h1 {
-        font-family: 'Alfa Slab One', serif;
-        font-size: clamp(2.2rem, 7vw, 3.2rem);
-        margin: 0 0 24px;
-        color: var(--gold);
-        text-shadow: 2px 2px 0 var(--ink);
-      }
-
-      section {
-        margin-bottom: 26px;
-      }
-
-      h2 {
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        /* Cream at this small size; gold only clears AA on green at display sizes. */
-        color: var(--cream);
-        margin: 0 0 6px;
-      }
-
-      p {
-        margin: 0 0 8px;
-        line-height: 1.6;
-        font-size: 0.98rem;
-      }
-
-      ul {
-        margin: 10px 0 0;
-        padding-left: 1.2rem;
-        line-height: 1.55;
-      }
-
-      li {
-        margin-bottom: 8px;
-      }
-
-      li::marker {
-        color: var(--gold);
-      }
-
-      .tmdb-attr {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 14px;
-      }
-
-      /* The logo's wordmark is dark navy, so sit it on a light chip for
-         contrast against the green page (per TMDB's attribution guidance). */
-      .tmdb-attr a {
-        display: inline-flex;
-        align-items: center;
-        background: var(--cream);
-        padding: 6px 10px;
-        border-radius: 8px;
-      }
-
-      .tmdb-logo {
-        display: block;
-        height: 19px;
-        width: auto;
-      }
-
-      .tmdb-note {
-        font-size: 0.8rem;
-        margin-top: 10px;
-      }
-
-      /* Cream link text with a gold underline: keeps AA on green while the
-         underline preserves the gold link accent. */
-      a {
-        color: var(--cream);
-        font-weight: 700;
-        text-decoration-color: var(--gold);
-        text-underline-offset: 2px;
-      }
-
-      a:hover,
-      a:focus-visible {
-        color: var(--gold);
-      }
-    </style>
-  </body>
-</html>
+    <section>
+      <h2>Data Sources</h2>
+      <p>The predictions are transcribed by hand into tidy CSVs for each edition.</p>
+      <p>Domestic box office comes from Box Office Mojo. Review scores come from Metacritic.</p>
+      <p class="tmdb-attr">
+        Movie details and posters provided by
+        <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">
+          <img
+            class="tmdb-logo"
+            src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg"
+            alt="The Movie Database (TMDB)"
+            width="300"
+            height="22"
+            loading="lazy"
+          />
+        </a>
+      </p>
+      <p class="tmdb-note">
+        This website uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.
+      </p>
+    </section>
+  </main>
+</BaseLayout>

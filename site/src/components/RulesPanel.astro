@@ -1,0 +1,42 @@
+---
+import type { ScoringRules } from '../data/games';
+import { ruleLines } from '../lib/format';
+
+interface Props {
+  scoring: ScoringRules;
+}
+
+const { scoring } = Astro.props;
+const objectiveNote = scoring.objective === 'low' ? 'Lowest combined score wins.' : 'Most combined points wins.';
+---
+
+<details class="rules">
+  <summary>How the scoring works</summary>
+  <div class="rules-body">
+    <div>
+      <h3>Domestic box office</h3>
+      <ul>
+        {
+          ruleLines(scoring.boxOffice, 'bo').map((rule) => (
+            <li>
+              {rule.label} &rarr; <strong>{rule.pts}</strong>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div>
+      <h3>Metacritic score</h3>
+      <ul>
+        {
+          ruleLines(scoring.metacritic, 'meta').map((rule) => (
+            <li>
+              {rule.label} &rarr; <strong>{rule.pts}</strong>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <p class="rules-note">{objectiveNote}</p>
+  </div>
+</details>

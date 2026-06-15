@@ -1,0 +1,30 @@
+---
+interface Props {
+  cardData: Record<string, unknown>;
+}
+
+const { cardData } = Astro.props;
+---
+
+<div id="movie-card" hidden>
+  <img id="card-poster" alt="" loading="lazy" />
+  <div class="card-body">
+    <h2 id="card-title"></h2>
+    <p id="card-meta" class="card-meta"></p>
+    <p id="card-tagline" class="card-tagline"></p>
+    <p id="card-overview" class="card-overview"></p>
+    <p id="card-credits" class="card-credits"></p>
+    <p id="card-links" class="card-links">
+      <a id="card-link-tmdb" target="_blank" rel="noopener noreferrer" aria-label="TMDB — opens in a new tab">TMDB</a>
+      <a id="card-link-imdb" target="_blank" rel="noopener noreferrer" aria-label="IMDb — opens in a new tab">IMDb</a>
+      <a
+        id="card-link-letterboxd"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Letterboxd — opens in a new tab">Letterboxd</a
+      >
+    </p>
+  </div>
+</div>
+
+<script type="application/json" id="movie-data" set:html={JSON.stringify(cardData)} />

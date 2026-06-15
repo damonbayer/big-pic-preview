@@ -1,0 +1,46 @@
+---
+import type { GameMeta } from '../data/games';
+
+interface Props {
+  meta: GameMeta;
+}
+
+const { meta } = Astro.props;
+---
+
+<header class="hero">
+  <p class="kicker">An unofficial scoreboard for The Ringer&rsquo;s</p>
+  <h1>
+    <span class="script">The</span>
+    <span class="slab"
+      ><span class="big">Big</span>
+      <span class="picture">Picture</span></span
+    >
+  </h1>
+  <p class="event">{meta.title}</p>
+  <p class="edition">{meta.year}</p>
+  <svg class="projector" viewBox="0 0 200 110" aria-hidden="true">
+    <g fill="var(--ink)">
+      <circle cx="62" cy="38" r="34"></circle>
+      <circle cx="138" cy="38" r="34"></circle>
+      <rect x="42" y="64" width="116" height="34" rx="6"></rect>
+      <polygon points="158,72 186,64 186,98 158,90"></polygon>
+      <rect x="20" y="76" width="26" height="14" rx="4"></rect>
+    </g>
+    <g fill="var(--gold)">
+      <g class="reel reel-left">
+        <circle cx="62" cy="24" r="6.5"></circle>
+        <circle cx="62" cy="52" r="6.5"></circle>
+        <circle cx="48" cy="38" r="6.5"></circle>
+        <circle cx="76" cy="38" r="6.5"></circle>
+      </g>
+      <g class="reel reel-right">
+        <circle cx="138" cy="24" r="6.5"></circle>
+        <circle cx="138" cy="52" r="6.5"></circle>
+        <circle cx="124" cy="38" r="6.5"></circle>
+        <circle cx="152" cy="38" r="6.5"></circle>
+      </g>
+    </g>
+    <rect x="52" y="74" width="58" height="6" rx="3" fill="var(--green)"></rect>
+  </svg>
+</header>

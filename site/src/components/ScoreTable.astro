@@ -1,0 +1,227 @@
+---
+import type { GameData } from '../data/games';
+import {
+  advantage as advantageOf,
+  boGuessTitle,
+  diffChip as diffChipOf,
+  fmtBO,
+  fmtDate,
+  fmtMeta,
+  metaGuessTitle,
+  ptsTitle,
+} from '../lib/format';
+
+interface Props {
+  game: GameData;
+}
+
+const { game } = Astro.props;
+const { meta, movies, totals } = game;
+const lowerWins = meta.scoring.objective === 'low';
+const advantage = (seanPts: number, amandaPts: number) => advantageOf(seanPts, amandaPts, lowerWins);
+
+const realizedScores = movies.flatMap((movie) => [
+  ...(movie.actualMeta === null ? [] : [movie.sean.metaPts, movie.amanda.metaPts]),
+  ...(movie.actualBO === null ? [] : [movie.sean.boPts, movie.amanda.boPts]),
+]);
+const heatMin = realizedScores.length ? Math.min(...realizedScores) : 0;
+const heatMax = realizedScores.length ? Math.max(...realizedScores) : 0;
+const heatRange = heatMax - heatMin;
+const heat = (pts: number, actual: number | null): string | undefined => {
+  if (actual === null || realizedScores.length === 0) return undefined;
+  const intensity = heatRange === 0 ? 1 : Math.log1p(pts - heatMin) / Math.log1p(heatRange);
+  return `--heat: ${Math.max(0, Math.min(1, intensity)).toFixed(3)}`;
+};
+const heatLegendMin = Math.floor(heatMin / 10) * 10;
+const heatLegendMax = Math.ceil(heatMax / 10) * 10;
+
+const overallDiff = totals.sean - totals.amanda;
+const overallGap = Math.abs(overallDiff);
+const overall =
+  overallDiff === 0
+    ? { text: 'All tied up', cls: 'tie' }
+    : overallDiff > 0
+      ? { text: `+${overallGap} Sean`, cls: 'sean' }
+      : { text: `+${overallGap} Amanda`, cls: 'amanda' };
+---
+
+<section class="table-card">
+  {
+    realizedScores.length > 0 && (
+      <div class="heat-key" aria-label="Green highlight key">
+        <span class="heat-ramp" aria-hidden="true" />
+        <span>{heatLegendMin} pts</span>
+        <span class="heat-key-arrow" aria-hidden="true">
+          &rarr;
+        </span>
+        <span>{heatLegendMax} pts</span>
+      </div>
+    )
+  }
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr class="groups">
+          <th rowspan="2" class="movie-col"
+            ><button class="sort-btn" data-sort-key="movieTitle" aria-label="Sort by movie title">Movie</button></th
+          >
+          <th rowspan="2" aria-sort="ascending"
+            ><button class="sort-btn" data-sort-key="releaseDate" aria-label="Sort by release date">Release</button></th
+          >
+          <th colspan="3" class="group">Metacritic</th>
+          <th colspan="3" class="group">Box Office</th>
+          <th colspan="2" class="group">Points</th>
+          <th rowspan="2"
+            ><button class="sort-btn" data-sort-key="diff" aria-label="Sort by differential">Differential</button></th
+          >
+        </tr>
+        <tr class="subs">
+          <th
+            ><button class="sort-btn" data-sort-key="seanMeta" aria-label="Sort by Sean's Metacritic prediction"
+              >Sean</button
+            ></th
+          >
+          <th
+            ><button class="sort-btn" data-sort-key="amandaMeta" aria-label="Sort by Amanda's Metacritic prediction"
+              >Amanda</button
+            ></th
+          >
+          <th class="actual"
+            ><button class="sort-btn" data-sort-key="actualMeta" aria-label="Sort by actual Metacritic score"
+              >Actual</button
+            ></th
+          >
+          <th
+            ><button class="sort-btn" data-sort-key="seanBoxOffice" aria-label="Sort by Sean's box office prediction"
+              >Sean</button
+            ></th
+          >
+          <th
+            ><button
+              class="sort-btn"
+              data-sort-key="amandaBoxOffice"
+              aria-label="Sort by Amanda's box office prediction">Amanda</button
+            ></th
+          >
+          <th class="actual"
+            ><button class="sort-btn" data-sort-key="actualBoxOffice" aria-label="Sort by actual box office"
+              >Actual</button
+            ></th
+          >
+          <th><button class="sort-btn" data-sort-key="seanPoints" aria-label="Sort by Sean's points">Sean</button></th>
+          <th
+            ><button class="sort-btn" data-sort-key="amandaPoints" aria-label="Sort by Amanda's points">Amanda</button
+            ></th
+          >
+        </tr>
+      </thead>
+      <tbody>
+        {
+          movies.map((movie) => {
+            const chip = diffChipOf(movie);
+            const adv = movie.scored ? advantage(movie.sean.totalPts, movie.amanda.totalPts) : 0;
+            return (
+              <tr
+                class={movie.scored ? '' : 'pending'}
+                data-sort-movie-title={movie.title.toLowerCase()}
+                data-sort-release-date={movie.releaseDate ?? ''}
+                data-sort-sean-meta={movie.sean.metaPred}
+                data-sort-amanda-meta={movie.amanda.metaPred}
+                data-sort-actual-meta={movie.actualMeta ?? ''}
+                data-sort-sean-box-office={movie.sean.boPred}
+                data-sort-amanda-box-office={movie.amanda.boPred}
+                data-sort-actual-box-office={movie.actualBO ?? ''}
+                data-sort-sean-points={movie.scored ? movie.sean.totalPts : ''}
+                data-sort-amanda-points={movie.scored ? movie.amanda.totalPts : ''}
+                data-sort-diff={movie.scored ? movie.diff : ''}
+              >
+                <td class="movie-col">
+                  <button class="movie-btn" type="button" data-title={movie.title}>
+                    {movie.title}
+                  </button>
+                </td>
+                <td class="date">{fmtDate(movie.releaseDate)}</td>
+                <td
+                  class="num"
+                  style={heat(movie.sean.metaPts, movie.actualMeta)}
+                  title={metaGuessTitle(movie.sean.metaPred, movie.actualMeta, movie.sean.metaPts)}
+                >
+                  {fmtMeta(movie.sean.metaPred)}
+                </td>
+                <td
+                  class="num"
+                  style={heat(movie.amanda.metaPts, movie.actualMeta)}
+                  title={metaGuessTitle(movie.amanda.metaPred, movie.actualMeta, movie.amanda.metaPts)}
+                >
+                  {fmtMeta(movie.amanda.metaPred)}
+                </td>
+                <td class="num actual">
+                  {movie.links.metacritic ? (
+                    <a
+                      class="actual-link"
+                      href={movie.links.metacritic}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${movie.title}: Metacritic ${fmtMeta(movie.actualMeta)} — opens Metacritic in a new tab`}
+                    >
+                      {fmtMeta(movie.actualMeta)}
+                    </a>
+                  ) : (
+                    fmtMeta(movie.actualMeta)
+                  )}
+                </td>
+                <td
+                  class="num"
+                  style={heat(movie.sean.boPts, movie.actualBO)}
+                  title={boGuessTitle(movie.sean.boPred, movie.actualBO, movie.sean.boPts)}
+                >
+                  {fmtBO(movie.sean.boPred)}
+                </td>
+                <td
+                  class="num"
+                  style={heat(movie.amanda.boPts, movie.actualBO)}
+                  title={boGuessTitle(movie.amanda.boPred, movie.actualBO, movie.amanda.boPts)}
+                >
+                  {fmtBO(movie.amanda.boPred)}
+                </td>
+                <td class="num actual">
+                  {movie.links.boxOffice ? (
+                    <a
+                      class="actual-link"
+                      href={movie.links.boxOffice}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${movie.title}: box office ${fmtBO(movie.actualBO)} — opens Box Office Mojo in a new tab`}
+                    >
+                      {fmtBO(movie.actualBO)}
+                    </a>
+                  ) : (
+                    fmtBO(movie.actualBO)
+                  )}
+                </td>
+                <td class={`num pts ${adv > 0 ? 'win' : ''}`} title={ptsTitle(movie.sean, movie.scored)}>
+                  {movie.scored ? movie.sean.totalPts : '—'}
+                </td>
+                <td class={`num pts ${adv < 0 ? 'win' : ''}`} title={ptsTitle(movie.amanda, movie.scored)}>
+                  {movie.scored ? movie.amanda.totalPts : '—'}
+                </td>
+                <td class="diff">
+                  <span class={`chip ${chip.cls}`}>{chip.text}</span>
+                </td>
+              </tr>
+            );
+          })
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="movie-col">Totals</td>
+          <td colspan="7"></td>
+          <td class="num pts">{totals.sean}</td>
+          <td class="num pts">{totals.amanda}</td>
+          <td class="diff"><span class={`chip ${overall.cls}`}>{overall.text}</span></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</section>

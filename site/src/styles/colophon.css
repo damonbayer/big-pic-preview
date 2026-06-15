@@ -1,0 +1,107 @@
+:root {
+  --page-text: var(--cream);
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 56px 20px 80px;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 28px;
+  color: var(--cream);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.back:hover,
+.back:focus-visible {
+  color: var(--gold);
+}
+
+h1 {
+  font-family: 'Alfa Slab One', serif;
+  font-size: clamp(2.2rem, 7vw, 3.2rem);
+  margin: 0 0 24px;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+section {
+  margin-bottom: 26px;
+}
+
+h2 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  /* Cream at this small size; gold only clears AA on green at display sizes. */
+  color: var(--cream);
+  margin: 0 0 6px;
+}
+
+p {
+  margin: 0 0 8px;
+  line-height: 1.6;
+  font-size: 0.98rem;
+}
+
+ul {
+  margin: 10px 0 0;
+  padding-left: 1.2rem;
+  line-height: 1.55;
+}
+
+li {
+  margin-bottom: 8px;
+}
+
+li::marker {
+  color: var(--gold);
+}
+
+.tmdb-attr {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* The logo's wordmark is dark navy, so sit it on a light chip for
+   contrast against the green page (per TMDB's attribution guidance). */
+.tmdb-attr a {
+  display: inline-flex;
+  align-items: center;
+  background: var(--cream);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.tmdb-logo {
+  display: block;
+  height: 19px;
+  width: auto;
+}
+
+.tmdb-note {
+  font-size: 0.8rem;
+  margin-top: 10px;
+}
+
+/* Cream link text with a gold underline: keeps AA on green while the
+   underline preserves the gold link accent. */
+a {
+  color: var(--cream);
+  font-weight: 700;
+  text-decoration-color: var(--gold);
+  text-underline-offset: 2px;
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--gold);
+}

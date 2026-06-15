@@ -1,0 +1,59 @@
+---
+import type { GameData } from '../data/games';
+
+interface Props {
+  game: GameData;
+  leader: 'sean' | 'amanda' | null;
+}
+
+const { game, leader } = Astro.props;
+const { meta, totals } = game;
+const lowerWins = meta.scoring.objective === 'low';
+const leadLabel = meta.live ? 'In the lead' : 'Winner';
+const objectiveLabel = lowerWins ? 'Low score wins' : 'High score wins';
+const objectiveIcon = lowerWins ? '↓' : '↑';
+---
+
+<section class="scoreboard" aria-label="Season totals">
+  <div class={`score-card sean ${leader === 'sean' ? 'leading' : ''}`}>
+    {leader === 'sean' && <span class="badge">★ {leadLabel}</span>}
+    <span class="host">Sean</span>
+    <span class="points">{totals.sean}</span>
+    <span class="pts-label">points</span>
+  </div>
+  <div class="vs">
+    <span>VS</span>
+  </div>
+  <div class={`score-card amanda ${leader === 'amanda' ? 'leading' : ''}`}>
+    {leader === 'amanda' && <span class="badge">★ {leadLabel}</span>}
+    <span class="host">Amanda</span>
+    <span class="points">{totals.amanda}</span>
+    <span class="pts-label">points</span>
+  </div>
+</section>
+
+<p class={`objective ${lowerWins ? 'low' : 'high'}`}>
+  <span class="objective-icon" aria-hidden="true">{objectiveIcon}</span>
+  {objectiveLabel}
+</p>
+
+<p class="progress">
+  {
+    meta.live ? (
+      <span class="wrap">
+        <button class="emoji" type="button" aria-label="Make the popcorn dance">
+          &#127871;
+        </button>
+        <strong>{totals.scoredCount}</strong> of {totals.movieCount} movies scored so far &mdash; fresh scores served
+        daily around 2&nbsp;pm Pacific.
+      </span>
+    ) : (
+      <span class="wrap">
+        <button class="emoji" type="button" aria-label="Make the clapperboard dance">
+          &#127916;
+        </button>{' '}
+        That&rsquo;s a wrap! All movies have been scored.
+      </span>
+    )
+  }
+</p>
