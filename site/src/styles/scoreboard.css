@@ -77,20 +77,12 @@
   filter: drop-shadow(0 6px 0 rgba(10, 25, 35, 0.25));
 }
 
-/* The two film reels turn slowly, like the projector's threading up.
-   transform-box: view-box keeps the px origin in the SVG's coordinate system,
-   so each reel spins about its own hub. */
+/* The reel holes live in a translated local coordinate system, so the center
+   origin stays attached to the reel under browser zoom. */
 .projector .reel {
-  transform-box: view-box;
+  transform-box: fill-box;
+  transform-origin: center;
   animation: reel-spin 7s linear infinite;
-}
-
-.projector .reel-left {
-  transform-origin: 62px 38px;
-}
-
-.projector .reel-right {
-  transform-origin: 138px 38px;
 }
 
 @keyframes reel-spin {

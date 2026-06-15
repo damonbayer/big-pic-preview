@@ -28,17 +28,21 @@ const { meta } = Astro.props;
       <rect x="20" y="76" width="26" height="14" rx="4"></rect>
     </g>
     <g fill="var(--gold)">
-      <g class="reel reel-left">
-        <circle cx="62" cy="24" r="6.5"></circle>
-        <circle cx="62" cy="52" r="6.5"></circle>
-        <circle cx="48" cy="38" r="6.5"></circle>
-        <circle cx="76" cy="38" r="6.5"></circle>
+      <g transform="translate(62 38)">
+        <g class="reel reel-left">
+          <circle cx="0" cy="-14" r="6.5"></circle>
+          <circle cx="0" cy="14" r="6.5"></circle>
+          <circle cx="-14" cy="0" r="6.5"></circle>
+          <circle cx="14" cy="0" r="6.5"></circle>
+        </g>
       </g>
-      <g class="reel reel-right">
-        <circle cx="138" cy="24" r="6.5"></circle>
-        <circle cx="138" cy="52" r="6.5"></circle>
-        <circle cx="124" cy="38" r="6.5"></circle>
-        <circle cx="152" cy="38" r="6.5"></circle>
+      <g transform="translate(138 38)">
+        <g class="reel reel-right">
+          <circle cx="0" cy="-14" r="6.5"></circle>
+          <circle cx="0" cy="14" r="6.5"></circle>
+          <circle cx="-14" cy="0" r="6.5"></circle>
+          <circle cx="14" cy="0" r="6.5"></circle>
+        </g>
       </g>
     </g>
     <rect x="52" y="74" width="58" height="6" rx="3" fill="var(--green)"></rect>
