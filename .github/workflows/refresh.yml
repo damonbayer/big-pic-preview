@@ -4,8 +4,7 @@ on:
   schedule:
     # Box Office Mojo posts the prior day's actual domestic gross in the late
     # morning Pacific; this runs in the early afternoon Pacific to catch the
-    # settled number. 21:00 UTC = 2pm PDT (summer) / 1pm PST (winter) — after
-    # the morning update either way. GitHub cron is UTC and ignores DST.
+    # settled number.
     - cron: '0 14 * * *'
       timezone: 'America/Los_Angeles'
   workflow_dispatch:
