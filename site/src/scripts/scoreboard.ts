@@ -135,6 +135,22 @@ if (badge) {
   badge.closest('.score-card')?.addEventListener('click', wiggle);
 }
 
+// ----- horizontal scroll shadows -----
+// Toggle edge shadows on the table card so the off-screen Points/Differential
+// columns are discoverable on narrow viewports.
+const scroller = document.querySelector<HTMLElement>('.table-scroll');
+const tableCard = document.querySelector<HTMLElement>('.table-card');
+if (scroller && tableCard) {
+  const updateShadows = () => {
+    const max = scroller.scrollWidth - scroller.clientWidth;
+    tableCard.classList.toggle('can-scroll-left', scroller.scrollLeft > 1);
+    tableCard.classList.toggle('can-scroll-right', scroller.scrollLeft < max - 1);
+  };
+  updateShadows();
+  scroller.addEventListener('scroll', updateShadows, { passive: true });
+  window.addEventListener('resize', updateShadows, { passive: true });
+}
+
 // ----- column sorting -----
 const tbody = document.querySelector('tbody')!;
 // The server renders rows sorted by release date ascending.

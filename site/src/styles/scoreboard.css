@@ -1,6 +1,8 @@
 :root {
-  --green: #1f9e68;
-  --green-deep: #15875a;
+  /* Background green darkened to clear WCAG AA (≈4.7:1) for cream body text;
+     green-deep follows so the "+N AMANDA" chip and rule headings stay legible. */
+  --green: #137a49;
+  --green-deep: #0f6b40;
   --ink: #142838;
   --ink-soft: #1d3850;
   --cream: #f4efe1;
@@ -27,7 +29,7 @@ body {
   font-family: 'Archivo', system-ui, sans-serif;
   color: var(--ink);
   min-height: 100vh;
-  background: radial-gradient(1100px 480px at 50% 360px, rgba(255, 255, 255, 0.15), transparent 70%), var(--green);
+  background: radial-gradient(1100px 480px at 50% 360px, rgba(255, 255, 255, 0.12), transparent 70%), var(--green);
 }
 
 /* ---------- hero ---------- */
@@ -38,8 +40,9 @@ body {
 
 .kicker {
   margin: 0 0 4px;
+  /* Full cream (no opacity dim): dimming composites toward the green and drops
+     this small label back under AA contrast. */
   color: var(--cream);
-  opacity: 0.85;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -93,7 +96,9 @@ body {
 
 .edition {
   margin: 6px 0 0;
-  color: var(--gold);
+  /* Cream rather than gold: gold on green only clears AA at display sizes, and
+     this 0.8rem label is small. */
+  color: var(--cream);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3em;
@@ -372,7 +377,6 @@ main {
 .progress {
   text-align: center;
   color: var(--cream);
-  opacity: 0.9;
   margin: 20px 0 6px;
   font-weight: 600;
 }
@@ -385,6 +389,9 @@ main {
 .progress .wrap strong {
   color: var(--gold);
   font-weight: 900;
+  /* Bumped to display size so the gold count clears AA as large text (3:1)
+     while still popping against the cream sentence around it. */
+  font-size: 1.25em;
 }
 
 /* The popcorn/clapper emoji does a slow, gentle sway — enough to catch the eye
@@ -491,6 +498,7 @@ main {
 
 /* ---------- table ---------- */
 .table-card {
+  position: relative;
   background: var(--cream);
   border-radius: 18px;
   box-shadow: var(--shadow);
@@ -498,6 +506,37 @@ main {
      symmetrically inside the card. */
   padding: 10px;
   margin-bottom: 36px;
+}
+
+/* Edge shadows that hint the table scrolls horizontally — the payoff columns
+   (Points, Differential) sit off-screen on narrow viewports. JS toggles the
+   .can-scroll-* classes so each shadow only shows when there's more that way. */
+.table-card::before,
+.table-card::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  width: 26px;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.table-card::before {
+  left: 10px;
+  background: linear-gradient(to right, rgba(20, 40, 56, 0.28), transparent);
+}
+
+.table-card::after {
+  right: 10px;
+  background: linear-gradient(to left, rgba(20, 40, 56, 0.28), transparent);
+}
+
+.table-card.can-scroll-left::before,
+.table-card.can-scroll-right::after {
+  opacity: 1;
 }
 
 .table-scroll {
@@ -877,7 +916,6 @@ footer {
   color: var(--cream);
   padding: 26px 18px 40px;
   font-size: 0.82rem;
-  opacity: 0.92;
 }
 
 footer p {
@@ -885,7 +923,8 @@ footer p {
 }
 
 footer a {
-  color: var(--gold);
+  /* Cream text keeps AA on green; the gold underline carries the link accent. */
+  color: var(--cream);
   font-weight: 700;
 }
 
@@ -894,7 +933,7 @@ footer a {
 }
 
 .meta-link a {
-  color: var(--gold);
+  color: var(--cream);
   font-weight: 700;
   font-size: 0.82rem;
   text-transform: uppercase;
