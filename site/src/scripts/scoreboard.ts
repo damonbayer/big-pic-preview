@@ -151,15 +151,13 @@ for (const emoji of document.querySelectorAll<HTMLElement>('.progress .emoji')) 
 }
 
 // ----- horizontal scroll shadows -----
-// Toggle edge shadows on the table card so the off-screen Points/Differential
+// Toggle the right table-edge shadow so the off-screen Points/Differential
 // columns are discoverable on narrow viewports.
 const scroller = document.querySelector<HTMLElement>('.table-scroll');
-const tableCard = document.querySelector<HTMLElement>('.table-card');
-if (scroller && tableCard) {
+if (scroller) {
   const updateShadows = () => {
     const max = scroller.scrollWidth - scroller.clientWidth;
-    tableCard.classList.toggle('can-scroll-left', scroller.scrollLeft > 1);
-    tableCard.classList.toggle('can-scroll-right', scroller.scrollLeft < max - 1);
+    scroller.classList.toggle('can-scroll-right', scroller.scrollLeft < max - 1);
   };
   updateShadows();
   scroller.addEventListener('scroll', updateShadows, { passive: true });

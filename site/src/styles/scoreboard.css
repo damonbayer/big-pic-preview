@@ -567,37 +567,6 @@ main {
   margin-bottom: 36px;
 }
 
-/* Edge shadows that hint the table scrolls horizontally — the payoff columns
-   (Points, Differential) sit off-screen on narrow viewports. JS toggles the
-   .can-scroll-* classes so each shadow only shows when there's more that way. */
-.table-card::before,
-.table-card::after {
-  content: '';
-  position: absolute;
-  top: 10px;
-  bottom: 10px;
-  width: 26px;
-  z-index: 4;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.table-card::before {
-  left: 10px;
-  background: linear-gradient(to right, rgba(20, 40, 56, 0.28), transparent);
-}
-
-.table-card::after {
-  right: 10px;
-  background: linear-gradient(to left, rgba(20, 40, 56, 0.28), transparent);
-}
-
-.table-card.can-scroll-left::before,
-.table-card.can-scroll-right::after {
-  opacity: 1;
-}
-
 .heat-key {
   position: relative;
   z-index: 5;
@@ -628,6 +597,13 @@ main {
   overflow-x: auto;
   /* Concentric with the card: 18px card radius − 10px padding = 8px. */
   border-radius: 8px;
+  transition: box-shadow 0.15s ease;
+}
+
+/* Right edge hint for horizontally hidden table columns. Keep it on the
+   scroller so it stops at the actual table instead of covering the key. */
+.table-scroll.can-scroll-right {
+  box-shadow: inset -26px 0 18px -20px rgba(20, 40, 56, 0.45);
 }
 
 table {
