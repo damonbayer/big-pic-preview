@@ -389,27 +389,35 @@ main {
 .progress .wrap strong {
   color: var(--gold);
   font-weight: 900;
-  /* Bumped to display size so the gold count clears AA as large text (3:1)
-     while still popping against the cream sentence around it. */
-  font-size: 1.25em;
 }
 
-/* The popcorn/clapper emoji does a slow, gentle sway — enough to catch the eye
-   without becoming a distraction. */
+/* The emoji does a brief flourish, then rests so the progress line stays calm. */
 .progress .emoji {
   display: inline-block;
   margin-right: 4px;
-  animation: emoji-dance 2.4s ease-in-out infinite;
+  font-size: 1.2em;
+  vertical-align: -0.08em;
+  animation: emoji-dance 7s ease-in-out infinite;
   transform-origin: 70% 80%;
 }
 
 @keyframes emoji-dance {
   0%,
   100% {
-    transform: rotate(-9deg);
+    transform: rotate(-4deg) scale(1);
   }
-  50% {
-    transform: rotate(9deg);
+  4% {
+    transform: translateY(-3px) rotate(16deg) scale(1.12);
+  }
+  8% {
+    transform: translateY(1px) rotate(-18deg) scale(1.08);
+  }
+  12% {
+    transform: translateY(-2px) rotate(12deg) scale(1.14);
+  }
+  18%,
+  92% {
+    transform: rotate(-4deg) scale(1);
   }
 }
 
