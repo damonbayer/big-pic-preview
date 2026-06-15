@@ -105,3 +105,18 @@ npm install
 npm run dev    # local dev server
 npm run build  # production build
 ```
+
+### Regenerate the social image
+
+The Open Graph image at `site/public/og.png` is generated from the private Astro
+template at `site/src/templates/OgImage.astro`:
+
+```sh
+cd site
+npm run generate:og
+```
+
+The script creates a temporary local-only route, builds the site, captures that
+route with headless Chrome, and removes the route from both `src/pages/` and
+`dist/`. Set `CHROME_PATH` if Chrome or Chromium is not installed in a standard
+location.

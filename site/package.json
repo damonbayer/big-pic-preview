@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "generate:og": "node scripts/regenerate-og-image.mjs",
     "test": "vitest run --config vitest.config.mjs"
   },
   "dependencies": {

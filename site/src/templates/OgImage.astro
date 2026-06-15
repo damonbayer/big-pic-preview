@@ -1,0 +1,89 @@
+---
+import '../styles/scoreboard.css';
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { currentGame } from '../data/games';
+
+const title = 'The Big Picture Summer Movie Preview Game';
+const description = 'Social-share card template for The Big Picture scoreboard.';
+---
+
+<BaseLayout title={title} description={description}>
+  <main class="og-card" aria-label={title}>
+    <div class="filmstrip filmstrip-top" aria-hidden="true"></div>
+    <PageHero meta={currentGame.meta} />
+    <div class="filmstrip filmstrip-bottom" aria-hidden="true"></div>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  html,
+  body {
+    width: 1200px;
+    height: 630px;
+    min-height: 630px;
+    overflow: hidden;
+  }
+
+  body {
+    background: radial-gradient(1100px 520px at 50% 46%, rgba(255, 255, 255, 0.13), transparent 70%), var(--green);
+  }
+
+  .og-card {
+    width: 1200px;
+    height: 630px;
+    max-width: none;
+    margin: 0;
+    padding: 0 16px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .og-card .filmstrip {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30px;
+    padding: 8px 0;
+  }
+
+  .og-card .filmstrip-top {
+    top: 0;
+  }
+
+  .og-card .filmstrip-bottom {
+    bottom: 0;
+  }
+
+  .og-card .hero {
+    padding: 0;
+  }
+
+  .og-card .kicker {
+    margin-bottom: 6px;
+    font-size: 1.05rem;
+  }
+
+  .og-card .hero .script {
+    font-size: 3.4rem;
+    margin-bottom: -0.18em;
+  }
+
+  .og-card .hero .slab {
+    font-size: 6.8rem;
+  }
+
+  .og-card .event {
+    margin-top: 22px;
+    font-size: 1.5rem;
+  }
+
+  .og-card .projector {
+    width: 120px;
+    margin-top: 24px;
+  }
+</style>
