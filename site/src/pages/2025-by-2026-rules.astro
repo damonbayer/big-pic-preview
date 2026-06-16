@@ -1,0 +1,21 @@
+---
+// Hidden easter-egg page: the 2025 game's predictions graded under the 2026
+// scoring method. Not linked from anywhere (no entry in the season switcher,
+// no nav) — reachable only by visiting /2025-by-2026-rules/ directly.
+import Scoreboard from '../components/Scoreboard.astro';
+import { getGame, scoreGameAs } from '../data/games';
+
+// Pull the 2026 method straight from the 2026 game so the manifest stays the
+// single source of truth — if the bands change, this page follows.
+const method2026 = getGame('2026-summer')?.meta.scoring;
+const game = method2026 && scoreGameAs('2025-summer', method2026);
+
+if (!game) {
+  throw new Error('Cannot build /2025-by-2026-rules/: the 2025 or 2026 game is missing from the manifest.');
+}
+
+// Passing a single-game list keeps the season switcher (which only renders for
+// 2+ editions) hidden, so the page has no links back into the live scoreboard.
+---
+
+<Scoreboard game={game} allGames={[game]} />

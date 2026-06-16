@@ -284,3 +284,26 @@ export const currentGame: GameData = [...games].reverse().find((g) => g.meta.liv
 export function getGame(id: string): GameData | undefined {
   return games.find((g) => g.meta.id === id);
 }
+
+// Re-score one edition's predictions under a different edition's scoring rules,
+// returning a fresh GameData. Powers the hidden cross-scoring page (the 2025
+// game graded by the 2026 method); not linked anywhere on the live site.
+export function scoreGameAs(
+  id: string,
+  scoring: ScoringRules,
+  metaOverrides: Partial<GameMeta> = {},
+): GameData | undefined {
+  const base = manifest.games.find((g) => g.id === id);
+  if (!base) return undefined;
+  return computeGame({
+    id: base.id,
+    season: base.season,
+    year: base.year,
+    title: base.title,
+    live: base.live,
+    episodes: base.episodes ?? [],
+    updatedAt: lastUpdatedAt(base.id),
+    scoring,
+    ...metaOverrides,
+  });
+}
