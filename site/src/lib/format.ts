@@ -12,6 +12,21 @@ export function fmtDate(iso: string | null): string {
   return `${MONTHS[m - 1]} ${d}`;
 }
 
+// Server-side fallback for the "scores last updated" stamp. The client script
+// (see scoreboard.ts) rewrites this in the visitor's own time zone; this is what
+// no-JS readers and the first paint see, rendered in UTC so it's unambiguous.
+export function fmtUpdated(iso: string): string {
+  return new Date(iso).toLocaleString('en-US', {
+    timeZone: 'UTC',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
+}
+
 export function fmtBO(v: number | null): string {
   if (v === null) return '—';
   const millions = v / 1e6;

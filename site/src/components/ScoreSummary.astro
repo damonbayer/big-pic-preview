@@ -1,5 +1,6 @@
 ---
 import type { GameData } from '../data/games';
+import { fmtUpdated } from '../lib/format';
 
 interface Props {
   game: GameData;
@@ -45,7 +46,7 @@ const objectiveIcon = lowerWins ? '↓' : '↑';
           &#127871;
         </button>
         <strong>{totals.scoredCount}</strong> of {totals.movieCount} movies scored so far &mdash; fresh scores served
-        daily around 2&nbsp;pm Pacific.
+        daily.
       </span>
     ) : (
       <span class="wrap">
@@ -57,3 +58,14 @@ const objectiveIcon = lowerWins ? '↓' : '↑';
     )
   }
 </p>
+
+{
+  meta.live && meta.updatedAt && (
+    <p class="updated">
+      Scores last updated{' '}
+      <time class="updated-time" datetime={meta.updatedAt} data-local-time>
+        {fmtUpdated(meta.updatedAt)}
+      </time>
+    </p>
+  )
+}

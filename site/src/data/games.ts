@@ -1,7 +1,32 @@
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import Papa from 'papaparse';
 import manifest from '../../../games/games.json';
 import { DEFAULT_SCORING, pointsFor } from './scoring';
 import type { ScoringRules } from './scoring';
+
+// Repo root, three levels up from site/src/data/. Used to ask git when each
+// game's results.csv last changed.
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+
+// When was this game's results last refreshed? The refresh workflow only commits
+// results.csv when a score actually changes, so the file's last commit time is
+// the true "scores last updated" moment — no timestamp column needed in the CSV.
+// Returns an ISO-8601 string, or null if git isn't available (the stamp is then
+// simply omitted from the page rather than failing the build).
+function lastUpdatedAt(gameId: string): string | null {
+  try {
+    const out = execFileSync('git', ['log', '-1', '--format=%cI', '--', `games/${gameId}/results.csv`], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return out || null;
+  } catch {
+    return null;
+  }
+}
 
 // Re-export the scoring types/values so existing importers keep using './games'.
 export { DEFAULT_SCORING };
@@ -70,6 +95,8 @@ export interface GameMeta {
   live: boolean;
   episodes: Episode[];
   scoring: ScoringRules;
+  // ISO-8601 commit time of this game's results.csv, or null if unavailable.
+  updatedAt: string | null;
 }
 
 export interface TmdbInfo {
@@ -243,6 +270,7 @@ export const games: GameData[] = manifest.games.map((g) =>
     title: g.title,
     live: g.live,
     episodes: g.episodes ?? [],
+    updatedAt: lastUpdatedAt(g.id),
     // JSON widens the discriminant strings (e.g. "bands") to `string`, so the
     // structural shape can't satisfy the union directly — cast it.
     scoring: (g.scoring as ScoringRules | undefined) ?? DEFAULT_SCORING,

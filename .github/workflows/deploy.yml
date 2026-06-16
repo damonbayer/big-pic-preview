@@ -20,6 +20,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        # Full history so the build can read each results.csv's last commit time
+        # for the "scores last updated" stamp (see site/src/data/games.ts).
+        with:
+          fetch-depth: 0
       - name: Build with Astro
         uses: withastro/action@v6
         with:
