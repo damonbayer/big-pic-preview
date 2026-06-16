@@ -5,7 +5,7 @@ on:
     # Box Office Mojo posts the prior day's actual domestic gross in the late
     # morning Pacific; this runs in the early afternoon Pacific to catch the
     # settled number.
-    - cron: "0 21 * * *"
+    - cron: '0 21 * * *'
   workflow_dispatch:
 
 permissions:
