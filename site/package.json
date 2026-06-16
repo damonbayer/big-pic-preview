@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "astro": "^5.8.0",
+    "canvas-confetti": "^1.9.4",
     "papaparse": "^5.5.3"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/papaparse": "^5.5.2",
     "vitest": "^4.1.8"
   }
