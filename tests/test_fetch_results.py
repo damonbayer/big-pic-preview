@@ -19,8 +19,50 @@ def test_parse_domestic_box_office_missing():
 
 
 def test_parse_metacritic_score():
-    page = '{"name": "Metascore", "ratingValue": "68"}'
+    # JSON-LD as Metacritic ships it: the Metascore nested in aggregateRating.
+    page = """
+    <html><head>
+    <script type="application/ld+json">
+    {
+      "@type": "Movie",
+      "name": "Some Movie",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "name": "Metascore",
+        "ratingValue": 68,
+        "bestRating": 100
+      }
+    }
+    </script>
+    </head></html>
+    """
     assert fr.parse_metacritic_score(page) == 68
+
+
+def test_parse_metacritic_score_field_order_independent():
+    # ratingValue before name (the old regex window assumed name came first).
+    page = (
+        '<script type="application/ld+json">'
+        '{"ratingValue": "72", "name": "Metascore"}'
+        "</script>"
+    )
+    assert fr.parse_metacritic_score(page) == 72
+
+
+def test_parse_metacritic_score_rendered_fallback():
+    # No JSON-LD; fall back to the rendered score snippet.
+    page = '<div>Metascore <div class="c-siteReviewScore"><span>54</span></div></div>'
+    assert fr.parse_metacritic_score(page) == 54
+
+
+def test_parse_metacritic_score_ignores_invalid_json_ld():
+    page = (
+        '<script type="application/ld+json">{ not valid json </script>'
+        '<script type="application/ld+json">'
+        '{"name": "Metascore", "ratingValue": "61"}'
+        "</script>"
+    )
+    assert fr.parse_metacritic_score(page) == 61
 
 
 def test_parse_metacritic_score_missing():

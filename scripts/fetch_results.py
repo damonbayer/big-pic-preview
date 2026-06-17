@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import html
+import json
 import re
 import sys
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import polars as pl
 from bs4 import BeautifulSoup
@@ -92,20 +95,64 @@ def parse_domestic_box_office(page: str) -> int | None:
     return money_to_int(match.group(0)) if match else None
 
 
-def parse_metacritic_score(page: str) -> int | None:
-    normalized = html.unescape(page)
-    match = re.search(
-        r'"name"\s*:\s*"Metascore".{0,1200}?"ratingValue"\s*:\s*"?(\d{1,3})"?',
-        normalized,
-        flags=re.DOTALL,
-    )
-    if match:
-        return int(match.group(1))
+def iter_json_ld(soup: BeautifulSoup) -> Iterator[Any]:
+    """Yield the parsed contents of every <script type="application/ld+json">.
 
-    # Fallback for rendered score snippets.
+    Blocks that aren't valid JSON are skipped rather than failing the parse.
+    """
+    for tag in soup.find_all("script", type="application/ld+json"):
+        text = tag.string or tag.get_text()
+        if not text:
+            continue
+        try:
+            yield json.loads(text)
+        except json.JSONDecodeError:
+            continue
+
+
+def find_metascore(node: Any) -> int | None:
+    """Depth-first search for a JSON-LD object named "Metascore".
+
+    Metacritic nests the Metascore as an ``aggregateRating`` whose ``name`` is
+    "Metascore" and whose ``ratingValue`` is the number we want. Walk the whole
+    structure rather than assume a fixed shape, so field reordering can't break
+    it the way the old regex window could.
+    """
+    if isinstance(node, dict):
+        name = node.get("name")
+        rating = node.get("ratingValue")
+        if (
+            isinstance(name, str)
+            and name.strip().lower() == "metascore"
+            and rating is not None
+        ):
+            try:
+                return int(str(rating).strip())
+            except ValueError:
+                return None
+        for value in node.values():
+            found = find_metascore(value)
+            if found is not None:
+                return found
+    elif isinstance(node, list):
+        for item in node:
+            found = find_metascore(item)
+            if found is not None:
+                return found
+    return None
+
+
+def parse_metacritic_score(page: str) -> int | None:
+    soup = BeautifulSoup(page, "html.parser")
+    for data in iter_json_ld(soup):
+        score = find_metascore(data)
+        if score is not None:
+            return score
+
+    # Fallback for rendered score snippets when JSON-LD is absent.
     match = re.search(
         r"Metascore.{0,300}?c-siteReviewScore[^>]*>\s*<span[^>]*>(\d{1,3})</span>",
-        normalized,
+        html.unescape(page),
         flags=re.DOTALL,
     )
     return int(match.group(1)) if match else None
