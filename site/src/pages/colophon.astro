@@ -1,9 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { home } from '../lib/paths';
 import '../styles/colophon.css';
 
-const base = import.meta.env.BASE_URL;
-const home = `${base}/`.replace('//', '/');
 const repo = 'https://github.com/damonbayer/big-pic-preview';
 
 const title = 'Colophon · The Big Picture Summer Movie Preview Scoreboard';
@@ -11,7 +10,7 @@ const description = 'How this site was made, who made it, and where to find the 
 ---
 
 <BaseLayout title={title} description={description}>
-  <main>
+  <main class="colophon">
     <a class="back" href={home}>&larr; Back to the scoreboard</a>
     <h1>Colophon</h1>
 

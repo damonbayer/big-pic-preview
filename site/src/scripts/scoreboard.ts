@@ -1,124 +1,150 @@
-const data = JSON.parse(document.getElementById('movie-data')!.textContent!);
-const card = document.getElementById('movie-card')!;
-const poster = document.getElementById('card-poster') as HTMLImageElement;
-const titleEl = document.getElementById('card-title')!;
-const metaEl = document.getElementById('card-meta')!;
-const taglineEl = document.getElementById('card-tagline')!;
-const overviewEl = document.getElementById('card-overview')!;
-const creditsEl = document.getElementById('card-credits')!;
-const linksEl = document.getElementById('card-links')!;
-const linkTmdb = document.getElementById('card-link-tmdb') as HTMLAnchorElement;
-const linkImdb = document.getElementById('card-link-imdb') as HTMLAnchorElement;
-const linkLetterboxd = document.getElementById('card-link-letterboxd') as HTMLAnchorElement;
+// ----- movie hover/click card -----
+// Wrapped so a missing card element only disables this feature; the sorting,
+// scroll shadows, timestamp, and badge/emoji animations below run regardless.
+initMovieCard();
 
-let pinned: string | null = null;
+function initMovieCard() {
+  const dataEl = document.getElementById('movie-data');
+  const card = document.getElementById('movie-card');
+  const poster = document.getElementById('card-poster') as HTMLImageElement | null;
+  const titleEl = document.getElementById('card-title');
+  const metaEl = document.getElementById('card-meta');
+  const taglineEl = document.getElementById('card-tagline');
+  const overviewEl = document.getElementById('card-overview');
+  const creditsEl = document.getElementById('card-credits');
+  const linksEl = document.getElementById('card-links');
+  const linkTmdb = document.getElementById('card-link-tmdb') as HTMLAnchorElement | null;
+  const linkImdb = document.getElementById('card-link-imdb') as HTMLAnchorElement | null;
+  const linkLetterboxd = document.getElementById('card-link-letterboxd') as HTMLAnchorElement | null;
 
-function setLink(a: HTMLAnchorElement, url: string | null | undefined) {
-  if (url) {
-    a.href = url;
-    a.hidden = false;
-  } else {
-    a.removeAttribute('href');
-    a.hidden = true;
+  if (
+    !dataEl?.textContent ||
+    !card ||
+    !poster ||
+    !titleEl ||
+    !metaEl ||
+    !taglineEl ||
+    !overviewEl ||
+    !creditsEl ||
+    !linksEl ||
+    !linkTmdb ||
+    !linkImdb ||
+    !linkLetterboxd
+  ) {
+    return;
   }
-}
 
-function fill(title: string) {
-  const d = data[title];
-  if (!d) return false;
-  titleEl.textContent = title;
-  const bits = [d.date];
-  if (d.runtime) bits.push(`${d.runtime} min`);
-  if (d.genres?.length) bits.push(d.genres.join(' / '));
-  metaEl.textContent = bits.join(' · ');
-  taglineEl.textContent = d.tagline ?? '';
-  taglineEl.hidden = !d.tagline;
-  overviewEl.textContent = d.overview ?? 'No synopsis yet.';
-  const credits = [];
-  if (d.directors?.length) credits.push(`Directed by ${d.directors.join(', ')}`);
-  if (d.cast?.length) credits.push(`Starring ${d.cast.join(', ')}`);
-  creditsEl.textContent = credits.join(' · ');
-  creditsEl.hidden = credits.length === 0;
-  const links = d.links ?? {};
-  setLink(linkTmdb, links.tmdb);
-  setLink(linkImdb, links.imdb);
-  setLink(linkLetterboxd, links.letterboxd);
-  if (d.poster) {
-    poster.src = d.poster;
-    poster.hidden = false;
-  } else {
-    poster.removeAttribute('src');
-    poster.hidden = true;
-  }
-  return true;
-}
+  const data = JSON.parse(dataEl.textContent);
 
-function place(anchor: Element) {
-  const r = anchor.getBoundingClientRect();
-  card.hidden = false;
-  const cw = card.offsetWidth;
-  const ch = card.offsetHeight;
-  let x = r.right + 14;
-  if (x + cw > window.innerWidth - 8) x = Math.max(8, window.innerWidth - cw - 8);
-  let y = r.top - 8;
-  if (y + ch > window.innerHeight - 8) y = Math.max(8, window.innerHeight - ch - 8);
-  card.style.left = `${x}px`;
-  card.style.top = `${y}px`;
-}
+  let pinned: string | null = null;
 
-function show(btn: Element) {
-  const title = (btn as HTMLElement).dataset.title!;
-  if (fill(title)) place(btn);
-}
-
-function hide() {
-  if (!pinned) card.hidden = true;
-}
-
-// Pinning enables pointer events so the source links can be clicked;
-// hover-only cards stay click-through so they don't block the table.
-function closeCard() {
-  pinned = null;
-  card.hidden = true;
-  card.style.pointerEvents = '';
-}
-
-for (const btn of document.querySelectorAll<HTMLElement>('.movie-btn')) {
-  btn.addEventListener('mouseenter', () => {
-    if (!pinned) show(btn);
-  });
-  btn.addEventListener('mouseleave', hide);
-  btn.addEventListener('focus', () => {
-    if (!pinned) show(btn);
-  });
-  btn.addEventListener('blur', hide);
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const title = btn.dataset.title!;
-    if (pinned === title) {
-      closeCard();
+  function setLink(a: HTMLAnchorElement, url: string | null | undefined) {
+    if (url) {
+      a.href = url;
+      a.hidden = false;
     } else {
-      pinned = title;
-      show(btn);
-      card.style.pointerEvents = 'auto';
+      a.removeAttribute('href');
+      a.hidden = true;
     }
-  });
-}
+  }
 
-// Clicking a source link shouldn't dismiss the pinned card.
-linksEl.addEventListener('click', (e) => e.stopPropagation());
+  function fill(title: string) {
+    const d = data[title];
+    if (!d) return false;
+    titleEl.textContent = title;
+    const bits = [d.date];
+    if (d.runtime) bits.push(`${d.runtime} min`);
+    if (d.genres?.length) bits.push(d.genres.join(' / '));
+    metaEl.textContent = bits.join(' · ');
+    taglineEl.textContent = d.tagline ?? '';
+    taglineEl.hidden = !d.tagline;
+    overviewEl.textContent = d.overview ?? 'No synopsis yet.';
+    const credits = [];
+    if (d.directors?.length) credits.push(`Directed by ${d.directors.join(', ')}`);
+    if (d.cast?.length) credits.push(`Starring ${d.cast.join(', ')}`);
+    creditsEl.textContent = credits.join(' · ');
+    creditsEl.hidden = credits.length === 0;
+    const links = d.links ?? {};
+    setLink(linkTmdb, links.tmdb);
+    setLink(linkImdb, links.imdb);
+    setLink(linkLetterboxd, links.letterboxd);
+    if (d.poster) {
+      poster.src = d.poster;
+      poster.hidden = false;
+    } else {
+      poster.removeAttribute('src');
+      poster.hidden = true;
+    }
+    return true;
+  }
 
-document.addEventListener('click', closeCard);
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeCard();
-});
-window.addEventListener(
-  'scroll',
-  () => {
+  function place(anchor: Element) {
+    const r = anchor.getBoundingClientRect();
+    card.hidden = false;
+    const cw = card.offsetWidth;
+    const ch = card.offsetHeight;
+    let x = r.right + 14;
+    if (x + cw > window.innerWidth - 8) x = Math.max(8, window.innerWidth - cw - 8);
+    let y = r.top - 8;
+    if (y + ch > window.innerHeight - 8) y = Math.max(8, window.innerHeight - ch - 8);
+    card.style.left = `${x}px`;
+    card.style.top = `${y}px`;
+  }
+
+  function show(btn: Element) {
+    const title = (btn as HTMLElement).dataset.title!;
+    if (fill(title)) place(btn);
+  }
+
+  function hide() {
     if (!pinned) card.hidden = true;
-  },
-  { passive: true },
-);
+  }
+
+  // Pinning enables pointer events so the source links can be clicked;
+  // hover-only cards stay click-through so they don't block the table.
+  function closeCard() {
+    pinned = null;
+    card.hidden = true;
+    card.style.pointerEvents = '';
+  }
+
+  for (const btn of document.querySelectorAll<HTMLElement>('.movie-btn')) {
+    btn.addEventListener('mouseenter', () => {
+      if (!pinned) show(btn);
+    });
+    btn.addEventListener('mouseleave', hide);
+    btn.addEventListener('focus', () => {
+      if (!pinned) show(btn);
+    });
+    btn.addEventListener('blur', hide);
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const title = btn.dataset.title!;
+      if (pinned === title) {
+        closeCard();
+      } else {
+        pinned = title;
+        show(btn);
+        card.style.pointerEvents = 'auto';
+      }
+    });
+  }
+
+  // Clicking a source link shouldn't dismiss the pinned card.
+  linksEl.addEventListener('click', (e) => e.stopPropagation());
+
+  document.addEventListener('click', closeCard);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeCard();
+  });
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!pinned) card.hidden = true;
+    },
+    { passive: true },
+  );
+}
 
 // ----- leader badge wiggle -----
 // The "Winner" / "In the lead" badge does a little shimmy on load and whenever

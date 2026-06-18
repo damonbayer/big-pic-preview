@@ -1,5 +1,6 @@
 ---
 import '../styles/site.css';
+import { assetPath } from '../lib/paths';
 
 interface Props {
   title: string;
@@ -16,11 +17,6 @@ const {
   ogImagePath = 'og.png',
   ogImageAlt = 'The Big Picture — Summer Movie Preview scoreboard',
 } = Astro.props;
-
-const base = import.meta.env.BASE_URL;
-function assetPath(path: string): string {
-  return `${base}/${path}`.replace(/\/{2,}/g, '/');
-}
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL(assetPath(ogImagePath), Astro.site).href;

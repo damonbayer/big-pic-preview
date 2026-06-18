@@ -410,8 +410,10 @@ main {
   text-align: center;
   margin: 0 0 6px;
   font-size: 0.8rem;
+  /* Solid cream (no opacity dim): at this small size, dimming composites toward
+     the green and drops the text under AA — same reason the kicker/edition
+     labels stay full cream. */
   color: var(--cream);
-  opacity: 0.7;
 }
 
 .updated-time {
@@ -1023,6 +1025,11 @@ footer a {
 @media (max-width: 640px) {
   .scoreboard {
     grid-template-columns: 1fr;
+  }
+
+  /* Tighter cards when stacked, so the single column doesn't run too tall. */
+  .score-card {
+    padding: 16px 16px 14px;
   }
 
   .vs {

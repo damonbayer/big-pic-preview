@@ -1,5 +1,6 @@
 ---
 import type { GameData } from '../data/games';
+import { assetPath } from '../lib/paths';
 
 interface Props {
   games: GameData[];
@@ -7,12 +8,8 @@ interface Props {
 }
 
 const { games, currentId } = Astro.props;
-const base = import.meta.env.BASE_URL;
-function path(p: string): string {
-  return `${base}/${p}`.replace(/\/{2,}/g, '/');
-}
 function gameUrl(id: string): string {
-  return path(`games/${id}/`);
+  return assetPath(`games/${id}/`);
 }
 
 // Switcher lists every edition, most recent first.

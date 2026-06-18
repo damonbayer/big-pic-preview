@@ -1,14 +1,18 @@
+/* All rules are scoped under .colophon so these broad element selectors
+   (a, p, h1, li, …) can't leak onto other pages if a shared component ever
+   lands here. The one intentionally global bit is the --page-text override,
+   which retints the inherited body text to cream for this page. */
 :root {
   --page-text: var(--cream);
 }
 
-main {
+.colophon {
   max-width: 640px;
   margin: 0 auto;
   padding: 56px 20px 80px;
 }
 
-.back {
+.colophon .back {
   display: inline-block;
   margin-bottom: 28px;
   color: var(--cream);
@@ -17,12 +21,12 @@ main {
   font-weight: 600;
 }
 
-.back:hover,
-.back:focus-visible {
+.colophon .back:hover,
+.colophon .back:focus-visible {
   color: var(--gold);
 }
 
-h1 {
+.colophon h1 {
   font-family: 'Alfa Slab One', serif;
   font-size: clamp(2.2rem, 7vw, 3.2rem);
   margin: 0 0 24px;
@@ -30,11 +34,11 @@ h1 {
   text-shadow: 2px 2px 0 var(--ink);
 }
 
-section {
+.colophon section {
   margin-bottom: 26px;
 }
 
-h2 {
+.colophon h2 {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -43,27 +47,27 @@ h2 {
   margin: 0 0 6px;
 }
 
-p {
+.colophon p {
   margin: 0 0 8px;
   line-height: 1.6;
   font-size: 0.98rem;
 }
 
-ul {
+.colophon ul {
   margin: 10px 0 0;
   padding-left: 1.2rem;
   line-height: 1.55;
 }
 
-li {
+.colophon li {
   margin-bottom: 8px;
 }
 
-li::marker {
+.colophon li::marker {
   color: var(--gold);
 }
 
-.tmdb-attr {
+.colophon .tmdb-attr {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -73,7 +77,7 @@ li::marker {
 
 /* The logo's wordmark is dark navy, so sit it on a light chip for
    contrast against the green page (per TMDB's attribution guidance). */
-.tmdb-attr a {
+.colophon .tmdb-attr a {
   display: inline-flex;
   align-items: center;
   background: var(--cream);
@@ -81,27 +85,27 @@ li::marker {
   border-radius: 8px;
 }
 
-.tmdb-logo {
+.colophon .tmdb-logo {
   display: block;
   height: 19px;
   width: auto;
 }
 
-.tmdb-note {
+.colophon .tmdb-note {
   font-size: 0.8rem;
   margin-top: 10px;
 }
 
 /* Cream link text with a gold underline: keeps AA on green while the
    underline preserves the gold link accent. */
-a {
+.colophon a {
   color: var(--cream);
   font-weight: 700;
   text-decoration-color: var(--gold);
   text-underline-offset: 2px;
 }
 
-a:hover,
-a:focus-visible {
+.colophon a:hover,
+.colophon a:focus-visible {
   color: var(--gold);
 }
