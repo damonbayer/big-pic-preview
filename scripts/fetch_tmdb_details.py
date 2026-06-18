@@ -15,6 +15,7 @@ import time
 from pathlib import Path
 
 import polars as pl
+import requests
 import tmdbsimple as tmdb
 from dotenv import load_dotenv
 from schemas import (
@@ -29,6 +30,12 @@ from games import ROOT, parse_game_selection
 
 REQUEST_DELAY_SECONDS = 0.25
 POSTER_BASE = "https://image.tmdb.org/t/p/w342"
+# (connect, read) timeout in seconds. TMDB occasionally returns the 200 headers
+# then stalls before sending the body; without a read timeout the fetch hangs
+# forever on whatever title is in flight. Bound it and retry instead.
+REQUEST_TIMEOUT = (10, 15)
+MAX_ATTEMPTS = 3
+RETRY_BACKOFF_SECONDS = 1.0
 
 
 def load_api_key() -> str:
@@ -42,7 +49,15 @@ def load_api_key() -> str:
 
 def fetch(tmdb_id: str) -> dict:
     movie = tmdb.Movies(int(tmdb_id))
-    info = movie.info(append_to_response="credits")
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            info = movie.info(append_to_response="credits")
+            break
+        except (requests.Timeout, requests.ConnectionError) as exc:
+            if attempt == MAX_ATTEMPTS:
+                raise
+            print(f"  retry {attempt}/{MAX_ATTEMPTS - 1} after {type(exc).__name__}")
+            time.sleep(RETRY_BACKOFF_SECONDS * attempt)
     directors = [
         c["name"]
         for c in info.get("credits", {}).get("crew", [])
@@ -88,6 +103,8 @@ def refresh_game(
         if not row.get("tmdb_id"):
             print(f"skip {title}: no tmdb_id")
             continue
+        else:
+            print(f"fetching {title} (TMDB ID {row['tmdb_id']})...")
         expected += 1
         try:
             info = fetch(row["tmdb_id"])
@@ -130,6 +147,8 @@ def main() -> None:
         print("No games selected; nothing to fetch.")
         return
     tmdb.API_KEY = load_api_key()
+    # Bound every request so a stalled response can't hang the run forever.
+    tmdb.REQUESTS_TIMEOUT = REQUEST_TIMEOUT
     for game in games:
         print(f"== {game.id} ==")
         refresh_game(
