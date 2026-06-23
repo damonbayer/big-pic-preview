@@ -183,7 +183,7 @@
     "release_date": "2026-05-21",
     "overview": "A group of shoplifters take aim at a cutthroat fashion maven by stealing from her stores and reselling them at a lower price \u2014 what they call 'fashion-forward philanthropy'.",
     "tagline": "Booster: Somebody who steals clothes from a store and sells them at a discount price, aka community service.",
-    "runtime": 114,
+    "runtime": 113,
     "genres": [
       "Comedy",
       "Science Fiction",
@@ -296,10 +296,10 @@
     "release_date": "2026-05-21",
     "overview": "A talented piano tuner's life is turned upside down when he discovers that his meticulous skills for tuning pianos can equally be applied to cracking safes.",
     "tagline": "Everybody has one hidden talent.",
-    "runtime": 107,
+    "runtime": 108,
     "genres": [
-      "Crime",
-      "Thriller"
+      "Thriller",
+      "Crime"
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/kyM60vcgf7lfofmZB4F5Rj7OrHW.jpg",
     "directors": [
@@ -370,7 +370,7 @@
       "Music",
       "Drama"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/lsDLLagSIyTu0Gi06QjVKDp2LI2.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/sGgX2K0SJqw90Ju8TONdhDVwlzT.jpg",
     "directors": [
       "John Carney"
     ],
@@ -389,8 +389,7 @@
     "tagline": "Every line will be crossed.",
     "runtime": 96,
     "genres": [
-      "Comedy",
-      "Horror"
+      "Comedy"
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/reZ8NInXjMkkaOpUHcI3Pn7iaRN.jpg",
     "directors": [
@@ -407,11 +406,10 @@
     "tmdb_id": 1275779,
     "tmdb_title": "Disclosure Day",
     "release_date": "2026-06-10",
-    "overview": "If you found out we weren\u2019t alone, if someone showed you, proved it to you, would that frighten you?",
+    "overview": "A cybersecurity expert becomes a whistleblower after uncovering secrets about aliens, putting him on the run from a corporation. Meanwhile, a meteorologist experiencing strange phenomena joins forces with him to prove there's life beyond our understanding.",
     "tagline": "We deserve to know.",
     "runtime": 145,
     "genres": [
-      "Action",
       "Science Fiction",
       "Thriller"
     ],
@@ -461,7 +459,7 @@
       "Comedy",
       "Adventure"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/pxG26JdyuiDvJbSoucknaFiLeZD.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/a6H2U7pjibMia41TwyFVd1PVQw3.jpg",
     "directors": [
       "Andrew Stanton"
     ],
@@ -481,7 +479,8 @@
     "runtime": 123,
     "genres": [
       "Drama",
-      "Thriller"
+      "Thriller",
+      "Action"
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/4cD7KeABHyzeJmzdA6QKe36fp2d.jpg",
     "directors": [
@@ -497,7 +496,7 @@
   "Girls Like Girls": {
     "tmdb_id": 1397485,
     "tmdb_title": "Girls Like Girls",
-    "release_date": "2026-06-19",
+    "release_date": "2026-06-18",
     "overview": "Coley, 17, from rural Oregon, navigates intimacy after her mother's passing. Meeting Sonya sparks new feelings, but self-doubt hinders their connection. Sonya, unfamiliar with dating girls, is uncertain. They learn to embrace emotions.",
     "tagline": "Love begins when you let it in.",
     "runtime": 95,
@@ -528,7 +527,7 @@
       "Adventure",
       "Science Fiction"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/6CDfEftzqo5qjZAzyW0W6lFVGl0.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/moejGxR2haap29d9NQ7qe8x4eGj.jpg",
     "directors": [
       "Craig Gillespie"
     ],
@@ -578,10 +577,10 @@
       "Olivia Wilde"
     ],
     "cast": [
-      "Olivia Wilde",
       "Seth Rogen",
-      "Pen\u00e9lope Cruz",
-      "Edward Norton"
+      "Olivia Wilde",
+      "Edward Norton",
+      "Pen\u00e9lope Cruz"
     ]
   },
   "Minions & Monsters": {
@@ -615,10 +614,11 @@
     "release_date": "2026-07-03",
     "overview": "Before he led a nation, George Washington was a young soldier thrown into a global conflict. With alliances crumbling and war closing in, he must choose who to trust and confront the leader he's becoming.",
     "tagline": "250 years of history begins with one man.",
-    "runtime": null,
+    "runtime": 125,
     "genres": [
-      "History",
-      "Drama"
+      "Action",
+      "Adventure",
+      "War"
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/ntW9zzhDmbt3sXDyPXb7SHVuDdB.jpg",
     "directors": [
@@ -644,7 +644,7 @@
       "Comedy",
       "Adventure"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/zKVgiv5qHCvCLT4A2ymJi5QeXDH.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/rQ0f1Y3t9w3DxVxuVydkgqQ2Hji.jpg",
     "directors": [
       "Thomas Kail"
     ],
@@ -688,7 +688,7 @@
       "Action",
       "Fantasy"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/pe5cCoX5iIb5IWKPsbPkCwjLFHt.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/krVa7rKCQb4OBfsr2LTJv4rTz5q.jpg",
     "directors": [
       "Christopher Nolan"
     ],
@@ -724,14 +724,14 @@
     "tmdb_id": 1212763,
     "tmdb_title": "Evil Dead Burn",
     "release_date": "2026-07-08",
-    "overview": "After the loss of her husband, a woman seeks solace with her in-laws in their secluded family home. As one by one they are transformed into Deadites\u2014turning the gathering into a family reunion from hell\u2014she comes to discover that the vows she took in life... live on even in death.",
+    "overview": "After the loss of her husband, a woman seeks solace with her in-laws. As one by one they transform into deadites, she comes to discover that the vows she took in life - survive even in death.",
     "tagline": "Every family has its demons.",
     "runtime": 110,
     "genres": [
       "Horror",
       "Thriller"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/ztadKzIIR0ERYqpHteaPFtk7inP.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/syGSQh7bqPHCFRhwHewHdR5EqjD.jpg",
     "directors": [
       "S\u00e9bastien Vani\u010dek"
     ],
@@ -747,7 +747,7 @@
     "tmdb_title": "Spider-Man: Brand New Day",
     "release_date": "2026-07-29",
     "overview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him\u2014and the pressure of seeing his old friends move on without him\u2014sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
-    "tagline": "A brand new day starts now.",
+    "tagline": null,
     "runtime": null,
     "genres": [
       "Science Fiction",
@@ -769,7 +769,7 @@
     "tmdb_id": 1101412,
     "tmdb_title": "Fall 2: Deadpoint",
     "release_date": "2026-08-13",
-    "overview": "Overwhelmed by her sister Hunter\u2019s death, Jax connects with Luce, Hunter\u2019s fearless friend. To heal, they attempt the infamous plank walk of Mount Kwan in Thailand. After a sudden rockslide leaves them stranded on a fragile plank 3000 feet in the air, Jax must confront her deepest fears and fight for survival to find closure.",
+    "overview": "On a perilous climb across Thailand's Mount Kwan, two climbers become trapped thousands of feet above the ground, where vertigo-inducing heights, sheer exposure, and impossible odds turn every moment into a fight for survival.",
     "tagline": "Are you down?",
     "runtime": null,
     "genres": [
@@ -777,8 +777,8 @@
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/ckKAdEz49bJ10jCLbCYIzVHJGEu.jpg",
     "directors": [
-      "Peter Spierig",
-      "Michael Spierig"
+      "Michael Spierig",
+      "Peter Spierig"
     ],
     "cast": [
       "Harriet Slater",
@@ -971,7 +971,7 @@
   "Spa Weekend": {
     "tmdb_id": 1341138,
     "tmdb_title": "Spa Weekend",
-    "release_date": "2026-08-21",
+    "release_date": "2026-08-20",
     "overview": "Four lifelong friends realize that somewhere between careers, relationships, families and everyday responsibilities, they have forgotten how to take care of themselves and each other. Burned out and overdue for a break, the women escape to a luxury spa retreat for what turns out to be an unforgettable weekend dedicated to fun, laughter, and a lot of really bad decisions.",
     "tagline": "Friendship is a real trip.",
     "runtime": null,
@@ -1016,7 +1016,7 @@
   "Coyote vs ACME": {
     "tmdb_id": 1204680,
     "tmdb_title": "Coyote vs ACME",
-    "release_date": "2026-08-26",
+    "release_date": "2026-08-21",
     "overview": "After Acme products fail him one too many times in his dogged pursuit of the Roadrunner, Wile E. Coyote decides to hire a billboard lawyer to sue the Acme Corporation.",
     "tagline": "The movie ACME doesn't want you to see.",
     "runtime": null,
