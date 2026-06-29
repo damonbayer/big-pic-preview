@@ -51,10 +51,10 @@
     "runtime": 109,
     "genres": [
       "Comedy",
-      "Family",
-      "Mystery"
+      "Mystery",
+      "Family"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/6QtL9rl3Zb4d8qW6EJ4qO5hSSfU.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/iKy5460GdsoknM8ppmGlJbKxAKa.jpg",
     "directors": [
       "Kyle Balda"
     ],
@@ -294,22 +294,24 @@
     "tmdb_id": 1340206,
     "tmdb_title": "Tuner",
     "release_date": "2026-05-21",
-    "overview": "A talented piano tuner's life is turned upside down when he discovers that his meticulous skills for tuning pianos can equally be applied to cracking safes.",
+    "overview": "A gifted piano tuner's meticulous skills for tuning pianos lead him to discover an unexpected aptitude for cracking safes, turning his life upside down.",
     "tagline": "Everybody has one hidden talent.",
     "runtime": 108,
     "genres": [
-      "Thriller",
-      "Crime"
+      "Crime",
+      "Drama",
+      "Music",
+      "Thriller"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/kyM60vcgf7lfofmZB4F5Rj7OrHW.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/5OvA3i9wZs5jHu0DCrfmXlzAM67.jpg",
     "directors": [
       "Daniel Roher"
     ],
     "cast": [
       "Leo Woodall",
       "Havana Rose Liu",
-      "Lior Raz",
-      "Tovah Feldshuh"
+      "Dustin Hoffman",
+      "Lior Raz"
     ]
   },
   "Backrooms": {
@@ -389,7 +391,8 @@
     "tagline": "Every line will be crossed.",
     "runtime": 96,
     "genres": [
-      "Comedy"
+      "Comedy",
+      "Horror"
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/reZ8NInXjMkkaOpUHcI3Pn7iaRN.jpg",
     "directors": [
@@ -428,7 +431,7 @@
     "tmdb_id": 1541560,
     "tmdb_title": "Stop! That! Train!",
     "release_date": "2026-06-12",
-    "overview": "Best friends and train stewardesses Tess and DeeDee trade their dreary shifts on the Stank Rail for the glitzy Glamazonian Express. However, when a catastrophic Stormaganza threatens to crash the high-speed train into Los Angeles, the duo in coach must join forces with the snobby first-class attendants and President Gagwell to save the day.",
+    "overview": "Best friends and train stewardesses Tess and DeeDee trade their dreary shifts on the Stank Rail for the glitzy Glamazonian Express. However, when a catastrophic Stormaganza threatens to crash the high-speed train into Celebration, Florida, the duo in coach must join forces with the snobby first-class attendants, a hot but dimwitted co-conductor, and fabulous US President Judy Gagwell to save the day.",
     "tagline": "The greatest trainwreck in herstory.",
     "runtime": 90,
     "genres": [
@@ -459,7 +462,7 @@
       "Comedy",
       "Adventure"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/a6H2U7pjibMia41TwyFVd1PVQw3.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/pxG26JdyuiDvJbSoucknaFiLeZD.jpg",
     "directors": [
       "Andrew Stanton"
     ],
@@ -478,6 +481,7 @@
     "tagline": "He was no hero.",
     "runtime": 123,
     "genres": [
+      "Adventure",
       "Drama",
       "Thriller",
       "Action"
@@ -518,7 +522,7 @@
   "Supergirl": {
     "tmdb_id": 1081003,
     "tmdb_title": "Supergirl",
-    "release_date": "2026-06-23",
+    "release_date": "2026-06-24",
     "overview": "When an unexpected and ruthless adversary strikes too close to home, Kara Zor-El, aka Supergirl, reluctantly joins forces with an unlikely companion on an epic, interstellar journey of vengeance and justice.",
     "tagline": "Truth. Justice. Whatever.",
     "runtime": 108,
@@ -527,7 +531,7 @@
       "Adventure",
       "Science Fiction"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/moejGxR2haap29d9NQ7qe8x4eGj.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/niSvU02l2BONH9ivubV6K1a5QiK.jpg",
     "directors": [
       "Craig Gillespie"
     ],
@@ -535,7 +539,7 @@
       "Milly Alcock",
       "Eve Ridley",
       "Matthias Schoenaerts",
-      "David Krumholtz"
+      "Jason Momoa"
     ]
   },
   "Jackass: Best and Last": {
@@ -572,7 +576,7 @@
       "Drama",
       "Comedy"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/vJRFj5ri9Zm7Tg0Tn7pBmOtXqKb.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/b7Dr8Chzse8VagexAporUu2RtLx.jpg",
     "directors": [
       "Olivia Wilde"
     ],
@@ -644,7 +648,7 @@
       "Comedy",
       "Adventure"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/rQ0f1Y3t9w3DxVxuVydkgqQ2Hji.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/zKVgiv5qHCvCLT4A2ymJi5QeXDH.jpg",
     "directors": [
       "Thomas Kail"
     ],
@@ -731,7 +735,7 @@
       "Horror",
       "Thriller"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/syGSQh7bqPHCFRhwHewHdR5EqjD.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/ztadKzIIR0ERYqpHteaPFtk7inP.jpg",
     "directors": [
       "S\u00e9bastien Vani\u010dek"
     ],
@@ -747,7 +751,7 @@
     "tmdb_title": "Spider-Man: Brand New Day",
     "release_date": "2026-07-29",
     "overview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him\u2014and the pressure of seeing his old friends move on without him\u2014sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
-    "tagline": null,
+    "tagline": "A brand new day starts now.",
     "runtime": null,
     "genres": [
       "Science Fiction",
@@ -777,8 +781,8 @@
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/ckKAdEz49bJ10jCLbCYIzVHJGEu.jpg",
     "directors": [
-      "Michael Spierig",
-      "Peter Spierig"
+      "Peter Spierig",
+      "Michael Spierig"
     ],
     "cast": [
       "Harriet Slater",
@@ -1049,7 +1053,7 @@
       "Science Fiction",
       "Thriller"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/ePWFnyCQQr4fvBOD1lgKtcvfnCd.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/A7i16oDi03qrKep5pBfuTWNUTb.jpg",
     "directors": [
       "Ridley Scott"
     ],
