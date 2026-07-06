@@ -10,7 +10,7 @@
       "Comedy",
       "Drama"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/xTI42pmsP5EDnvsNJPEDubwWBQO.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/fCAURTUx3YfsJ8k9I0UamjSILiR.jpg",
     "directors": [
       "David Frankel"
     ],
@@ -27,7 +27,7 @@
     "release_date": "2026-04-29",
     "overview": "When novelist Ohm Bauman retreats to a remote inn to scatter his parents' ashes, he is consumed by tales of a witch haunting the honeymoon suite. Disturbing visions and a shocking disappearance forces him to confront dark corners of his past.",
     "tagline": "We've been expecting you.",
-    "runtime": 107,
+    "runtime": 108,
     "genres": [
       "Horror"
     ],
@@ -50,11 +50,11 @@
     "tagline": "A new breed of mystery.",
     "runtime": 109,
     "genres": [
-      "Comedy",
       "Mystery",
+      "Comedy",
       "Family"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/iKy5460GdsoknM8ppmGlJbKxAKa.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/TEaSqmI6TZQVimULYbingDIdXT.jpg",
     "directors": [
       "Kyle Balda"
     ],
@@ -139,7 +139,7 @@
     "release_date": "2026-05-13",
     "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
     "tagline": "Be careful who you wish for\u2026",
-    "runtime": 108,
+    "runtime": 109,
     "genres": [
       "Horror",
       "Thriller"
@@ -209,7 +209,8 @@
     "runtime": 94,
     "genres": [
       "Horror",
-      "Thriller"
+      "Thriller",
+      "Adventure"
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/2sOEJzhPzjTkZSlPbGxOJ7xgIyS.jpg",
     "directors": [
@@ -300,7 +301,6 @@
     "genres": [
       "Crime",
       "Drama",
-      "Music",
       "Thriller"
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/5OvA3i9wZs5jHu0DCrfmXlzAM67.jpg",
@@ -319,7 +319,7 @@
     "tmdb_title": "Backrooms",
     "release_date": "2026-05-27",
     "overview": "A strange doorway appears in the basement of a furniture showroom.",
-    "tagline": "You are not supposed to be here.",
+    "tagline": "See how far it goes.",
     "runtime": 111,
     "genres": [
       "Horror",
@@ -391,10 +391,9 @@
     "tagline": "Every line will be crossed.",
     "runtime": 96,
     "genres": [
-      "Comedy",
-      "Horror"
+      "Comedy"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/reZ8NInXjMkkaOpUHcI3Pn7iaRN.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/1KlYdWoOrbL5ux357rW9LC155qw.jpg",
     "directors": [
       "Michael Tiddes"
     ],
@@ -411,12 +410,12 @@
     "release_date": "2026-06-10",
     "overview": "A cybersecurity expert becomes a whistleblower after uncovering secrets about aliens, putting him on the run from a corporation. Meanwhile, a meteorologist experiencing strange phenomena joins forces with him to prove there's life beyond our understanding.",
     "tagline": "We deserve to know.",
-    "runtime": 145,
+    "runtime": 146,
     "genres": [
       "Science Fiction",
       "Thriller"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/3o5YPjDGDTcTDL5ftDA9NwN9dLd.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/7RYO0KTXIJ0rS0LqnCQLxeNR3P3.jpg",
     "directors": [
       "Steven Spielberg"
     ],
@@ -462,7 +461,7 @@
       "Comedy",
       "Adventure"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/pxG26JdyuiDvJbSoucknaFiLeZD.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/sfQtVlIHljToOwYjhe21KPGzZWK.jpg",
     "directors": [
       "Andrew Stanton"
     ],
@@ -486,7 +485,7 @@
       "Thriller",
       "Action"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/4cD7KeABHyzeJmzdA6QKe36fp2d.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/13MmRwmG5NmaMfU8qNrtgGXisiD.jpg",
     "directors": [
       "Michael Sarnoski"
     ],
@@ -569,7 +568,7 @@
     "tmdb_id": 950028,
     "tmdb_title": "The Invite",
     "release_date": "2026-06-25",
-    "overview": "Joe and Angela\u2019s marriage is on thin ice. When they invite their enigmatic upstairs neighbors for a dinner party, the night spirals into unexpected places. Have they reignited the spark or lit the match that burns it all down?",
+    "overview": "Joe and Angela's marriage is on thin ice. When they invite their enigmatic upstairs neighbors for a dinner party, the night spirals into unexpected places. Have they reignited the spark or lit the match that burns it all down?",
     "tagline": "It'll be fun.",
     "runtime": 107,
     "genres": [
@@ -583,8 +582,8 @@
     "cast": [
       "Seth Rogen",
       "Olivia Wilde",
-      "Edward Norton",
-      "Pen\u00e9lope Cruz"
+      "Pen\u00e9lope Cruz",
+      "Edward Norton"
     ]
   },
   "Minions & Monsters": {
@@ -615,11 +614,12 @@
   "Young Washington": {
     "tmdb_id": 1308767,
     "tmdb_title": "Young Washington",
-    "release_date": "2026-07-03",
+    "release_date": "2026-07-02",
     "overview": "Before he led a nation, George Washington was a young soldier thrown into a global conflict. With alliances crumbling and war closing in, he must choose who to trust and confront the leader he's becoming.",
     "tagline": "250 years of history begins with one man.",
     "runtime": 125,
     "genres": [
+      "History",
       "Action",
       "Adventure",
       "War"
@@ -631,8 +631,8 @@
     "cast": [
       "William Franklyn-Miller",
       "Ben Kingsley",
-      "Andy Serkis",
-      "Kelsey Grammer"
+      "Mary-Louise Parker",
+      "Leo Hanna"
     ]
   },
   "Moana": {
@@ -640,7 +640,7 @@
     "tmdb_title": "Moana",
     "release_date": "2026-07-08",
     "overview": "Moana answers the Ocean's call and, for the first time, voyages beyond the reef of her island of Motunui with the infamous demigod Maui on an unforgettable journey to restore prosperity to her people.",
-    "tagline": "The ocean is calling.",
+    "tagline": "The ocean chose her for a reason.",
     "runtime": 115,
     "genres": [
       "Family",
@@ -662,9 +662,9 @@
   "Gail Daughtry and the Celebrity Sex Pass": {
     "tmdb_id": 1476682,
     "tmdb_title": "Gail Daughtry and the Celebrity Sex Pass",
-    "release_date": "2026-07-10",
-    "overview": "A Midwestern bride-to-be, Gail Daughtry, has a celebrity hall pass agreement with her fianc\u00e9\u2026 who uses it. Their relationship in crisis, Gail sets out on an epic journey through Hollywood to even the scales.",
-    "tagline": null,
+    "release_date": "2026-07-09",
+    "overview": "Small town hairdresser Gail Daughtry (Zoey Deutch) is engaged to her devoted high school sweetheart, Tom (Michael Cassidy). Her life takes a turn when a trip to a book signing leads to Tom meeting - and sleeping - with his \"celebrity pass\". Reeling from the betrayal, Gail impulsively joins her friend Otto (Miles Gutierrez-Riley) on a trip to Los Angeles, where a psychic convinces Gail that the only way to save her marriage is to \"even the scales\" with her own celebrity pass: Jon Hamm (Jon Hamm). Thus begins an epic journey through Tinseltown as Gail and Otto join forces with a talent agency assistant, a paparazzo, and actor John Slattery (John Slattery), all in the search for Hamm. Along the way, they collide with celebrities and are hunted by a group of Italian assassins as they get ever closer to finding the elusive star.",
+    "tagline": "It's hammer time... who's your celebrity sex pass?",
     "runtime": 93,
     "genres": [
       "Comedy"
@@ -692,7 +692,7 @@
       "Action",
       "Fantasy"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/krVa7rKCQb4OBfsr2LTJv4rTz5q.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
     "directors": [
       "Christopher Nolan"
     ],
@@ -727,7 +727,7 @@
   "Evil Dead Burn": {
     "tmdb_id": 1212763,
     "tmdb_title": "Evil Dead Burn",
-    "release_date": "2026-07-08",
+    "release_date": "2026-07-07",
     "overview": "After the loss of her husband, a woman seeks solace with her in-laws. As one by one they transform into deadites, she comes to discover that the vows she took in life - survive even in death.",
     "tagline": "Every family has its demons.",
     "runtime": 110,
@@ -752,7 +752,7 @@
     "release_date": "2026-07-29",
     "overview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him\u2014and the pressure of seeing his old friends move on without him\u2014sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
     "tagline": "A brand new day starts now.",
-    "runtime": null,
+    "runtime": 144,
     "genres": [
       "Science Fiction",
       "Action",
@@ -781,8 +781,8 @@
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/ckKAdEz49bJ10jCLbCYIzVHJGEu.jpg",
     "directors": [
-      "Peter Spierig",
-      "Michael Spierig"
+      "Michael Spierig",
+      "Peter Spierig"
     ],
     "cast": [
       "Harriet Slater",
@@ -819,7 +819,7 @@
     "release_date": "2026-08-05",
     "overview": "Two love-starved strangers crash into each other on the one night of the year when single people are allowed to have sex.",
     "tagline": "12 hours can change everything.",
-    "runtime": null,
+    "runtime": 102,
     "genres": [
       "Comedy",
       "Romance"
@@ -909,7 +909,7 @@
     "tmdb_id": 1124142,
     "tmdb_title": "The Rivals of Amziah King",
     "release_date": "2026-08-14",
-    "overview": "Deep within the backwoods of rural Oklahoma, charismatic and musically gifted Amziah King herds a bluegrass-playing band of misfits while overseeing the premier honey-making operation in town. When Amziah\u2019s estranged foster daughter unexpectedly returns, Amziah leaps at the possibility to renew connection and create a family business. But the honey game is ruthless, and Amziah\u2019s rivals threaten to destroy everything he has built.",
+    "overview": "Amziah King, beekeeper, musician, and anchor of his community, reunites with former foster daughter Kateri after many years apart, and fends off threats to his honey business.",
     "tagline": "Ain\u2019t no one all bad or all good.",
     "runtime": 130,
     "genres": [
@@ -984,8 +984,8 @@
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/d2Ga7lZI4c19YGcIH09vj9mDZKU.jpg",
     "directors": [
-      "Jon Lucas",
-      "Scott Moore"
+      "Scott Moore",
+      "Jon Lucas"
     ],
     "cast": [
       "Leslie Mann",
@@ -997,7 +997,7 @@
   "Cliffhanger": {
     "tmdb_id": 1120556,
     "tmdb_title": "Cliffhanger",
-    "release_date": "2026-08-26",
+    "release_date": "2026-08-28",
     "overview": "During a weekend trip with a billionaire's son, seasoned mountaineer Ray Cooper and his daughter Sydney are targeted by a gang of kidnappers. Ray\u2019s other daughter Naomi, still haunted by a past climbing accident, witnesses the attack and escapes. To save her family, she must confront her fears and fight for survival.",
     "tagline": null,
     "runtime": null,
@@ -1082,8 +1082,8 @@
     "cast": [
       "Spike Fearn",
       "Angourie Rice",
-      "Minnie Driver",
-      "Yali Topol Margalith"
+      "Cora Kirk",
+      "Prasanna Puwanarajah"
     ]
   },
   "Idiots": {
@@ -1097,7 +1097,7 @@
       "Comedy",
       "Crime"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/4td0HGCYFePje1PKHERyxXhp2Hf.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/6GighAm1FOixgUuMQ1uEGxe3AKq.jpg",
     "directors": [
       "Macon Blair"
     ],
