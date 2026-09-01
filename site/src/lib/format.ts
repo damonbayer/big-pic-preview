@@ -12,6 +12,48 @@ export function fmtDate(iso: string | null): string {
   return `${MONTHS[m - 1]} ${d}`;
 }
 
+type UpdatedFormatOptions = {
+  now?: Date;
+  locale?: string | string[];
+  timeZone?: string;
+};
+
+function calendarDay(date: Date, locale: string | string[] | undefined, timeZone?: string): number {
+  const parts = new Intl.DateTimeFormat(locale, {
+    ...(timeZone ? { timeZone } : {}),
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  }).formatToParts(date);
+  const value = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((part) => part.type === type)?.value);
+  return Date.UTC(value('year'), value('month') - 1, value('day')) / 86_400_000;
+}
+
+export function formatUpdated(iso: string, options: UpdatedFormatOptions = {}): string {
+  const { now = new Date(), locale, timeZone } = options;
+  const date = new Date(iso);
+  const dayDifference = calendarDay(now, locale, timeZone) - calendarDay(date, locale, timeZone);
+  const time = date.toLocaleTimeString(locale, {
+    ...(timeZone ? { timeZone } : {}),
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
+
+  if (dayDifference === 0) return `today at ${time}`;
+  if (dayDifference === 1) return `yesterday at ${time}`;
+
+  return date.toLocaleString(locale, {
+    ...(timeZone ? { timeZone } : {}),
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
+}
+
 // Server-side fallback for the "scores last updated" stamp. The client script
 // (see scoreboard.ts) rewrites this in the visitor's own time zone; this is what
 // no-JS readers and the first paint see, rendered in UTC so it's unambiguous.

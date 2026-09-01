@@ -1,3 +1,5 @@
+import { formatUpdated } from '../lib/format';
+
 // ----- movie hover/click card -----
 // Wrapped so a missing card element only disables this feature; the sorting,
 // scroll shadows, timestamp, and badge/emoji animations below run regardless.
@@ -179,20 +181,13 @@ for (const emoji of document.querySelectorAll<HTMLElement>('.progress .emoji')) 
 // ----- localize the "scores last updated" stamp -----
 // The page ships a UTC fallback (for no-JS readers and the first paint); rewrite
 // it here in the visitor's own locale and time zone so the time reads on their
-// clock. `toLocaleString(undefined, …)` defaults to both.
+// clock. Leaving locale and time zone unspecified defaults to both.
 for (const el of document.querySelectorAll<HTMLTimeElement>('time[data-local-time]')) {
   const iso = el.getAttribute('datetime');
   if (!iso) continue;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) continue;
-  el.textContent = d.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZoneName: 'short',
-  });
+  el.textContent = formatUpdated(iso);
   el.title = d.toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'long' });
 }
 

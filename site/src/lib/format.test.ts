@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MovieRow } from '../data/games';
-import { advantage, diffChip } from './format';
+import { advantage, diffChip, formatUpdated } from './format';
 
 // diffChip only reads `scored` and `diff`, so a minimal stub stands in for a row.
 function row(diff: number, scored = true): MovieRow {
@@ -42,5 +42,32 @@ describe('diffChip — plain Sean−Amanda gap (objective-independent)', () => {
 
   it('shows TBD before a movie is scored', () => {
     expect(diffChip(row(5, false))).toEqual({ text: 'TBD', cls: 'tbd' });
+  });
+});
+
+describe('formatUpdated', () => {
+  const now = new Date('2026-09-01T18:00:00Z');
+  const options = { now, locale: 'en-US', timeZone: 'UTC' };
+
+  it('uses relative wording for today', () => {
+    expect(formatUpdated('2026-09-01T12:34:00Z', options)).toBe('today at 12:34 PM UTC');
+  });
+
+  it('uses relative wording for yesterday', () => {
+    expect(formatUpdated('2026-08-31T12:34:00Z', options)).toBe('yesterday at 12:34 PM UTC');
+  });
+
+  it('uses the full date for older updates', () => {
+    expect(formatUpdated('2026-08-30T12:34:00Z', options)).toBe('Aug 30, 2026, 12:34 PM UTC');
+  });
+
+  it('compares calendar days in the displayed time zone', () => {
+    expect(
+      formatUpdated('2026-09-01T04:30:00Z', {
+        now: new Date('2026-09-01T07:30:00Z'),
+        locale: 'en-US',
+        timeZone: 'America/Chicago',
+      }),
+    ).toBe('yesterday at 11:30 PM CDT');
   });
 });
