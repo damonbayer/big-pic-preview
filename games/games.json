@@ -33,7 +33,7 @@
       "season": "Summer",
       "year": 2026,
       "title": "Summer Movie Preview",
-      "live": true,
+      "live": false,
       "episodes": [
         {
           "label": "The Summer Movie Preview",
@@ -46,6 +46,10 @@
         {
           "label": "The July Check-In",
           "url": "https://www.theringer.com/podcasts/the-big-picture/2026/07/27/sex-hell-and-10-movies-we-missed-this-summer-plus-gregg-araki"
+        },
+        {
+          "label": "The September Wrap-Up",
+          "url": "https://www.theringer.com/podcasts/the-big-picture/2026/09/11/the-winners-and-losers-of-the-summer-movies-came-roaring-back-plus-hope-the-uprising-and-10-more-we-missed"
         }
       ],
       "scoring": {

@@ -29,7 +29,8 @@
     "tagline": "We've been expecting you.",
     "runtime": 108,
     "genres": [
-      "Horror"
+      "Horror",
+      "Thriller"
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/x6rHcQFiYcczLQPrmxXPAicm54E.jpg",
     "directors": [
@@ -211,7 +212,7 @@
       "Horror",
       "Thriller"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/2sOEJzhPzjTkZSlPbGxOJ7xgIyS.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/svrAzMTif4OmIjGJzC0W92d5O1o.jpg",
     "directors": [
       "Andr\u00e9 \u00d8vredal"
     ],
@@ -234,7 +235,7 @@
       "Adventure",
       "Science Fiction"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/7GV5rrUJf0BRUhoh2cyFoeNthlQ.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/uwMKWjcNID0D9jjplsjkQS2OrB4.jpg",
     "directors": [
       "Jon Favreau"
     ],
@@ -294,7 +295,7 @@
     "tmdb_id": 1340206,
     "tmdb_title": "Tuner",
     "release_date": "2026-05-21",
-    "overview": "A talented piano tuner's meticulous skills for tuning pianos lead him to discover an unexpected aptitude for cracking safes, turning his life upside down.",
+    "overview": "A gifted piano tuner's meticulous skills for tuning pianos lead him to discover an unexpected aptitude for cracking safes, turning his life upside down.",
     "tagline": "Everybody has one hidden talent.",
     "runtime": 108,
     "genres": [
@@ -308,9 +309,9 @@
     ],
     "cast": [
       "Leo Woodall",
+      "Dustin Hoffman",
       "Havana Rose Liu",
-      "Lior Raz",
-      "Tovah Feldshuh"
+      "Lior Raz"
     ]
   },
   "Backrooms": {
@@ -397,10 +398,10 @@
       "Michael Tiddes"
     ],
     "cast": [
-      "Marlon Wayans",
-      "Shawn Wayans",
       "Anna Faris",
-      "Regina Hall"
+      "Regina Hall",
+      "Marlon Wayans",
+      "Shawn Wayans"
     ]
   },
   "Disclosure Day": {
@@ -436,7 +437,7 @@
       "Action",
       "Comedy"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/7t69fo096Ddre1fEmCitxTdQ89v.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/w90dGS6D2lVO4aO5rdQ8QECrUGY.jpg",
     "directors": [
       "Adam Shankman"
     ],
@@ -512,8 +513,8 @@
     "cast": [
       "Maya da Costa",
       "Myra Molloy",
-      "Levon Hawke",
-      "Zach Braff"
+      "Zach Braff",
+      "Levon Hawke"
     ]
   },
   "Supergirl": {
@@ -579,8 +580,8 @@
       "Olivia Wilde"
     ],
     "cast": [
-      "Seth Rogen",
       "Olivia Wilde",
+      "Seth Rogen",
       "Pen\u00e9lope Cruz",
       "Edward Norton"
     ]
@@ -646,7 +647,7 @@
       "Comedy",
       "Adventure"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/zKVgiv5qHCvCLT4A2ymJi5QeXDH.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/gaet1xQ2nxrG0V1Ep9T20ZMNEIC.jpg",
     "directors": [
       "Thomas Kail"
     ],
@@ -776,16 +777,16 @@
     "genres": [
       "Thriller"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/p73G56bJGPa5y52cyqWscHR6NnN.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/fgSm5ylwiXbIHn8UbUXDjk9RRu4.jpg",
     "directors": [
-      "Michael Spierig",
-      "Peter Spierig"
+      "Peter Spierig",
+      "Michael Spierig"
     ],
     "cast": [
       "Harriet Slater",
       "Arsema Thomas",
       "Tom Brittney",
-      "Einar Haraldsson"
+      "Virginia Gardner"
     ]
   },
   "Ice Cream Man": {
@@ -796,32 +797,33 @@
     "tagline": "We all scream.",
     "runtime": 86,
     "genres": [
+      "Comedy",
       "Horror",
-      "Comedy"
+      "Thriller"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/c987gxFjXqYOxZEZKcTkS1ONTWH.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/lNBxToxHWrzmkqeFnf1XADUTxQq.jpg",
     "directors": [
       "Eli Roth"
     ],
     "cast": [
       "Ari Millen",
       "Charlie Zeltzer",
-      "Kole Parks",
-      "Shiloh O\u2019Reilly"
+      "Shiloh O\u2019Reilly",
+      "Kiori Mirza Waldman"
     ]
   },
   "One Night Only": {
     "tmdb_id": 1433367,
     "tmdb_title": "One Night Only",
-    "release_date": "2026-07-28",
+    "release_date": "2026-08-06",
     "overview": "Two love-starved strangers crash into each other on the one night of the year when single people are allowed to have sex.",
     "tagline": "12 hours can change everything.",
-    "runtime": 102,
+    "runtime": 103,
     "genres": [
-      "Comedy",
-      "Romance"
+      "Romance",
+      "Comedy"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/9LGEqZvzI7Tsosf8srwEY48rZsD.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/f1v8IcYcQggeq1N0unoMJMrzTd9.jpg",
     "directors": [
       "Will Gluck"
     ],
@@ -836,15 +838,15 @@
     "tmdb_id": 675871,
     "tmdb_title": "Super Troopers 3",
     "release_date": "2026-08-06",
-    "overview": "When Farva's over-the-top Indian engagement to Thorny's sister spirals into chaos, the Super Troopers must navigate Thorny's schemes to break up the relationship, all while trying to bring down a pernicious new drug ring.",
+    "overview": "When Farva\u2019s wildly over-the-top Indian engagement to Thorny\u2019s sister spirals into chaos, the Super Troopers must navigate Thorny\u2019s schemes to break up the relationship, while trying to crack a pernicious new drug ring  \u2014 all to save the day and maybe the wedding itself.",
     "tagline": "The mustache rides, again. Again.",
-    "runtime": 100,
+    "runtime": 104,
     "genres": [
       "Comedy",
       "Crime",
       "Mystery"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/VVU42nqsEmUtFpH1d9MHj5BIpF.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/ecTxAyfx4fdTMy2N288oZMMn3Ey.jpg",
     "directors": [
       "Jay Chandrasekhar"
     ],
@@ -861,7 +863,7 @@
     "release_date": "2026-08-12",
     "overview": "After a mysterious cosmic event rips Oak Street from suburbia and transports their neighborhood to someplace unknown, the Platt family soon discovers that their very survival depends on them sticking together as they navigate their now unrecognizable surroundings.",
     "tagline": "Where goes the neighborhood.",
-    "runtime": 99,
+    "runtime": 100,
     "genres": [
       "Science Fiction",
       "Mystery",
@@ -874,8 +876,8 @@
     "cast": [
       "Anne Hathaway",
       "Ewan McGregor",
-      "Christian Convery",
-      "Maisy Stella"
+      "Maisy Stella",
+      "Christian Convery"
     ]
   },
   "PAW Patrol: The Dino Movie": {
@@ -909,11 +911,11 @@
     "release_date": "2026-08-13",
     "overview": "Deep within the backwoods of rural Oklahoma, charismatic and musically gifted Amziah King herds a bluegrass-playing band of misfits while overseeing the premier honey-making operation in town. When Amziah\u2019s estranged foster daughter unexpectedly returns, Amziah leaps at the possibility to renew connection and create a family business. But the honey game is ruthless, and Amziah\u2019s rivals threaten to destroy everything he has built.",
     "tagline": "Ain\u2019t no one all bad or all good.",
-    "runtime": 130,
+    "runtime": 131,
     "genres": [
+      "Thriller",
       "Crime",
-      "Drama",
-      "Thriller"
+      "Drama"
     ],
     "poster_url": "https://image.tmdb.org/t/p/w342/3iVDCDS1VwHIm95PjWEPwsfdhaf.jpg",
     "directors": [
@@ -921,9 +923,9 @@
     ],
     "cast": [
       "Matthew McConaughey",
+      "Kurt Russell",
       "Angelina LookingGlass",
-      "Jake Horowitz",
-      "Scott Shepherd"
+      "Cole Sprouse"
     ]
   },
   "Insidious: Out of the Further": {
@@ -944,8 +946,8 @@
     "cast": [
       "Amelia Eve",
       "Island Austin",
-      "Lin Shaye",
-      "Sam Spruell"
+      "Brandon Perea",
+      "Lin Shaye"
     ]
   },
   "Mutiny": {
@@ -954,7 +956,7 @@
     "release_date": "2026-08-19",
     "overview": "After witnessing his billionaire boss' murder and being framed for the crime, Cole Reed boards a cargo ship on a one-man crusade to avenge his boss' death only to discover an international conspiracy.",
     "tagline": "There's blood in the water.",
-    "runtime": 95,
+    "runtime": 96,
     "genres": [
       "Action",
       "Thriller"
@@ -980,7 +982,7 @@
     "genres": [
       "Comedy"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/i3I19SbOyz6AIl0cSYdyVJRucMr.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/uhx4YjT9YbSxrKVE7GWJdjI412J.jpg",
     "directors": [
       "Jon Lucas",
       "Scott Moore"
@@ -995,7 +997,7 @@
   "Cliffhanger": {
     "tmdb_id": 1120556,
     "tmdb_title": "Cliffhanger",
-    "release_date": "2027-02-24",
+    "release_date": "2027-04-29",
     "overview": "During a weekend trip with a billionaire's son, seasoned mountaineer Ray Cooper and his daughter Sydney are targeted by a gang of kidnappers. Ray\u2019s other daughter Naomi, still haunted by a past climbing accident, witnesses the attack and escapes. To save her family, she must confront her fears and fight for survival.",
     "tagline": null,
     "runtime": null,
@@ -1027,7 +1029,7 @@
       "Adventure",
       "Family"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/vhv7lBWYM0DUuNU2a0V7Rhq21dD.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/kYDCl2y0VPvhT5eYWbMRInPoB03.jpg",
     "directors": [
       "Dave Green"
     ],
@@ -1047,10 +1049,10 @@
     "runtime": 119,
     "genres": [
       "Science Fiction",
-      "Adventure",
-      "Thriller"
+      "Thriller",
+      "Adventure"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/5O616X9vmRzQdB68PHzBewPittd.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/A7i16oDi03qrKep5pBfuTWNUTb.jpg",
     "directors": [
       "Ridley Scott"
     ],
@@ -1087,14 +1089,14 @@
     "tmdb_id": 445466,
     "tmdb_title": "Idiots",
     "release_date": "2026-08-20",
-    "overview": "When two unqualified bozos are hired to transfer a rich teen to rehab, their straightforward gig quickly spirals into dangerous mayhem.",
+    "overview": "Two rock-bottom drivers transport a wealthy teen to rehab, but their simple job spirals into a chaotic journey of drugs, danger, and crime as their passenger derails their plans.",
     "tagline": "They're doing their best.",
     "runtime": 100,
     "genres": [
       "Comedy",
       "Crime"
     ],
-    "poster_url": "https://image.tmdb.org/t/p/w342/l1JFNC1SdgyXVr7BaD5ehaYBvOC.jpg",
+    "poster_url": "https://image.tmdb.org/t/p/w342/flpCqxH46pGZD1kNOdYgrVsDoTm.jpg",
     "directors": [
       "Macon Blair"
     ],
